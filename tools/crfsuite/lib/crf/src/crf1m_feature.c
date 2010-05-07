@@ -162,9 +162,14 @@ crf1ml_features_t* crf1ml_generate_features(
     const int L = num_labels;
     logging_t lg;
 
+    
+    
     lg.func = func;
     lg.instance = instance;
     lg.percent = 0;
+    
+    //Log info about running this function
+    logging(&lg, "Features rebuild\n");
 
     /* Allocate a feature container. */
     features = (crf1ml_features_t*)calloc(1, sizeof(crf1ml_features_t));
@@ -192,10 +197,12 @@ crf1ml_features_t* crf1ml_generate_features(
             f.src = prev;
             f.dst = cur;
             f.freq = 1;
+	    //printf("Item: %d Features: ", cur);
             featureset_add(set, &f);
 
             for (c = 0;c < item->num_contents;++c) {
                 /* State feature: attribute #a -> state #(item->yid). */
+		//printf("%d ", item->contents[c].aid);
                 f.type = FT_STATE;
                 f.src = item->contents[c].aid;
                 f.dst = cur;
