@@ -142,7 +142,7 @@ for line in fi:
 			pof = w[-2:] 
 		else:
 			pof = ''
-		fo.write('%s : %s\n' % (w, pof))
+		#fo.write('%s : %s\n' % (w, pof))
 
               	seq.append((
 			encode(w), 		# word
