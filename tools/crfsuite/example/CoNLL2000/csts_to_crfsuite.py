@@ -8,6 +8,7 @@ def output_features(fo, seq):
     for i in range(2, len(seq)-2):
         fs = []
         
+	# word
         fs.append('U00=%s' % seq[i-2][0])
         fs.append('U01=%s' % seq[i-1][0])
         fs.append('U02=%s' % seq[i][0])
@@ -16,6 +17,7 @@ def output_features(fo, seq):
         #fs.append('U05=%s/%s' % (seq[i-1][0], seq[i][0]))
         #fs.append('U06=%s/%s' % (seq[i][0], seq[i+1][0]))
 
+	# tag
         fs.append('U10=%s' % seq[i-2][1])
         fs.append('U11=%s' % seq[i-1][1])
         fs.append('U12=%s' % seq[i][1])
@@ -30,18 +32,45 @@ def output_features(fo, seq):
         #fs.append('U21=%s/%s/%s' % (seq[i-1][1], seq[i][1], seq[i+1][1]))
         #fs.append('U22=%s/%s/%s' % (seq[i][1], seq[i+1][1], seq[i+2][1]))
 
+	# lemma
         fs.append('U20=%s' % seq[i-2][2])
         fs.append('U21=%s' % seq[i-1][2])
         fs.append('U22=%s' % seq[i][2])
         fs.append('U23=%s' % seq[i+1][2])
         fs.append('U24=%s' % seq[i+2][2])
 
+	#postfix
         fs.append('U30=%s' % seq[i-2][3])
         fs.append('U31=%s' % seq[i-1][3])
         fs.append('U32=%s' % seq[i][3])
         fs.append('U33=%s' % seq[i+1][3])
         fs.append('U34=%s' % seq[i+2][3])
  
+	w = seq[i][0]
+
+	# features for prefixes of word
+	fs.append('U40=%s' % w[:1])
+	fs.append('U41=%s' % w[:2])
+	fs.append('U42=%s' % w[:3])
+	fs.append('U43=%s' % w[-1:])
+
+	# capitalized?
+
+	c = 0
+
+	if w.isupper():
+		c = 1
+	if w.islower():
+		c = 2
+	if w[0].isupper() & w[1:].islower():
+		c = 3
+
+	fs.append('U50=%s' % c)
+
+	# position in sentence
+	fs.append('U51=%d' % (i-2))
+
+
         fo.write('%s\t%s\n' % (seq[i][4], '\t'.join(fs)))
     fo.write('\n')
 
@@ -52,7 +81,7 @@ def encode(x):
 
 # sets format of tag - only several parts of tag might be used
 def formattag(tag):
-    tag = tag[:2] + tag[4:5] + tag[7:8]
+    tag = tag[:3] + tag[4:5] + tag[7:8]
     return tag
 
     
@@ -82,14 +111,14 @@ d = ('', '', '', '', '')
 
 seq = [d, d]
 
-n = 2000
+n = 5000
 i = 0
 
 for line in fi:
     line = line.strip('\n')
     if i > n*3:
 	break
-    if i < n:
+    if i <= n:
         fo = sys.stdout
     else:
         fo = sys.stderr
