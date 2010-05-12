@@ -55,7 +55,6 @@ def output_features(fo, seq):
 	fs.append('U43=%s' % w[-1:])
 
 	# capitalized?
-
 	c = 0
 
 	if w.isupper():
@@ -70,8 +69,36 @@ def output_features(fo, seq):
 	# position in sentence
 	fs.append('U51=%d' % (i-2))
 
+	# word length
+	fs.append('U52=%d' % len(w))
+
+#	fo.write('\n\npos:%d len:%d\n' % (i, (len(seq) - 2)))
+
+	v = ""
+	# closest verbs tag
+	for j in range( 1 , len(seq) - 2):
+
+
+		#check for verb tag
+		#dirrection to beginning of sequence
+		if i-j >= 2:
+#			fo.write('%d:%s' % ((i - j), seq[i-j][1]))
+			if seq[i-j][1][0] == "V":
+				v = seq[i-j][1]
+				break
+		#dirrection to end of sentence
+		if i+j < len(seq) - 2:
+#			fo.write(' - %d:%s' % ((i + j), seq[i+j][1]))
+			if seq[i+j][1][0] == "V":
+				v = seq[i+j][1]
+				break
+#		fo.write('\n')
+
+
+	fs.append('U53=%s' % v)
 
         fo.write('%s\t%s\n' % (seq[i][4], '\t'.join(fs)))
+
     fo.write('\n')
 
 def encode(x):
@@ -111,7 +138,7 @@ d = ('', '', '', '', '')
 
 seq = [d, d]
 
-n = 5000
+n = 2000
 i = 0
 
 for line in fi:
