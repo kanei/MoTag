@@ -35,6 +35,7 @@ class FeatureIndex {
   FeatureCache        feature_cache_;
   std::vector<char*>  unigram_templs_;
   std::vector<char*>  bigram_templs_;
+  std::vector<char*>  partial_bigram_templs_;
   std::vector<char*>  y_;
   FreeList<char>      char_freelist_;
   scoped_array< FreeList<Path> > path_freelist_;
@@ -90,7 +91,9 @@ class FeatureIndex {
 class EncoderFeatureIndex: public FeatureIndex {
  private:
   std::map <std::string, std::pair<int, unsigned int> > dic_;
+  std::map <std::string, int> part_dic_;        // dictionary for storing items for partial bigrams
   int getID(const char *);
+  int getPartID(const char*);                   // if string is not in part_dict_, adds it to it and returns its id
   bool openTemplate(const char *);
   bool openTagSet(const char *);
  public:

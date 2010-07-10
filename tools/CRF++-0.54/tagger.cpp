@@ -116,8 +116,8 @@ bool TaggerImpl::add2(size_t size, const char **column, bool copy) {
     }
   } else {
     for (size_t k = 0; k < size; ++k){
-      x_[s].push_back(column[k]);
       // Here all the columns are saved to x_
+      x_[s].push_back(column[k]);
       //std::cout<<column[k]<<'\n';
     }
   }

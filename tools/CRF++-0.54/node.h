@@ -38,12 +38,15 @@ struct Node {
   unsigned int         x;   //position in file - row
   unsigned short int   y;   // column in file
   char*                s;   //string containing original data
+  std::vector<char*>   partials;    //list containing all the partials
+  std::vector<int>     partials_cost;//list containing cost for every partial
   double               alpha;
   double               beta;
   double               cost;
   double               bestCost;
   Node                *prev;
   int                 *fvector;
+  int                 *pfvector;
   std::vector<Path *>  lpath;
   std::vector<Path *>  rpath;
 

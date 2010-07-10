@@ -47,6 +47,17 @@ int EncoderFeatureIndex::getID(const char *key) {
   return -1;
 }
 
+int EncoderFeatureIndex::getPartID(const char* key) {
+  std::map <std::string, int>::iterator it = part_dic_.find(key);
+  if (it == part_dic_.end()) {
+    part_dic_.insert(std::make_pair<std::string, int>(key, part_dic_.size()));
+    return part_dic_.size() - 1;
+  } else {
+    return it->second;
+  }
+
+}
+
 bool EncoderFeatureIndex::open(const char *filename1,
                                const char *filename2) {
   return openTemplate(filename1) && openTagSet(filename2);
@@ -63,6 +74,8 @@ bool EncoderFeatureIndex::openTemplate(const char *filename) {
       unigram_templs_.push_back(this->strdup(line.c_str()));
     } else if (line[0] == 'B') {
       bigram_templs_.push_back(this->strdup(line.c_str()));
+    } else if (line[0] == 'P') {
+      partial_bigram_templs_.push_back(this->strdup(line.c_str()));
     } else {
       CHECK_FALSE(true) << "unknown type: " << line << " " << filename;
     }
@@ -146,6 +159,8 @@ bool DecoderFeatureIndex::open(const char *filename1,
       unigram_templs_.push_back(v);
     } else if (v[0] == 'B') {
       bigram_templs_.push_back(v);
+    } else if (v[0] == 'P') {
+      partial_bigram_templs_.push_back(v);
     } else {
       CHECK_FALSE(true) << "unknown type: " << v;
     }
@@ -210,6 +225,7 @@ bool EncoderFeatureIndex::convert(const char *filename1,
   dic_.clear();
   unigram_templs_.clear();
   bigram_templs_.clear();
+  partial_bigram_templs_.clear();
   xsize_ = 0;
   maxid_ = 0;
 
@@ -255,6 +271,8 @@ bool EncoderFeatureIndex::convert(const char *filename1,
       unigram_templs_.push_back(this->strdup(line));
     } else if (line[0] == 'B') {
       bigram_templs_.push_back(this->strdup(line));
+    } else if (line[0] == 'P') {
+      partial_bigram_templs_.push_back(this->strdup(line));
     } else {
       CHECK_FALSE(true) << "unknown type: " << line << " " << filename1;
     }
@@ -303,6 +321,11 @@ bool EncoderFeatureIndex::save(const char *filename, bool textmodelfile) {
 
   for (size_t i = 0; i < bigram_templs_.size(); ++i) {
     templ_str += std::string(bigram_templs_[i]);
+    templ_str += '\0';
+  }
+
+  for (size_t i = 0; i < partial_bigram_templs_.size(); ++i) {
+    templ_str += std::string(partial_bigram_templs_[i]);
     templ_str += '\0';
   }
 
@@ -383,6 +406,9 @@ bool EncoderFeatureIndex::save(const char *filename, bool textmodelfile) {
 
     for (size_t i = 0; i < bigram_templs_.size(); ++i)
       tofs << bigram_templs_[i] << std::endl;
+
+    for (size_t i = 0; i < partial_bigram_templs_.size(); ++i)
+      tofs << partial_bigram_templs_[i] << std::endl;
 
     tofs << std::endl;
 

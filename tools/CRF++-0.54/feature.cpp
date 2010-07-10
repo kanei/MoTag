@@ -94,6 +94,12 @@ bool FeatureIndex::apply_rule(string_buffer *os,
             if (!r) return false;
             *os << r;
             break;
+          case 'p':
+            p+=2;
+            *os << *p;
+            p++;
+            //std::cout<<tagger.x(pos,static_cast<int>(tagger.xsize()))<<'\n';
+            break;
           default:
             return false;
         }
@@ -124,12 +130,15 @@ void FeatureIndex::rebuildFeatures(TaggerImpl *tagger) {
       n->clear();
       n->x = cur;
       n->y = i;
+
+      //std::cout<<n->partials[0]<<'\n';
       // Copy a data from tagger to nodes for later use
       if(tagger->x(cur,i)) {
         n->s = (char*) malloc(strlen(tagger->x(cur,i))+1);
         strcpy(n->s, tagger->x(cur,i));
       }
       n->fvector = f;
+      *n->pfvector = -1;
 
       //std::cout<<tagger->x(cur,i)<<'\n';
       tagger->set_node(n, cur, i);
@@ -138,6 +147,7 @@ void FeatureIndex::rebuildFeatures(TaggerImpl *tagger) {
 
   for (size_t cur = 1; cur < tagger->size(); ++cur) {
     int *f = feature_cache_[fid++];
+    //std::cout<<*f<<'\n';
     for (size_t j = 0; j < y_.size(); ++j) {
       for (size_t i = 0; i < y_.size(); ++i) {
         Path *p = path_freelist_[thread_id].alloc();
@@ -148,6 +158,26 @@ void FeatureIndex::rebuildFeatures(TaggerImpl *tagger) {
         p->fvector = f;
       }
     }
+  }
+
+  for (size_t cur = 1; cur < tagger->size(); ++cur) {
+    int *f = feature_cache_[fid++];
+    for (size_t i = 0; i < y_.size(); ++i) {
+      Node *n = node_freelist_[thread_id][cur];
+
+      // add all the partials to each node for future use
+      char *b = (char*) malloc(16);
+      strncpy(b, tagger->x(cur,i), 1);
+      b[1] = '\0';
+      n->partials.push_back(b);
+      n->partials_cost.push_back(0);
+
+      n->pfvector = f;
+
+      //std::cout<<tagger->x(cur,i)<<'\n';
+      tagger->set_node(n, cur, i);
+    }
+  
   }
 }
 
@@ -175,6 +205,17 @@ bool FeatureIndex::buildFeatures(TaggerImpl *tagger) {
   for (size_t cur = 1; cur < tagger->size(); ++cur) {
     for (std::vector<char *>::const_iterator it = bigram_templs_.begin();
          it != bigram_templs_.end(); ++it) {
+      CHECK_FALSE(apply_rule(&os, *it, cur, *tagger))
+          << "format error: " << *it;
+      ADD;
+    }
+    feature_cache_.add(feature);
+    feature.clear();
+  }
+
+  for (size_t cur = 1; cur < tagger->size(); ++cur) {
+    for (std::vector<char *>::const_iterator it = partial_bigram_templs_.begin();
+         it != partial_bigram_templs_.end(); ++it) {
       CHECK_FALSE(apply_rule(&os, *it, cur, *tagger))
           << "format error: " << *it;
       ADD;
