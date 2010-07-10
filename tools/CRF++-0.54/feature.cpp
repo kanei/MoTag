@@ -115,6 +115,7 @@ void FeatureIndex::rebuildFeatures(TaggerImpl *tagger) {
   path_freelist_[thread_id].free();
   node_freelist_[thread_id].free();
 
+  // here, links to data in tagger->x are saved into nodes
   for (size_t cur = 0; cur < tagger->size(); ++cur) {
     int *f = feature_cache_[fid++];
     //std::cout<<*f<<'\n';
@@ -123,7 +124,10 @@ void FeatureIndex::rebuildFeatures(TaggerImpl *tagger) {
       n->clear();
       n->x = cur;
       n->y = i;
+      n->s = tagger->x(cur,i);
       n->fvector = f;
+
+      //std::cout<<tagger->x(cur,i)<<'\n';
       tagger->set_node(n, cur, i);
     }
   }

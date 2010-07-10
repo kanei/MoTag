@@ -35,8 +35,9 @@ inline double logsumexp(double x, double y, bool flg) {
 struct Path;
 
 struct Node {
-  unsigned int         x;
-  unsigned short int   y;
+  unsigned int         x;   //position in file - row
+  unsigned short int   y;   // column in file
+  char*                s;   //string containing original data
   double               alpha;
   double               beta;
   double               cost;
