@@ -91,6 +91,9 @@ void TaggerImpl::close() {
   }
 }
 
+/**
+ * All the data is saved to x_ as two dimensional array
+ */
 bool TaggerImpl::add2(size_t size, const char **column, bool copy) {
   size_t xsize = feature_index_->xsize();
 
@@ -108,11 +111,15 @@ bool TaggerImpl::add2(size_t size, const char **column, bool copy) {
   s = x_.size() - 1;
 
   if (copy) {
-    for (size_t k = 0; k < size; ++k)
+    for (size_t k = 0; k < size; ++k){
       x_[s].push_back(feature_index_->strdup(column[k]));
+    }
   } else {
-    for (size_t k = 0; k < size; ++k)
+    for (size_t k = 0; k < size; ++k){
       x_[s].push_back(column[k]);
+      // Here all the columns are saved to x_
+      //std::cout<<column[k]<<'\n';
+    }
   }
 
   result_[s] = answer_[s] = 0;  // dummy
@@ -135,6 +142,9 @@ bool TaggerImpl::add(size_t size, const char **column) {
   return add2(size, column, true);
 }
 
+/**
+ * adds line of data
+ */
 bool TaggerImpl::add(const char* line) {
   const char* column[8192];
   char *p = feature_index_->strdup(line);
@@ -143,6 +153,9 @@ bool TaggerImpl::add(const char* line) {
   return true;
 }
 
+/**
+ * Reads data from training file
+ */
 bool TaggerImpl::read(std::istream *is) {
   char line[8192];
   clear();

@@ -93,8 +93,11 @@ bool EncoderFeatureIndex::openTagSet(const char *file) {
 
   y_.clear();
   for (std::set<std::string>::iterator it = candset.begin();
-       it != candset.end(); ++it)
+       it != candset.end(); ++it){
+    //!! What does this one do??
+    //std::cout<<it->c_str()<<'\n';
     y_.push_back(this->strdup(it->c_str()));
+  }
 
   ifs.close();
 

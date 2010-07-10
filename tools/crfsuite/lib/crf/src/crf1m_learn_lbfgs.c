@@ -48,6 +48,7 @@
 #include "logging.h"
 #include "params.h"
 #include <lbfgs.h>
+#include <include/crf.h>
 
 typedef struct {
     int l2_regularization;
@@ -130,6 +131,7 @@ static lbfgsfloatval_t lbfgs_evaluate(
         /* Update the model expectations of features. */
         crf1ml_enum_features(crf1mt, &seqs[i], update_model_expectations);
     }
+    
 
     /*
         L2 regularization.
@@ -173,6 +175,11 @@ static int lbfgs_progress(
         lbfgsi->best_w[i] = x[i];
         if (x[i] != 0.) ++num_active_features;
     }
+    
+    int itemValue = crf1mt->seqs[3].items[1].label;
+    
+    /* Test what is in items of seqs */
+    logging(crf1mt->lg, "In item, there is: %d \n", itemValue);
 
     /* Report the progress. */
     logging(crf1mt->lg, "***** Iteration #%d *****\n", k);
