@@ -124,8 +124,11 @@ void FeatureIndex::rebuildFeatures(TaggerImpl *tagger) {
       n->clear();
       n->x = cur;
       n->y = i;
-      n->s = (char*) malloc(strlen(tagger->x(cur,i)));
-      strcpy(n->s, tagger->x(cur,i));
+      // Copy a data from tagger to nodes for later use
+      if(tagger->x(cur,i)) {
+        n->s = (char*) malloc(strlen(tagger->x(cur,i))+1);
+        strcpy(n->s, tagger->x(cur,i));
+      }
       n->fvector = f;
 
       //std::cout<<tagger->x(cur,i)<<'\n';
