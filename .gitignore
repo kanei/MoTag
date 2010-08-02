@@ -1,0 +1,19 @@
+# Temporary and backup files
+*~
+.*.swp
+.*.swo
+*.backup
+*.bak
+
+# ssh
+.ssh/
+
+# openoffice
+*.odt#
+
+# tools
+tools/
+
+#backup
+backup/
+
