@@ -163,8 +163,7 @@ def main():
       line = line.strip('\n')
       if i > count:
          break
-      else:
-         fo = sys.stderr
+      
       if sr.match(line):
          seq.append(d)
          seq.append(d)

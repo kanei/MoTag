@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# run: nohup ./test.sh (computer name) &
+# run: nohup ./[script name].sh &
 
 id=pcnlp3
 ntrain=10000
