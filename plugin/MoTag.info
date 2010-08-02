@@ -1,0 +1,10 @@
+; $Id$ 
+name =MoTag research
+description = drupal module for maintaining training results
+package = MoTag
+version = "7.x-0.x-dev"
+core = 7.x
+files[] = MoTag.module
+files[] = MoTag.install
+; includes
+;files[] = WebNAPTR_create.inc

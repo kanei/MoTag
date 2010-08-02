@@ -1,0 +1,84 @@
+<?php
+// $Id$ 
+
+/**
+ * @file Drupal module for MoTag research project
+ */
+
+///**
+// * Implementation of hook_block()
+// */
+//function WebNAPTR_block($op='list', $delta=0, $edit=array()) {
+//  switch ($op) {
+//    case 'list':
+//
+//    case 'view':
+//
+//    case 'configure':
+//
+//    case 'save':
+//
+//  }
+//}
+
+/**
+ * Implementation of hook_menu()
+ */
+function MoTag_menu() {
+  $items = array();
+
+   $items['start_researcj'] = array(
+    'title' 		=> 'Start research',
+    'access callback' 	=> 'user_access',
+    'access arguments' 	=> array('motag_add'),
+    'page callback' 	=> 'drupal_get_form',
+    'page arguments' 	=> array('MoTag_test_start'),
+    'type' 		=> MENU_NORMAL_ITEM,
+    'file' => 'MoTag_add.inc',
+  );
+
+  $items['show_pending'] = array(
+    'title' 		=> 'Show pending researches',
+    'access callback' 	=> 'user_access',
+    'access arguments' 	=> array('motag_browse'),
+    'page callback' 	=> 'drupal_get_form',
+    'page arguments' 	=> array('MoTag_show_pending'),
+    'type' 		=> MENU_NORMAL_ITEM,
+    'file' => 'MoTag_pending.inc',
+  );
+
+  $items['reload'] = array(
+    'title' 		=> 'Reload motag module',
+    'access callback' 	=> 'user_access',
+    'access arguments' 	=> array('motag_add'),
+    'page callback' 	=> 'motag_reload',
+    'type' 		=> MENU_NORMAL_ITEM,
+    'file' => 'MoTag.install',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function MoTag_permission() {
+  return array(
+    'motag_add' => array(
+      'title' 		=> t('Add experiments'),
+      'description' 	=> t('Add experiments to the system.'),
+    ),
+    'motag_browse' => array(
+      'title' 		=> t('Browse experiments'),
+      'description' 	=> t('Browse through experiments in the system.'),
+    ),
+  );
+}
+
+
+///**
+// * Implementation of hook_help()
+// */
+//function WebNAPTR_help($path, $arg) {
+//
+//}

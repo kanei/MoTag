@@ -1,0 +1,216 @@
+<?php
+// $Id$ 
+
+/**
+ * @file 
+ */
+
+/**
+ * Implementation of hook_install() 
+ */
+function MoTag_install() {
+   drupal_uninstall_schema('MoTag');
+   drupal_install_schema('MoTag');
+
+   // Fill database with features data
+   $features = array(
+    array(
+      'caption' 	=> 'U00',
+      'description' 	=> 'Slovní tvar na pozici x-2',
+    ),
+    array(
+      'caption' 	=> 'U01',
+      'description' 	=> 'Slovní tvar na pozici x-1',
+    ),
+    array(
+      'caption' 	=> 'U02',
+      'description' 	=> 'Slovní tvar na současné pozici',
+    ),
+    array(
+      'caption' 	=> 'U03',
+      'description' 	=> 'Slovní tvar na pozici x+1',
+    ),
+    array(
+      'caption' 	=> 'U04',
+      'description' 	=> 'Slovní tvar na pozici x+2',
+    ),
+    array(
+      'caption' 	=> 'U10',
+      'description' 	=> 'Značka (společné sloupce všech možných) na pozici x-2',
+    ),
+    array(
+      'caption' 	=> 'U11',
+      'description' 	=> 'Značka (společné sloupce všech možných) na pozici x-1',
+    ),
+    array(
+      'caption' 	=> 'U12',
+      'description' 	=> 'Značka (společné sloupce všech možných) na současné pozici',
+    ),
+    array(
+      'caption' 	=> 'U13',
+      'description' 	=> 'Značka (společné sloupce všech možných) na pozici x+1',
+    ),
+    array(
+      'caption' 	=> 'U14',
+      'description' 	=> 'Značka (společné sloupce všech možných) na pozici x+2',
+    ),
+    array(
+      'caption' 	=> 'U20',
+      'description' 	=> 'Možná lemmata na pozici x-2',
+    ),
+    array(
+      'caption' 	=> 'U21',
+      'description' 	=> 'Možná lemmata na pozici x-1',
+    ),
+    array(
+      'caption' 	=> 'U22',
+      'description' 	=> 'Možná lemmata na současné pozici',
+    ),
+    array(
+      'caption' 	=> 'U23',
+      'description' 	=> 'Možná lemmata na pozici x+1',
+    ),
+    array(
+      'caption' 	=> 'U24',
+      'description' 	=> 'Možná lemmata na pozici x+2',
+    ),
+    array(
+      'caption' 	=> 'U30',
+      'description' 	=> 'Přípona na pozici x-2',
+    ),
+    array(
+      'caption' 	=> 'U31',
+      'description' 	=> 'Přípona na pozici x-1',
+    ),
+    array(
+      'caption' 	=> 'U32',
+      'description' 	=> 'Přípona na současné pozici',
+    ),
+    array(
+      'caption' 	=> 'U33',
+      'description' 	=> 'Přípona na pozici x+1',
+    ),
+    array(
+      'caption' 	=> 'U34',
+      'description' 	=> 'Přípona na pozici x+2',
+    ),
+   array(
+      'caption' 	=> 'U40',
+      'description' 	=> 'Předpona - první písmeno slova',
+    ),
+    array(
+      'caption' 	=> 'U41',
+      'description' 	=> 'Předpona - první dvě písmena slova',
+    ),
+    array(
+      'caption' 	=> 'U42',
+      'description' 	=> 'Předpona - první tři písmena slova',
+    ),
+    array(
+      'caption' 	=> 'U43',
+      'description' 	=> 'Koncovka - poslední písmeno slova',
+    ),
+    array(
+      'caption' 	=> 'U50',
+      'description' 	=> 'Velikost písmen - celé slovo velkými písmeny, nebo malými, nebo první písmeno velké',
+    ),       
+   array(
+      'caption' 	=> 'U51',
+      'description' 	=> 'Číslo, označující pozici ve větě',
+    ),
+   array(
+      'caption' 	=> 'U52',
+      'description' 	=> 'Délka slova',
+    ),
+   array(
+      'caption' 	=> 'U53',
+      'description' 	=> 'Značka nejbližšího slovesa ( vyhledáváno dopředu i dozadu)',
+    ),
+  );
+  $query = db_insert('motag_features')->fields(array('caption', 'description'));
+  foreach ($features as $record) {
+    $query->values($record);
+  }
+  $query->execute();
+}
+
+/**
+ * Implementation of hook_uninstall() 
+ */
+function MoTag_uninstall() {
+
+}
+
+/**
+* Implementation of hook_schema()
+*/
+function MoTag_schema() {
+  $schema['motag_features'] = array(
+    'description' => 'Available features.',
+    'fields' => array(
+      'feature_id' 	=> array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
+      'caption' 	=> array('type' => 'varchar', 'length' => 3, 'not null' => TRUE),
+      'description'		=> array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
+    ),
+    'primary key' => array('feature_id'),
+  );
+
+  $schema['motag_tests'] = array(
+    'description' => 'Finished and pending tests.',
+    'fields' => array(
+         'test_id'             => array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
+         'program'		 => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE),
+         'description'      => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
+         'machine'		 => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE),
+         'training_count'   => array('type' => 'int', 'default' => 0, 'not null' => TRUE),
+         'testing_count'   => array('type' => 'int', 'default' => 0, 'not null' => TRUE),
+         'max_iterations'   => array('type' => 'int', 'default' => 0, 'not null' => FALSE),
+         'regularization'		 => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE),
+         'label_columns'		 => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE),
+         'iterations'      => array('type' => 'int', 'default' => 0, 'not null' => FALSE),
+         'training_time'      => array('type' => 'int', 'default' => 0, 'not null' => FALSE),
+         'testing_time'      => array('type' => 'int', 'default' => 0, 'not null' => FALSE),
+         'word_count'      => array('type' => 'int', 'default' => 0, 'not null' => FALSE),
+         'label_count'      => array('type' => 'int', 'default' => 0, 'not null' => FALSE),
+         'label_success_rate'      => array('type' => 'float', 'not null' => FALSE),
+         'sentence_success_rate'      => array('type' => 'float', 'not null' => FALSE),
+         'pending'      => array('type' => 'int', 'size' => 'tiny',  'not null' => FALSE),
+    ),
+    'primary key' => array('test_id'),
+  );
+
+  $schema['fres_tests_features'] = array(
+    'description' => 'Connection between tests and features.',
+    'fields' => array(
+      'test_id' 	=> array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE),
+      'feature_id' 	=> array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
+    ),
+    'indexes' => array(
+      'test_id'	=> array('test_id'),
+      'feature_id'	=> array('feature_id'),
+    ),
+    'foreign keys' => array(
+      'test_id' 	=> array('motag_test' => 'test_id'),
+      'feature_id'	=> array('motag_feature' => 'feature_id'),
+    ),
+    'primary key' => array('test_id', 'feature_id'),
+  );
+
+  return $schema;
+}
+
+function MoTag_reload() {
+  drupal_uninstall_schema('fres_admin');
+  drupal_install_schema('fres_admin');
+
+  $output = 'Database schema reloaded.<br/>';
+
+  MoTag_install();
+
+  $output = 'Features reinserted.<br/>';
+
+  return array(
+    'output' => $output,
+    'module' => 'MoTag',
+  );
+}
