@@ -128,7 +128,7 @@ def main():
          usage()
          sys.exit()
       elif o in ("-n", "--count"):
-         count = a
+         count = int(a)
       else:
          assert False, "unhandled option"
 
@@ -158,12 +158,11 @@ def main():
    seq = [d, d]
    i = 0
 
+
    for line in fi:
       line = line.strip('\n')
       if i > count:
          break
-      if i <= count:
-         fo = sys.stdout
       else:
          fo = sys.stderr
       if sr.match(line):
