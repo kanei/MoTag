@@ -1,0 +1,50 @@
+/* 
+    Document   : general
+    Created on : 2.8.2010, 16:54:25
+    Author     : kanei
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+.form-item-program,
+.form-item-regularization,
+.form-item-count,
+.form-item-max-iterations {
+   float: left;
+   width: 200px;
+}
+
+.form-item-description {
+   clear: left;
+}
+
+#features {
+   clear: left;
+}
+
+#features .form-checkboxes .form-item {
+   float: left;
+   width: 40px;
+}
+
+#features_buttons {
+   clear: left;
+}
+
+#label_buttons {
+   clear: left;
+}
+
+#label {
+   clear: left;
+}
+
+#label .form-checkboxes .form-item {
+   float: left;
+   width: 20px;
+}
+

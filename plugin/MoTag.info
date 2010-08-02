@@ -1,5 +1,5 @@
 ; $Id$ 
-name =MoTag research
+name = MoTag research
 description = drupal module for maintaining training results
 package = MoTag
 version = "7.x-0.x-dev"

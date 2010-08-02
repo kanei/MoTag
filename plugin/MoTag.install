@@ -179,7 +179,7 @@ function MoTag_schema() {
     'primary key' => array('test_id'),
   );
 
-  $schema['fres_tests_features'] = array(
+  $schema['motag_tests_features'] = array(
     'description' => 'Connection between tests and features.',
     'fields' => array(
       'test_id' 	=> array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE),

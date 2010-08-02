@@ -27,7 +27,7 @@
 function MoTag_menu() {
   $items = array();
 
-   $items['start_researcj'] = array(
+   $items['start_research'] = array(
     'title' 		=> 'Start research',
     'access callback' 	=> 'user_access',
     'access arguments' 	=> array('motag_add'),
@@ -41,8 +41,7 @@ function MoTag_menu() {
     'title' 		=> 'Show pending researches',
     'access callback' 	=> 'user_access',
     'access arguments' 	=> array('motag_browse'),
-    'page callback' 	=> 'drupal_get_form',
-    'page arguments' 	=> array('MoTag_show_pending'),
+    'page callback' 	=> 'MoTag_show_pending',
     'type' 		=> MENU_NORMAL_ITEM,
     'file' => 'MoTag_pending.inc',
   );
