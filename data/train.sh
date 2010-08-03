@@ -4,7 +4,7 @@
 
 id=pcnlp3
 ntrain=10000
-ntest=5000
+ntest=7000
 iter=50
 
 #remove existing data
