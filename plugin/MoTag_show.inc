@@ -4,6 +4,8 @@
  *
  */
 function MoTag_show($pending = FALSE) {
+   drupal_add_css(drupal_get_path('module', 'MoTag') . '/css/general.css');
+   
    $output = '';
 
    if($pending == '1') {
@@ -35,6 +37,8 @@ function MoTag_show($pending = FALSE) {
          "Train t.",
          "Tag t.",
          "Model s.",
+         "Feat b.",
+         "Feat e.",
          "Succ. lab.",
          "Succ. sen.",
       ));
@@ -71,6 +75,8 @@ function MoTag_show($pending = FALSE) {
             $times,
             $record->testing_time . 's',
             $record->model_size . 'B',
+            $record->features_start,
+            $record->features_end,
             $record->label_success_rate . '%',
             $record->sentence_success_rate . '%',
          ));
@@ -90,4 +96,62 @@ function MoTag_show($pending = FALSE) {
 function _test_options($id){
         $links = l(t('Finish'), "finish/$id");
         return $links;
+}
+
+function Motag_show_overview() {
+   drupal_add_css(drupal_get_path('module', 'MoTag') . '/css/general.css');
+   
+   $output = '';
+
+   $header = array(
+      "ID",
+      "Machine",
+      "Train count",
+      "Label parts",
+   );
+
+   $features = db_query('SELECT * FROM {motag_features}');
+
+   foreach($features as $feature) {
+      $header[] = array( 'data' => substr($feature->caption, 1), 'class' => 'feature');
+   }
+
+   // prepare array with feature / test relations
+   $result = db_query('SELECT * FROM {motag_tests_features}');
+   $testfeature = array();
+
+   foreach($result as $item) {
+      if(!isset($testfeature[$item->test_id]))
+         $testfeature[$item->test_id] = array();
+
+      $testfeature[$item->test_id][$item->feature_id] = 1;
+   }
+
+   $rows = array();
+   $result = db_query('SELECT * FROM {motag_tests}');
+
+   // prepare data for saving
+   foreach ($result as $record) {
+      $row = array(
+         $record->test_id,
+         $record->machine,
+         $record->training_count,
+         $record->label_columns,
+      );
+
+      $features = db_query('SELECT * FROM {motag_features}');
+
+      foreach($features as $feature) {
+         if(isset($testfeature[$record->test_id][$feature->feature_id]))
+            $row[] = 'X';
+         else
+            $row[] = '-';
+      }
+
+      $rows[] = $row;
+   }
+   
+   $output .= theme('table', array('header' => $header, 'rows' => $rows));
+
+   return $output;
 }

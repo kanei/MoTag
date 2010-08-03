@@ -48,3 +48,6 @@ root {
    width: 20px;
 }
 
+th.feature {
+   padding: 5px 0px 0px 3px;
+}

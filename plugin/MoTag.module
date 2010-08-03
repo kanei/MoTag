@@ -75,6 +75,17 @@ function MoTag_menu() {
            'weight' => 6,
    );
 
+    $items['show_overview'] = array(
+           'title' 		=> 'Show tests overview',
+           'access callback' 	=> 'user_access',
+           'access arguments' 	=> array('motag_browse'),
+           'page callback' 	=> 'MoTag_show_overview',
+           'type' 		=> MENU_NORMAL_ITEM,
+           'file' => 'MoTag_show.inc',
+
+           'weight' => 7,
+   );
+
    /*$items['reload'] = array(
            'title' 		=> 'Reload motag module',
            'access callback' 	=> 'user_access',
