@@ -1,22 +1,27 @@
 #!/bin/sh
 
-# run: nohup ./test.sh (computer name) &
+# run: nohup ./[script name].sh &
+
+id=pcnlp3
+ntrain=10000
+ntest=7000
+iter=50
 
 #remove existing data
-rm $1.log $1.result $1.train $1.test $1.model $1.test
+rm $id.log $id.result $id.train $id.test $id.model $id.test
 
 ulimit -t unlimited
 ulimit -v unlimited
 ulimit -s unlimited
-date > $1.log
+date > $id.log
 #prepare data
-./$1.py <train-3-ann.cst > $1.train
+./$id.py -n $ntrain <train-3-ann.cst > $id.train
 #run training
-/var/mnt/eva/home/users/xv/xvantu00/git/MoTag/test/crfsuite-0.10/bin/crfsuite learn -p regularization=L1 -p lbfgs.max_iterations=50 -m $1.model $1.train >>$1.log 
-date >>$1.log
+/var/mnt/eva/home/users/xv/xvantu00/git/MoTag/test/crfsuite-0.10/bin/crfsuite learn -p regularization=L1 -p lbfgs.max_iterations=$iter -m $id.model $id.train >>$id.log 
+date >>$id.log
 #prepare data for testing
-./$1.py <dtest-3-ann.cst > $1.test
+./$id.py -n $ntest <dtest-3-ann.cst > $id.test
 #run testing
-/var/mnt/eva/home/users/xv/xvantu00/git/MoTag/test/crfsuite-0.10/bin/crfsuite tag -q -t -m $1.model $1.test >$1.result 
-date >> $1.result
+/var/mnt/eva/home/users/xv/xvantu00/git/MoTag/test/crfsuite-0.10/bin/crfsuite tag -q -t -m $id.model $id.test >$id.result 
+date >> $id.result
 

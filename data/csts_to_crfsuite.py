@@ -163,8 +163,7 @@ def main():
       line = line.strip('\n')
       if i > count:
          break
-      else:
-         fo = sys.stderr
+      
       if sr.match(line):
          seq.append(d)
          seq.append(d)
@@ -216,12 +215,12 @@ def main():
                pof = ''
             #fo.write('%s : %s\n' % (w, pof))
 
-               seq.append((
-                    encode(w),	# word
-                    encode(formattag(uni)), # common part of all possible tags
-                    encode(lp),	# possible lemmas
-                    encode(pof),	# postfix
-                    encode(t)))		# correct tag
+            seq.append((
+                 encode(w),	# word
+                 encode(formattag(uni)), # common part of all possible tags
+                 encode(lp),	# possible lemmas
+                 encode(pof),	# postfix
+                 encode(t)))		# correct tag
 
    #    if not line:
    #        seq.append(d)
