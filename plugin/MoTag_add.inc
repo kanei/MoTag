@@ -7,6 +7,8 @@ function MoTag_test_start($form, &$form_state) {
    drupal_add_css(drupal_get_path('module', 'MoTag') . '/css/general.css');
    drupal_add_js(drupal_get_path('module', 'MoTag') . '/js/start_test.js');
 
+
+
    $form['general'] = array(
            '#title' 		=> t("General informations"),
            '#prefix' 		=> '<div id="general">',
@@ -25,19 +27,20 @@ function MoTag_test_start($form, &$form_state) {
            '#required'		=> TRUE,
    );
 
+   $result = db_query('SELECT id, caption FROM {motag_remote_pcs}');
+
+   $pcs = array();
+   foreach ($result as $item) {
+      if(!db_query('SELECT test_id FROM {motag_tests} WHERE pending = 1 AND machine = \'' . $item->id . '\'')->rowCount())
+      {
+         $pcs[$item->id] = $item->caption;
+      }
+   }
+
    $form['general']['machine'] = array(
            '#type' 		=> 'select',
            '#title' 		=> t('Computer name'),
-           '#options' => array(
-                   'pcnlp3' => t('PC Nlp 3'),
-                   'pcnlp4' => t('PC Nlp 4'),
-                   'pcnlp5' => t('PC Nlp 5'),
-                   'pcnlp6' => t('PC Nlp 6'),
-                   'pcnlp7' => t('PC Nlp 7'),
-                   'athena2' => t('Athena 2'),
-                   'athena3' => t('Athena 5'),
-                   'athena4' => t('Athena 6'),
-           ),
+           '#options' => $pcs,
            '#required'		=> TRUE,
    );
 
@@ -180,7 +183,7 @@ function MoTag_test_start_submit($form, &$form_state) {
            ))
            ->execute();
 
-   $output .= "Test was successfully added.<br />";
+   $output .= "Test was successfully added with id: " . $test_id . ".<br />";
 
    $fcount = 0;
 

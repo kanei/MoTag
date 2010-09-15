@@ -87,16 +87,6 @@ function MoTag_finish($form, &$form_state, $id = FALSE) {
            '#required' => TRUE,
    );
 
-   $form['results']['testing_time'] = array(
-           '#type' => 'textfield',
-           '#title' => t('Time of testing'),
-           '#description' => t('Fill in value in seconds.'),
-           '#default_value' => '',
-           '#size' => 10,
-           '#maxlength' => 10,
-           '#required' => TRUE,
-   );
-
    $form['results']['features_start'] = array(
            '#type' => 'textfield',
            '#title' => t('Number of features in the beginning'),
@@ -115,13 +105,13 @@ function MoTag_finish($form, &$form_state, $id = FALSE) {
            '#required' => TRUE,
    );
 
-   $form['results']['model_size'] = array(
+   $form['results']['testing_time'] = array(
            '#type' => 'textfield',
-           '#title' => t('Size of model'),
-           '#description' => t('Fill in value in bytes.'),
+           '#title' => t('Time of testing'),
+           '#description' => t('Fill in value in seconds.'),
            '#default_value' => '',
            '#size' => 10,
-           '#maxlength' => 20,
+           '#maxlength' => 10,
            '#required' => TRUE,
    );
 
@@ -144,6 +134,17 @@ function MoTag_finish($form, &$form_state, $id = FALSE) {
            '#maxlength' => 10,
            '#required' => TRUE,
    );
+
+   $form['results']['model_size'] = array(
+           '#type' => 'textfield',
+           '#title' => t('Size of model'),
+           '#description' => t('Fill in value in bytes.'),
+           '#default_value' => '',
+           '#size' => 10,
+           '#maxlength' => 20,
+           '#required' => TRUE,
+   );
+
 
     $form['submit'] = array(
            '#type' 		=> 'submit',
