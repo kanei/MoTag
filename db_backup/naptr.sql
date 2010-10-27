@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 3.3.4
+-- version 3.3.8
 -- http://www.phpmyadmin.net
 --
--- Počítač: localhost
--- Vygenerováno: Středa 15. září 2010, 20:47
--- Verze MySQL: 5.1.49
--- Verze PHP: 5.3.3
+-- Host: localhost
+-- Generation Time: Oct 27, 2010 at 11:05 PM
+-- Server version: 5.1.51
+-- PHP Version: 5.3.3
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
@@ -16,13 +16,13 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Databáze: `naptr`
+-- Database: `naptr`
 --
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabulky `motag_features`
+-- Table structure for table `motag_features`
 --
 
 CREATE TABLE IF NOT EXISTS `motag_features` (
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `motag_features` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Available features.' AUTO_INCREMENT=29 ;
 
 --
--- Vypisuji data pro tabulku `motag_features`
+-- Dumping data for table `motag_features`
 --
 
 INSERT INTO `motag_features` (`feature_id`, `caption`, `description`) VALUES
@@ -69,7 +69,7 @@ INSERT INTO `motag_features` (`feature_id`, `caption`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Struktura tabulky `motag_remote_pcs`
+-- Table structure for table `motag_remote_pcs`
 --
 
 CREATE TABLE IF NOT EXISTS `motag_remote_pcs` (
@@ -77,17 +77,25 @@ CREATE TABLE IF NOT EXISTS `motag_remote_pcs` (
   `id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `caption` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   UNIQUE KEY `pc_id` (`pc_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=8 ;
 
 --
--- Vypisuji data pro tabulku `motag_remote_pcs`
+-- Dumping data for table `motag_remote_pcs`
 --
 
+INSERT INTO `motag_remote_pcs` (`pc_id`, `id`, `caption`) VALUES
+(1, 'pcnlp3', 'PC Nlp 3'),
+(2, 'pcnlp4', 'PC Nlp 4'),
+(3, 'pcnlp5', 'PC Nlp 5'),
+(4, 'pcnlp6', 'PC Nlp 6'),
+(5, 'athena1', 'Athena 1'),
+(6, 'athena1', 'Athena 2'),
+(7, 'athena1', 'Athena 3');
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabulky `motag_tests`
+-- Table structure for table `motag_tests`
 --
 
 CREATE TABLE IF NOT EXISTS `motag_tests` (
@@ -113,10 +121,10 @@ CREATE TABLE IF NOT EXISTS `motag_tests` (
   `sentence_success_rate` float DEFAULT NULL,
   `pending` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`test_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Finished and pending tests.' AUTO_INCREMENT=26 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Finished and pending tests.' AUTO_INCREMENT=34 ;
 
 --
--- Vypisuji data pro tabulku `motag_tests`
+-- Dumping data for table `motag_tests`
 --
 
 INSERT INTO `motag_tests` (`test_id`, `program`, `description`, `machine`, `training_count`, `testing_count`, `max_iterations`, `regularization`, `label_columns`, `iterations`, `training_begin`, `training_finish`, `testing_time`, `word_count`, `label_count`, `features_start`, `features_end`, `model_size`, `label_success_rate`, `sentence_success_rate`, `pending`) VALUES
@@ -141,15 +149,23 @@ INSERT INTO `motag_tests` (`test_id`, `program`, `description`, `machine`, `trai
 (19, 'crfsuite', '', 'athena3', 30000, 7000, 60, 'l1', 'xxxxxxxxx-------', 60, '2010-09-07 20:50:00', '2010-09-14 09:00:00', 1067, 30000, 854, 2006673, 412986, 16834728, 88.91, 6.31, 0),
 (20, 'crfsuite', '', 'athena1', 30000, 7000, 70, 'l1', 'xxxxx--xx-------', 0, NULL, NULL, 0, 0, 0, NULL, NULL, 0, NULL, NULL, 1),
 (21, 'crfsuite', '', 'pcnlp3', 30000, 7000, 10, 'l1', 'xxxxx--xx-------', 10, '2010-09-14 22:03:00', '2010-09-15 09:45:00', 673, 497125, 822, 2002356, 1841799, 70273172, 79.14, 15.04, 0),
-(22, 'crfsuite', '', 'pcnlp4', 30000, 7000, 20, 'l1', 'xxxxx--xx-------', 0, NULL, NULL, 0, 0, 0, NULL, NULL, 0, NULL, NULL, 1),
-(23, 'crfsuite', '', 'pcnlp5', 5000, 7000, 50, 'l1', 'xxxxx--xx-------', 0, NULL, NULL, 0, 0, 0, NULL, NULL, 0, NULL, NULL, 1),
-(24, 'crfsuite', '', 'pcnlp6', 15000, 7000, 50, 'l1', 'xxxxx--xx-------', 0, NULL, NULL, 0, 0, 0, NULL, NULL, 0, NULL, NULL, 1),
-(25, 'crfsuite', '', 'athena1', 30000, 7000, 60, 'l1', 'xxxxx--xx-------', 0, NULL, NULL, 0, 0, 0, NULL, NULL, 0, NULL, NULL, 1);
+(22, 'crfsuite', '', 'pcnlp4', 30000, 7000, 20, 'l1', 'xxxxx--xx-------', 20, '2010-09-14 22:05:00', '2010-09-15 18:58:00', 675, 497125, 822, 2002356, 1500554, 57371028, 91.87, 40.15, 0),
+(23, 'crfsuite', '', 'pcnlp5', 5000, 7000, 50, 'l1', 'xxxxx--xx-------', 50, '2010-09-14 22:05:00', '2010-09-15 03:35:00', 304, 83395, 671, 558871, 113149, 4751828, 91.04, 34.7, 0),
+(24, 'crfsuite', '', 'pcnlp6', 15000, 7000, 50, 'l1', 'xxxxx--xx-------', 50, '2010-09-14 22:06:00', '2010-09-15 21:52:00', 544, 245214, 769, 1202680, 266245, 10990504, 87.9, 7.73, 0),
+(25, 'crfsuite', '', 'athena1', 30000, 7000, 60, 'l1', 'xxxxx--xx-------', 0, NULL, NULL, 0, 0, 0, NULL, NULL, 0, NULL, NULL, 1),
+(26, 'crfsuite', '', 'pcnlp3', 20000, 7000, 50, 'l1', 'xxxxx--xx-------', 50, '2010-09-16 19:35:00', '2010-09-18 05:16:00', 527, 325818, 792, 1464587, 334939, 13706360, 88.37, 8.07, 0),
+(27, 'crfsuite', '', 'pcnlp4', 25000, 7000, 50, 'l1', 'xxxxx--xx-------', 50, '2010-09-16 19:34:00', '2010-09-18 16:59:00', 504, 409037, 811, 1724528, 423649, 17140200, 88.68, 8.2, 0),
+(28, 'crfsuite', '', 'pcnlp5', 35000, 7000, 50, 'l1', 'xxxxx--xx-------', 50, '2010-09-16 19:39:00', '2010-09-19 04:23:00', 590, 584740, 833, 2260670, 564590, 22744448, 89.38, 10.26, 0),
+(29, 'crfsuite', '', 'pcnlp6', 40000, 7000, 50, 'l1', 'xxxxx--xx-------', 50, '2010-09-16 20:11:00', '2010-09-19 15:05:00', 604, 670572, 843, 2488724, 586499, 23583752, 90.12, 15.69, 0),
+(30, 'crfsuite', '', 'pcnlp3', 45000, 7000, 50, 'l1', 'xxxxx--xx-------', 50, '2010-09-27 18:36:00', '2010-10-03 03:02:00', 718, 758020, 849, 2716001, 680082, 27177664, 90.62, 18.99, 0),
+(31, 'crfsuite', '', 'pcnlp4', 50000, 7000, 50, 'l1', 'xxxxx--xx-------', 0, NULL, NULL, 0, 0, 0, NULL, NULL, 0, NULL, NULL, 1),
+(32, 'crfsuite', '', 'pcnlp5', 55000, 7000, 50, 'l1', 'xxxxx--xx-------', 0, NULL, NULL, 0, 0, 0, NULL, NULL, 0, NULL, NULL, 1),
+(33, 'crfsuite', '', 'pcnlp6', 60000, 7000, 50, 'l1', 'xxxxx--xx-------', 0, NULL, NULL, 0, 0, 0, NULL, NULL, 0, NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabulky `motag_tests_features`
+-- Table structure for table `motag_tests_features`
 --
 
 CREATE TABLE IF NOT EXISTS `motag_tests_features` (
@@ -161,7 +177,7 @@ CREATE TABLE IF NOT EXISTS `motag_tests_features` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Connection between tests and features.';
 
 --
--- Vypisuji data pro tabulku `motag_tests_features`
+-- Dumping data for table `motag_tests_features`
 --
 
 INSERT INTO `motag_tests_features` (`test_id`, `feature_id`) VALUES
@@ -827,4 +843,228 @@ INSERT INTO `motag_tests_features` (`test_id`, `feature_id`) VALUES
 (25, 25),
 (25, 26),
 (25, 27),
-(25, 28);
+(25, 28),
+(26, 1),
+(26, 2),
+(26, 3),
+(26, 4),
+(26, 5),
+(26, 6),
+(26, 7),
+(26, 8),
+(26, 9),
+(26, 10),
+(26, 11),
+(26, 12),
+(26, 13),
+(26, 14),
+(26, 15),
+(26, 16),
+(26, 17),
+(26, 18),
+(26, 19),
+(26, 20),
+(26, 21),
+(26, 22),
+(26, 23),
+(26, 24),
+(26, 25),
+(26, 26),
+(26, 27),
+(26, 28),
+(27, 1),
+(27, 2),
+(27, 3),
+(27, 4),
+(27, 5),
+(27, 6),
+(27, 7),
+(27, 8),
+(27, 9),
+(27, 10),
+(27, 11),
+(27, 12),
+(27, 13),
+(27, 14),
+(27, 15),
+(27, 16),
+(27, 17),
+(27, 18),
+(27, 19),
+(27, 20),
+(27, 21),
+(27, 22),
+(27, 23),
+(27, 24),
+(27, 25),
+(27, 26),
+(27, 27),
+(27, 28),
+(28, 1),
+(28, 2),
+(28, 3),
+(28, 4),
+(28, 5),
+(28, 6),
+(28, 7),
+(28, 8),
+(28, 9),
+(28, 10),
+(28, 11),
+(28, 12),
+(28, 13),
+(28, 14),
+(28, 15),
+(28, 16),
+(28, 17),
+(28, 18),
+(28, 19),
+(28, 20),
+(28, 21),
+(28, 22),
+(28, 23),
+(28, 24),
+(28, 25),
+(28, 26),
+(28, 27),
+(28, 28),
+(29, 1),
+(29, 2),
+(29, 3),
+(29, 4),
+(29, 5),
+(29, 6),
+(29, 7),
+(29, 8),
+(29, 9),
+(29, 10),
+(29, 11),
+(29, 12),
+(29, 13),
+(29, 14),
+(29, 15),
+(29, 16),
+(29, 17),
+(29, 18),
+(29, 19),
+(29, 20),
+(29, 21),
+(29, 22),
+(29, 23),
+(29, 24),
+(29, 25),
+(29, 26),
+(29, 27),
+(29, 28),
+(30, 1),
+(30, 2),
+(30, 3),
+(30, 4),
+(30, 5),
+(30, 6),
+(30, 7),
+(30, 8),
+(30, 9),
+(30, 10),
+(30, 11),
+(30, 12),
+(30, 13),
+(30, 14),
+(30, 15),
+(30, 16),
+(30, 17),
+(30, 18),
+(30, 19),
+(30, 20),
+(30, 21),
+(30, 22),
+(30, 23),
+(30, 24),
+(30, 25),
+(30, 26),
+(30, 27),
+(30, 28),
+(31, 1),
+(31, 2),
+(31, 3),
+(31, 4),
+(31, 5),
+(31, 6),
+(31, 7),
+(31, 8),
+(31, 9),
+(31, 10),
+(31, 11),
+(31, 12),
+(31, 13),
+(31, 14),
+(31, 15),
+(31, 16),
+(31, 17),
+(31, 18),
+(31, 19),
+(31, 20),
+(31, 21),
+(31, 22),
+(31, 23),
+(31, 24),
+(31, 25),
+(31, 26),
+(31, 27),
+(31, 28),
+(32, 1),
+(32, 2),
+(32, 3),
+(32, 4),
+(32, 5),
+(32, 6),
+(32, 7),
+(32, 8),
+(32, 9),
+(32, 10),
+(32, 11),
+(32, 12),
+(32, 13),
+(32, 14),
+(32, 15),
+(32, 16),
+(32, 17),
+(32, 18),
+(32, 19),
+(32, 20),
+(32, 21),
+(32, 22),
+(32, 23),
+(32, 24),
+(32, 25),
+(32, 26),
+(32, 27),
+(32, 28),
+(33, 1),
+(33, 2),
+(33, 3),
+(33, 4),
+(33, 5),
+(33, 6),
+(33, 7),
+(33, 8),
+(33, 9),
+(33, 10),
+(33, 11),
+(33, 12),
+(33, 13),
+(33, 14),
+(33, 15),
+(33, 16),
+(33, 17),
+(33, 18),
+(33, 19),
+(33, 20),
+(33, 21),
+(33, 22),
+(33, 23),
+(33, 24),
+(33, 25),
+(33, 26),
+(33, 27),
+(33, 28);
