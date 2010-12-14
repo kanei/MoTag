@@ -216,11 +216,11 @@ def main():
             #fo.write('%s : %s\n' % (w, pof))
 
             seq.append((
-                 encode(w),	# word
-                 encode(formattag(uni)), # common part of all possible tags
-                 encode(lp),	# possible lemmas
-                 encode(pof),	# postfix
-                 encode(t)))		# correct tag
+	       encode(w),	# word
+	       encode(formattag(uni)), # common part of all possible tags
+	       encode(lp),	# possible lemmas
+	       encode(pof),	# postfix
+	       encode(t)))		# correct tag
 
    #    if not line:
    #        seq.append(d)
