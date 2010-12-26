@@ -1,19 +1,43 @@
 #!/bin/sh
 
-# run: nohup ./run.sh &
+# run: nohup ./run.sh -d [pc_id] -t [train_count] -e [test_count] -i [iterations] -p [tag_parts] -r [reg]&
+# default values:        ^pcnlp3    ^10000           ^7000           ^50             ^111110011     ^L1
 
 id=pcnlp3
 ntrain=10000
 ntest=7000
 iter=50
-reg="L1"
+parts=111110011
+reg=L1
+
+
+while getopts "d:t:e:i:p:r:" optname
+do
+  case "$optname" in 
+  "d")
+  id=$OPTARG
+  ;;
+  "t")
+  ntrain=$OPTARG
+  ;; 
+  "e")
+  ntest=$OPTARG
+  ;; 
+  "i")
+  iter=$OPTARG
+  ;; 
+  "p")
+  parts=$OPTARG
+  ;; 
+  "r")
+  reg=$OPTARG
+  ;;
+  esac
+done
 
 #remove existing data
 rm $id.log $id.result $id.train $id.test $id.model $id.test
 
-ulimit -t unlimited
-ulimit -v unlimited
-ulimit -s unlimited
 date > $id.log
 #prepare data
 python2.7 $id.py -n $ntrain <train-3-ann.cst > $id.train
