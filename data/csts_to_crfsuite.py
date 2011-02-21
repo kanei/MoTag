@@ -10,7 +10,9 @@ def usage():
    print "Script for converting data from csts to format suitable \
 	for crfsuite program. \
 	arguments: \
-	-n [sentence count]	defines how many sentences will be processed"
+	-n [sentence count]	defines how many sentences will be processed\
+	-p 111---		uses parts of tag which are defined as 1"
+
 
 
 def output_features(fo, seq):
@@ -109,26 +111,32 @@ def encode(x):
    return x
 
 # sets format of tag - only several parts of tag might be used
-def formattag(tag):
-   tag = tag[:5] + tag[7:9]
-   return tag
+def formattag(tag, parts):
+   res = ''
+   for i in range(0, len(parts)):
+      if parts[i] == "1":
+         res = res + tag[i]
+   return res
 
 #main function
 def main():
    try:
-      opts, args = getopt.getopt(sys.argv[1:], "hn:", ["help", "count="])
+      opts, args = getopt.getopt(sys.argv[1:], "hn:p:", ["help", "count=","parts="])
    except getopt.GetoptError, err:
       print str(err)
       usage()
       sys.exit(2)
 
    count = 5000
+   tagParts = "1111100110000000"
    for o, a in opts:
       if o in ("-h", "--help"):
          usage()
          sys.exit()
       elif o in ("-n", "--count"):
          count = int(a)
+      elif o in ("-p", "--parts"):
+         tagParts = a
       else:
          assert False, "unhandled option"
 
@@ -204,7 +212,7 @@ def main():
    #		fo.write('%s\n' % (lp))
 
             # get correct tag and lemma
-            t = formattag(tr.search(line).group(1))
+            t = formattag(tr.search(line).group(1), tagParts)
             l = lr.search(line).group(1)
             w = f.group(1)
 
@@ -217,7 +225,7 @@ def main():
 
             seq.append((
 	       encode(w),	# word
-	       encode(formattag(uni)), # common part of all possible tags
+	       encode(formattag(uni, tagParts)), # common part of all possible tags
 	       encode(lp),	# possible lemmas
 	       encode(pof),	# postfix
 	       encode(t)))		# correct tag
