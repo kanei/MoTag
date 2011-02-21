@@ -5,7 +5,9 @@
  */
 function MoTag_show($pending = FALSE) {
    drupal_add_css(drupal_get_path('module', 'MoTag') . '/css/general.css');
-   
+   drupal_add_css(drupal_get_path('module', 'MoTag') . '/css/filtergrid.css');
+   drupal_add_js(drupal_get_path('module', 'MoTag') . '/js/tablefilter_all_min.js');
+   drupal_add_js(drupal_get_path('module', 'MoTag') . '/js/MoTag_show.js');
    $output = '';
 
    if($pending == '1') {
@@ -85,7 +87,7 @@ function MoTag_show($pending = FALSE) {
       $rows[] = $row;
    }
 
-   $output .= theme('table', array('header' => $header, 'rows' => $rows));
+   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'motag_show_table')));
 
    return $output;
 }
