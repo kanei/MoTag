@@ -1,0 +1,153 @@
+%============================================================================
+% tento soubor pouzijte jako zaklad
+% (c) 2008 Michal Bidlo
+% E-mail: bidlom AT fit vutbr cz
+%============================================================================
+% kodovaní: iso-8859-2 (zmena prikazem iconv, recode nebo cstocs)
+%----------------------------------------------------------------------------
+% zpracování: make, make pdf, make desky, make clean
+% pøipomínky posílejte na e-mail: bidlom AT fit.vutbr.cz
+% vim: set syntax=tex encoding=latin2:
+%============================================================================
+\documentclass[cover]{fitthesis} % odevzdani do wisu - odkazy, na ktere se da klikat
+%\documentclass[cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
+%\documentclass[english,print]{fitthesis} % pro tisk - na odkazy se neda klikat
+%      \documentclass[english]{fitthesis}
+% * Je-li prace psana v anglickem jazyce, je zapotrebi u tridy pouzit 
+%   parametr english nasledovne:
+%      \documentclass[english]{fitthesis}
+% * Neprejete-li si vysazet na prvni strane dokumentu desky, zruste 
+%   parametr cover
+
+% zde zvolime kodovani, ve kterem je napsan text prace
+% "latin2" pro iso8859-2 nebo "cp1250" pro windows-1250, "utf8" pro "utf-8"
+%\usepackage{ucs}
+\usepackage[latin2]{inputenc}
+\usepackage[T1, IL2]{fontenc}
+\usepackage{url}
+\DeclareUrlCommand\url{\def\UrlLeft{<}\def\UrlRight{>} \urlstyle{tt}}
+
+%zde muzeme vlozit vlastni balicky
+
+
+% =======================================================================
+% balíèek "hyperref" vytváøí klikací odkazy v pdf, pokud tedy pou¾ijeme pdflatex
+% problém je, ¾e balíèek hyperref musí být uveden jako poslední, tak¾e nemù¾e
+% být v ¹ablonì
+\ifWis
+\ifx\pdfoutput\undefined % nejedeme pod pdflatexem
+\else
+  \usepackage{color}
+  \usepackage[unicode,colorlinks,hyperindex,plainpages=false,pdftex]{hyperref}
+  \definecolor{links}{rgb}{0.4,0.5,0}
+  \definecolor{anchors}{rgb}{1,0,0}
+  \def\AnchorColor{anchors}
+  \def\LinkColor{links}
+  \def\pdfBorderAttrs{/Border [0 0 0] }  % bez okrajù kolem odkazù
+  \pdfcompresslevel=9
+\fi
+\fi
+
+%Informace o praci/projektu
+%---------------------------------------------------------------------------
+\projectinfo{
+  %Prace
+  project=BP,            %typ prace BP/SP/DP/DR
+  year=2011,             %rok
+  date=\today,           %datum odevzdani
+  %Nazev prace
+  title.cs={Metody strojového uèení ve zpracování pøirozeného jazyka},  %nazev prace v cestine
+  title.en={Computer Learning Methods Used in Natural Language Parsing}, %nazev prace v anglictine
+  %Autor
+  author={Marek Vantuch},   %jmeno prijmeni autora
+  %author.title.p=Bc., %titul pred jmenem (nepovinne)
+  %author.title.a=PhD, %titul za jmenem (nepovinne)
+  %Ustav
+  department=UITS, % doplnte prislusnou zkratku: UPSY/UIFS/UITS/UPGM
+  %Skolitel
+  supervisor= Lubomír Otrusina, %jmeno prijmeni skolitele
+  supervisor.title.p=Ing.,   %titul pred jmenem (nepovinne)
+  %supervisor.title.a={Ph.D.},    %titul za jmenem (nepovinne)
+  %Klicova slova, abstrakty, prohlaseni a podekovani je mozne definovat 
+  %bud pomoci nasledujicich parametru nebo pomoci vyhrazenych maker (viz dale)
+  %===========================================================================
+  %Klicova slova
+  keywords.cs={Poèítaèové uèení, znaèkování textu, Conditional Random Fields, L-BFGS}, %klicova slova v ceskem jazyce
+  keywords.en={Computer Learning, POS tagging, Conditional Random Fields, L-BFGS}, %klicova slova v anglickem jazyce
+  %Abstract
+  abstract.cs={Práce se zabývá automatickým znaèkováním èeského jazyka za pomocí
+	existujících implementací, vyu¾ívajících model Conditional Random Fields a
+	algoritmy L-BFGS a SDG. Jsou popsány základní pravidla znaèkování a problémy, se
+	kterými se tento obor potýká v pøípadì zpracování èeského jazyka. Ètenáøi jsou
+	vysvìtleny principy pou¾itých algoritmù a modelù, které jsou implementovány 
+	v programech CRF++ a CRFSuite. Práce se poté zamìøuje na vlastní testování
+	úspì¹nosti na èeském korpusu a sna¾í se nalézt nejvhodnìj¹í parametry pøi vyu¾ití
+	v¹ech rysù.  Pøi nalezení rozumného kompromisu mezi èasem a pøesností se poté
+	sna¾í tuto hodnotu je¹tì zpøesnit za pomoci analýzy pøínosu jednotlivých rysù a
+	mo¾ností jejich vynechání.}, % abstrakt v ceskem jazyce
+  abstract.en={This work discourses using of existing implementations of Conditional
+	Random Fields model with L-BFGS and SDG algorithms for automatic part of speech
+ 	tagging of Czech language. Firstly it describes base rules and problems of
+	tagging, which can be met when tagging Czech language. Then it describes
+	principles of used algorithms and models, which are implemented in CRF++ and
+	CRFSuite programs. Work is then focused on the success rate of testing on Czech
+	corpus and tries to find the most suitable parameters for usage of features.
+	After finding a reasonable compromise between time and accuracy, it tries to even
+	improve this value by analysing the profit brought by any of the used feature and
+	possibility of it's omitting.}, % abstrakt v anglickem jazyce
+  %Prohlaseni
+  declaration={Prohla¹uji, ¾e jsem tuto bakaláøskou práci vypracoval samostatnì pod vedením pana Ing. Lubomíra Otrusiny},
+  %Podekovani (nepovinne)
+  acknowledgment={Dìkuji panu Ing. Lubomíru Otrusinovi za jeho pomoc a vedení
+ 	pøi tvrobì této práce, RNDr. Pavlu Smr¾i, Ph D. za mo¾nost na tomto tématu
+ 	pracovat a Ing. Marku Schmidtovi za poskytnuté rady.} % nepovinne
+}
+
+%Abstrakt (cesky, anglicky)
+%\abstract[cs]{Do tohoto odstavce bude zapsán výtah (abstrakt) práce v èeském jazyce.}
+%\abstract[en]{Do tohoto odstavce bude zapsán výtah (abstrakt) práce v anglickém jazyce.}
+
+%Klicova slova (cesky, anglicky)
+%\keywords[cs]{Sem budou zapsána jednotlivá klíèová slova v èeském jazyce, oddìlená èárkami.}
+%\keywords[en]{Sem budou zapsána jednotlivá klíèová slova v anglickém jazyce, oddìlená èárkami.}
+
+%Prohlaseni
+%\declaration{Prohla¹uji, ¾e jsem tuto bakaláøskou práci vypracoval samostatnì pod vedením pana X...
+%Dal¹í informace mi poskytli...
+%Uvedl jsem v¹echny literární prameny a publikace, ze kterých jsem èerpal.}
+
+%Podekovani (nepovinne)
+%\acknowledgment{V této sekci je mo¾no uvést podìkování vedoucímu práce a tìm, kteøí poskytli odbornou pomoc
+%(externí zadavatel, konzultant, apod.).}
+
+\begin{document}
+  % Vysazeni titulnich stran
+  % ----------------------------------------------
+  \maketitle
+  % Obsah
+  % ----------------------------------------------
+  \tableofcontents
+  
+  % Seznam obrazku a tabulek (pokud prace obsahuje velke mnozstvi obrazku, tak se to hodi)
+  % \listoffigures
+  % \listoftables 
+
+  % Text prace
+  % ----------------------------------------------
+  \input{obsah} % viz. obsah.tex
+
+  % Pouzita literatura
+  % ----------------------------------------------
+\ifczech
+  \bibliographystyle{czechiso}
+\else 
+  \bibliographystyle{plain}
+%  \bibliographystyle{alpha}
+\fi
+  \begin{flushleft}
+  \bibliography{literatura} % viz. literatura.bib
+  \end{flushleft}
+  \appendix
+  
+  \input{prilohy} % viz. prilohy.tex
+\end{document}
