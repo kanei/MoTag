@@ -4,95 +4,128 @@
 \chapter{Úvod}
 Tato práce pojednává o vyu¾ití existujících øe¹ení, vyu¾ívajících algoritmù automatického poèítaèového uèení (Conditional Random Fields s vyu¾ítím algoritmù Limited-memory BFGS a Stochastic Gradient Descent) a porovnání výsledkù s existujícími øe¹eními, kterými v na¹em pøípadì je program Morèe vyvíjený na pra¾ské Univerzitì Karlovì, pou¾ívající Hidden Markov Model. Z existujících øe¹ení poté byly vybrány programy CRF++ a CrfSuite.
 
-V dokumentu bude nejdøíve popsáno samotné znaèkování èe¹tiny a jeho pravidla, a potí¾e, které jsou s ním spojeny v porovnání s jinými, jednodu¹¹ími jazyky. Dále budou rozebrány matematické modely a algoritmy, které jsou pou¾ity pøi procesu uèení. K celému procesu bylo potøeba vytvoøit nìkolik nástrojù, buï konvertujících vstupní data pro jednotlivé programy, nebo ulehèujících vlastní proces testování. Mezi tyto patøí skritpy napsané v jazyce Python a bash a informaèní systém, starající se o správu bì¾ících a dokonèených testù a informací o nich, implementovaný za pomocí PHP, SQL a HTML, postavený na open-source CMS systému Drupal. Ve¹kerý kód byl spravován pomocí verzovacího systému GIT a je veøejnì dostupný na internetu[10].
+V dokumentu bude nejdøíve popsáno samotné znaèkování èe¹tiny a jeho pravidla, a potí¾e, které jsou s ním spojeny v porovnání s jinými, jednodu¹¹ími jazyky. Dále budou rozebrány matematické modely a algoritmy, které jsou pou¾ity pøi procesu uèení. K celému procesu bylo potøeba vytvoøit nìkolik nástrojù, buï konvertujících vstupní data pro jednotlivé programy, nebo ulehèujících vlastní proces testování. Mezi tyto patøí skritpy napsané v jazyce Python a bash a informaèní systém, starající se o správu bì¾ících a dokonèených testù a informací o nich, implementovaný za pomocí PHP, SQL a HTML, postavený na open-source CMS systému Drupal. Ve¹kerý kód byl spravován pomocí verzovacího systému GIT a je veøejnì dostupný na internetu\cite{zdrojak}.
 
 Nejdùle¾itìj¹í èástí dokumentù pak jsou výsledky testování, zpracovávaného na ¹kolních strojích pøes vzdálený pøistup. Testy byly provedeny z mnoha rùzných úhlù pohledu na efektivitu a jsou doplnìny o tabulky a grafy. 
 
 Pro úschovu a verzování zdrojového kódu byl vyu¾it program git a kód je veøejnì pøístupný \cite{zdrojak}.
 
+\section{Termíny}
+Pro dal¹í text definujeme následující termíny:
 \begin{itemize}
-\item Pouze priklad, smazat!!
+	\item \textbf{Znaèka} -- \textit{angl. Label} -- øetìzec popisující vlastnost
+ 		daného prvku, v na¹em pøípadì urèení mluvnických tøíd.
+	\item \textbf{Rys} -- \textit{angl. Feature} -- prvek pou¾ívaný pøi trénování,
+		specifikující vlastnost daného prvku ve vstupních datech.
+	\item \textbf{Vlastnost} -- \textit{angl. Atribut} -- pravidlo pro generování
+		jednotlivých rysù 
+	\item \textbf{Lemma} -- základní podoba slova (slovníkový tvar)
 \end{itemize}
+\chapter{Znaèkování èeského jazyka}
+\section{Proè znaèkovat jazyk}
+V èeském jazyce má mnoho slov tzv. homonymní tvar -- jedno slovo mù¾e být v rùzných pøípadech naprosto odli¹ným slovním druhem, nebo mít odli¹né urèení slovních kategorií. Pøi strojové analýze textu, pøekladech apod. je proto dùle¾ité, abychom byli schopni tyto kategorie rozli¹ovat a pøiøazovat jednotlivým slovùm jejich správnou znaèku.
+\section{Co je to znaèkování}
+Proces, pøi kterém je slovu, pøiøazena  znaèka obsahující jeho popis z mluvnického hlediska. Tento proces je èasto rozdìlen na nìkolik krokù, kdy slovu nejdøíve pøiøadíme v¹echny mo¾né znaèky a poté teprve vybereme tu správnou. V této práci se budeme zabývat pouze druhým krokem a v¹echna vstupní data proto ji¾ budou mít nastavena mno¾inu v¹ech znaèek, pøipadajících v úvahu. 
+\section{Kategorie popisované znaèkou v èeském jazyce}
+Ka¾dé slovo èeského jazyka má mnoho kategorií, do kterých mù¾e být zaøazeno -- od slovního druhu po slovesný vid. V poèítaèovém zpracování jazyka lze pou¾ít nìkolika rùzných pøístupù k ulo¾ení tìchto informací. V na¹em pøípadì bude struktura znaèek odpovídat systému\cite{znacky} pou¾ívanému na pra¾ské Univerzitì Karlovì. Tento systém se skládá ze 16 pozic viz tabulka ~\ref{tab:PopisZnacek}.
+\begin{center}
+	\begin{tabular}{|c|l|}
+		\hline
+		Pozice & Popis \\
+		\hline
+		1 & Slovní druh \\
+		2 & Detail slovního druhu \\
+		3 & Jmenný rod \\
+		4 & Èíslo \\
+		5 & Pád \\
+		6 & Pøivlastòovací rod \\
+		7 & Pøivlastòovací èíslo \\
+		8 & Osoba \\
+		9 & Èas \\
+		10 & Stupeò \\
+		11 & Negace \\
+		12 & Aktívum/pasívum \\	
+		13 & Nepou¾ito \\
+		14 & Nepou¾ito \\
+		15 & Varianta, stylový pøíznak a pod. \\
+		16 & Slovesný vid \\
+		\hline
+	\end{tabular}
+	\captionof{table}{Popis jednotlivých pozic morfologické znaèky}
+	\label{tab:PopisZnacek}
+\end{center}
 
-\section{Musíme mít co øíci}
-Dal¹ím dùle¾itým pøedpokladem dobrého psaní je {\it psát pro nìkoho}. Pí¹eme-li si poznámky sami pro sebe, pí¹eme je jinak ne¾ výzkumnou zprávu, èlánek, diplomovou práci, knihu nebo dopis. Podle pøedpokládaného ètenáøe se rozhodneme pro zpùsob psaní, rozsah informace a~míru detailù.
+\section{Problémy pøi znaèkování}
+Zatímco v angliètinì pøi pouhém oznaèkování slov s jednoznaènou znaèkou dosáhneme úspì¹nosti kolem 90\%, v èeském jazyce je situace mnohem slo¾itìj¹í. Kvùli vý¹e zmínìné homonymii a mno¾ství kategorii, do kterých v èeském jazyce slova mù¾eme zaøadit, bychom se v na¹em pøípadì k 90\% urèitì ani nepøiblí¾ili. V angliètinì se proto také pou¾ívá pouze tøí-pozicová znaèka, která velmi ulehèuje práci ve¹kerým automatickým programùm. Pøi takto nízkém poètu je také velmi nízká pamì»ová nároènost a poèet mo¾ných pøechodù není tak vysoký. Naproti tomu v èe¹tinì je kvùli 16 pozicím mo¾no získat celkový poèet znaèek v øádu tisícù a tím se neúmìrnì zvy¹uje èasová i pamì»ová nároènost celého procesu znaèkování. Z tohoto dùvodu jsem se pokou¹el tuto nároènost sní¾it vypu¹tìním ménì dùle¾itých kategorií a tím sní¾it celkový poèet variant k èíslu nepøevy¹ujícímu jeden tisíc. Nároènost na procesorový èas se tím razantnì sní¾ila a dala mi tak ¹anci otestovat mnohem vìt¹í mno¾ství kombinací rysù a nastavení programù.
+\section{Data}
+K trénování a následné evaluaci výsledkù máme k dispozici okolo 77 000 vìt. Data jsou získána z korpusu PDT 2.0 a ulo¾ena ve formátu dat CSTS\cite{csts}. Pomocí skriptù napsaných pøevá¾nì v jazyce python jsou poté tato data pøevedena do formátu kompatibilního s pou¾itými programy.
+\section{Existující øe¹ení pro znaèkování èeského jazyka}
+Pro porovnání výsledkù tohoto projektu byl pou¾it program Morèe\cite{Morce} vytvoøený na Ústavu formální a aplikované lingvistiky na Univerzitì Karlovì v Praze. K trénování je vyu¾íván Skrytý Markovùv Model s pou¾itím Prùmìrovaného perceptronu. Vstupními daty je korpus PDT 2.0 s údaji ve formátu CSTS. Podle dostupných údajù program dosahuje úspì¹nosti od 95 do 96 procent je tudí¾ nejpøesnìj¹ím znaèkovacím programem pro zpracování èeského jazyka. Z dùvodu pou¾ití stejných dat tedy nebude problém porovnat koneènou úspì¹nost námi pou¾ité implementace s úspì¹ností programu Morèe.
 
-\section{Musíme vìdìt, komu to chceme øíci}
-Dal¹ím dùle¾itým pøedpokladem dobrého psaní je psát pro nìkoho. Pí¹eme-li si poznámky sami pro sebe, pí¹eme je jinak ne¾ výzkumnou zprávu, èlánek, diplomovou práci, knihu nebo dopis. Podle pøedpokládaného ètenáøe se rozhodneme pro zpùsob psaní, rozsah informace a~míru detailù.
+\chapter{Pou¾ité algoritmy}
+Pro odli¹ení od existujících øe¹ení byl vybrán algoritmus Conditional Random Fields (Podmínìná náhodná pole), roz¹iøující Hidden Markov Model a tím nabízející vý¹¹í úèinnost na vstupních datech. Pro lep¹í pochopení CRF je potøeba nejdøíve porozumìt zpùsobu, jakým pracuje algoritmus HMM. V mnoha existujících øe¹eních se poté pro urèení parametrù pou¾ívají rùzné algoritmy od Viterbi algorithm, pou¾ívaného ji¾ od 60. let minulého století, pøes Forward-Backward algorithm, jeho modifikaci Baum-Welch algorithm a¾ po \uv{nejmodernìj¹í} zástupce, kterými jsou Low Memory BFGS a Stochastic Gradient Descent, poskytující nejlep¹í výsledky, nebo vysoké sní¾ení pamì»ové a èasové nároènosti.
 
-\section{Musíme si dokonale promyslet obsah}
-Musíme si dokonale promyslet a~sestavit obsah sdìlení a~vytvoøit poøadí, v~jakém chceme ètenáøi své my¹lenky prezentovat. 
-Jakmile víme, co chceme øíci a~komu, musíme si rozvrhnout látku. Ideální je takové rozvr¾ení, které tvoøí logicky pøesný a~psychologicky stravitelný celek, ve kterém je pro v¹echno místo a~jeho¾ jednotlivé èásti do sebe pøesnì zapadají. Jsou jasné v¹echny souvislosti a~je zøejmé, co kam patøí.
+Celý proces poté probíhá za tzv. Supervised Learning (uèení se pod dohledem), kdy programu nejdøíve pøedlo¾íme ji¾ správnì oznaèená data a necháme jej, aby se pomocí jednoho z vý¹e zmínìných algoritmù nauèil správné parametry modelu (CRF nebo HMM). Takto získaný model poté aplikujeme na men¹í skupinu dat, pomocí které poté urèíme koneènou úspì¹nost celého procesu.
 
-Abychom tohoto cíle dosáhli, musíme peèlivì organizovat látku. Rozhodneme, co budou hlavní kapitoly, co podkapitoly a~jaké jsou mezi nimi vztahy. Diagramem takové organizace je graf, který je velmi podobný stromu, ale ne øetìzci. Pøi organizaci látky je stejnì dùle¾itá otázka, co do osnovy zahrnout, jako otázka, co z~ní vypustit. Pøíli¹ mnoho podrobností mù¾e ètenáøe právì tak odradit jako ¾ádné detaily.
+\section{Hiden Markov Model (HMM)}
+Skrytý Markovský model (viz.\cite{Kovar}), pojmenovaný po ruském matematikovi Andreyi Markovi, oznaèuje statistický model urèený pro popis posloupnosti obsahující Markovské stavy. Tìmi máme na mysli takový stav, pro nì¾ je dùle¾itá pouze blízká minulost (v na¹em pøípadì pouze nìkolik pøedchozích stavù -- znaèek) a vzdálená minulost je zanedbána. Ve zpracování jazyka se èasto omezuje zpracování pouze na dvì pøedchozí znaèky.
 
-Výsledkem této etapy je osnova textu, kterou tvoøí sled hlavních my¹lenek a~mezi nì zaøazené detaily.
+Zatímco u klasického Markovského modelu známe posloupnost vstupních hodnot, v na¹em pøípadì známe pouze posloupnost hodnot výsledných (slovních tvarù). V ka¾dém kroku je poté ulo¾ena hodnota pravdìpodobnosti pøechodu do mo¾ných následujících stavù a hodnota pravdìpodobnosti vygenerování urèitého výstupu (znaèky). Celý proces je zachycen na obrázku ~\ref{fig:GrafHMM}.
 
-\section{Musíme psát strukturovanì} 
-Musíme zaèít psát strukturovanì a~souèasnì pracujeme na co nejsrozumitelnìj¹í formì, vèetnì dobrého slohu a~dokonalého znaèení. 
-Máme-li tedy my¹lenku, pøedstavu o~budoucím ètenáøi, cíl a~osnovu textu, mù¾eme zaèít psát. Pøi psaní prvního konceptu se sna¾íme zaznamenat v¹echny své my¹lenky a~názory vztahující se k~jednotlivým kapitolám a~podkapitolám. Ka¾dou my¹lenku musíme vysvìtlit, popsat a~prokázat. Hlavní my¹lenku má v¾dy vyjadøovat hlavní vìta a~nikoliv vìta vedlej¹í.
+\begin{figure}[ht!]
+	\centering
+		\includegraphics[width=\textwidth]{fig/HMM}
+		\caption{Graf mo¾ných pøechodù a výstupù modelu}
+		\label{fig:GrafHMM}
+\end{figure}
 
-I k~procesu psaní textu pøistupujeme strukturovanì. Souèasnì s~tím, jak si ujasòujeme strukturu písemné práce, vytváøíme kostru textu, kterou postupnì doplòujeme. Vyu¾íváme ty prostøedky DTP programu, které podporují strukturovanou stavbu textu (pøeddefinované typy pro nadpisy a~bloky textu). 
+Z tohoto ukázkového pøíkladu mù¾eme vyvodit, ¾e pøi posloupnosti pozorovaných tvarù ètverec, kosoètverec, kruh, trojúhelník, mù¾e \uv{skrytá} vstupní posloupnost mít jednu z podob zobrazených v tabulce ~\ref{tab:HMMPrechody}.
+\begin{figure}
+	\begin{center}
+		\begin{tabular}{|c c c c|}
+			\hline
+			1 & 2 & 1 & 1 \\
+			\hline
+			1 & 2 & 1 & 2 \\ 
+			\hline
+			1 & 2 & 2 & 1 \\ 
+			\hline
+			1 & 2 & 2 & 3 \\
+			\hline
+		\end{tabular}
+		\captionof{table}{Mo¾né pøechody mezi skrytými stavy modelu}
+		\label{tab:HMMPrechody}
+	\end{center}
+\end{figure}
+Nejpravdìpodobnìj¹í z nich bychom byli schopni urèit pomocí ohodnocení jednotlivých pøechodù. 
 
+V na¹em pøípadì bychom pak pøi trénování, kdy známe jak vstupní, tak výstupní posloupnost, museli urèitým zpùsobem vypoèítat hodnoty na jednotlivých pøechodech. K tomu mù¾eme pou¾ít jeden k tomu urèených algoritmù -- Viterbiho algoritmus, Forward-Backward algoritmus, nebo Baum-Welch algoritmus. S jejich pomocí jsme poté po nìkolika iteracích schopni získat hodnoty pro ideální prùchod pøi neznámé posloupnosti.
 
-\chapter{Nìkolik formálních pravidel}
-Na¹ím cílem je vytvoøit jasný a~srozumitelný text. Vyjadøujeme se proto pøesnì, pí¹eme dobrou èe¹tinou (nebo zpravidla angliètinou) a~dobrým slohem podle obecnì pøijatých zvyklostí. Text má upravit ètenáøi cestu k~rychlému pochopení problému, pøedvídat jeho obtí¾e a~pøedcházet jim. Dobrý sloh pøedpokládá bezvadnou gramatiku, správnou interpunkci a~vhodnou volbu slov. Sna¾íme se, aby ná¹ text nepùsobil pøíli¹ jednotvárnì pou¾íváním malého výbìru slov a~tím, ¾e nìkterá zvlá¹» oblíbená slova pou¾íváme pøíli¹ èasto. Pokud pou¾íváme cizích slov, je samozøejmým pøedpokladem, ¾e známe jejich pøesný význam. Ale i~èeských slov musíme pou¾ívat ve správném smyslu. Napø. platí jistá pravidla pøi pou¾ívání slova {\it zøejmì}. Je {\it zøejmé} opravdu zøejmé? A~pøesvìdèili jsme se, zda to, co je {\it zøejmé} opravdu platí? Pozor bychom si mìli dát i~na pøíli¹ èasté pou¾ívání zvratného se. Napøíklad obratu {\it dokázalo se}, ¾e... zásadnì nepou¾íváme. Není ¹patné pou¾ívat autorského {\it my}, tím pøedpokládáme, ¾e nìco øe¹íme, nebo napøíklad zobecòujeme spolu se ètenáøem. V~kvalifikaèních pracích pou¾ijeme autorského {\it já} (napøíklad kdy¾ vymezujeme podíl vlastní práce vùèi pøevzatému textu), ale v~bì¾ném textu se nadmìrné pou¾ívání první osoby jednotného èísla nedoporuèuje.
+I kdy¾ není HMM implementováno v ¾ádném z vyu¾itých programù, poskytuje základ pro pochopení algoritmu CRF.
 
-Za peèlivý výbìr stojí i~symbolika, kterou pou¾íváme ke {\it znaèení}. Máme tím na mysli volbu zkratek a~symbolù pou¾ívaných napøíklad pro vyjádøení typù souèástek, pro oznaèení hlavních èinností programu, pro pojmenování ovládacích kláves na klávesnici, pro pojmenování promìnných v~matematických formulích a~podobnì. Výsti¾né a~dùsledné znaèení mù¾e ètenáøi pøi èetbì textu velmi pomoci. Je vhodné uvést seznam znaèení na zaèátku textu. Nejen ve znaèení, ale i~v~odkazech a~v~celkové tiskové úpravì je dùle¾itá dùslednost.
+\section{Conditional Random Fields (CRF)}
+CRF mù¾eme popsat jako bezsmìrový grafický pravdìpodobnostní model (undirected probabilistic graphical model), ve kterém ka¾dý uzel (v na¹em pøípadì slovo) popisuje náhodnou promìnnou. CRF mù¾e také být vyjádøen jako model s koneèným poètem stavù a nenormalizovanými pravdìpodobnostmi pøechodù. V porovnání k HMM nemá jasnì dané hodnoty pøechodù mezi stavy a disponuje mo¾ností mnohonásobných funkcí, generujících rysy. Pøiná¹í také lep¹í výsledky ve zpracování dat se závislostmi vy¹¹ího øádu, které vìt¹inou lépe odpovídají reálnému modelu. Na rozdíl od generativních modelù také, jako¾to pravdìpodobnostní (conditional) model nemusí zkoumat v¹echny mo¾né sekvence pozorovaných prvkù (observations). Pro urèení parametrù tohoto modelu je v souèasné dobì nejvíce doporuèován algoritmus L-BFGS (Low-Memory BFGS), který poskytuje nejkvalitnìj¹í výsledky.
 
-S tím souvisí i~pojem z~typografie nazývaný {\it vyznaèování}. Zde máme na mysli zpùsob sazby textu pro jeho zvýraznìní. Pro zvolené znaèení by mìl být zvolen i~zpùsob vyznaèování v~textu. Tak napøíklad klávesy mohou být umístìny do obdélníèku, identifikátory ze zdrojového textu mohou být vypisovány {\tt písmem typu psací stroj} a~podobnì.
+\subsection{Label Bias problém}
+Problém ¹patného vyva¾ování znaèek (viz.\cite{Lafferty}) spoèívá v pøesunu pravdìpodobnostní hodnoty na dal¹í pozici v pøípadì pouze jediného pøechodu za ignorování pozorovaného prvku. Jak je ilustrováno na obrázku DOPLNIT!!, v pøípadì vstupní posloupnosti písmen t,i,k se v prvním kroku neumíme rozhodnout a vstupujeme do stavù 1 a 4 se stejnou pravdìpodobností. Nyní, i kdy¾ na vstupu je písmeno i, nemáme jinou mo¾nost, ne¾ pokraèovat do stavù 2, pøípadnì 5 za ignorování pozorovaného písmena. V pøípadì, ¾e by v trénovacích datech tedy pøevládal øetìzec \uv{tik} nad øetìzcem \uv{tak}, byly by oba tyto øetìzce v¾dy urèeny jako \uv{tik}. Toto je vy¾e¹eno algoritmem CRF pomocí ohodnocení pøechodù mezi stavy, kdy mù¾eme podle aktuálního pozorovaného prvku buï sní¾it, nebo zvý¹it koneènou pravdìpodobnost dané posloupnosti.
 
-Uvádíme-li nìkterá fakta, neskrýváme jejich pùvod a~ná¹ vztah k~nim. Kdy¾ nìco tvrdíme, v¾dycky výslovnì uvedeme, co z~toho bylo dokázáno, co teprve bude dokázáno v~na¹em textu a~co pøebíráme z~literatury s~uvedením odkazu na pøíslu¹ný zdroj. V~tomto smìru nenecháváme ètenáøe nikdy na pochybách, zda jde o~my¹lenku na¹i nebo pøevzatou z~literatury.
+\section{Viterbi algorithm}
+Byl navrhnut v roce 1967 Andrewem Viterbi jako dekódovací algoritmus pro konvoluèní kódy v telekomunikaèních sítích. Kvùli svému zamìøení na vyhledání nejpravdìpodobnìj¹í cesty sekvencí skrytých stavù (nejèastìji HMM) se v¹ak pou¾ívá v mnoha odvìtvích, jako zpracování signálù a také znaèkování jazyka. 
 
-Nikdy neplýtváme ètenáøovým èasem výkladem triviálních a~nepodstatných informací. Neuvádíme rovnì¾ nìkolikrát toté¾ jen jinými slovy. Pøi pozdìj¹ích úpravách textu se nám mù¾e nìkterá døíve napsaná pasá¾ jevit jako zbyteènì podrobná nebo dokonce zcela zbyteèná. Vypu¹tìní takové pasá¾e nebo alespoò její zestruènìní pøispìje k~lep¹í èitelnosti práce! Tento krok ale vy¾aduje odvahu zahodit èas, který jsme jejímu vytvoøení vìnovali. 
+Za pøedpokladu, ¾e vstupní data mají stejný poèet pozorovaných a skrytých stavù, obì posloupnosti jsou zarovnané a výpoèet v daném místì je závislý pouze na aktuálním a pøedchozím prvku, je pomocí získána tzv. Viterbiho cesta -- nejpravdìpodobnìj¹í cesta posloupností.  V ka¾dém kroku algoritmus vyhodnotí v¹echny cesty vedoucí k aktuálnímu stavu a ponechá pouze jednu, díky èemu¾ není nucen uchovávat v¹echny existující cesty, ale pouze jednu pro ka¾dý stav. Za pomocí uchovávaní ceny stavu se poka¾dé algoritmus rozhodne ze v¹ech mo¾ností pro dal¹í stav a ulo¾í kompletní cestu od zaèátku prùchodu posloupností.
 
+\section{Forward-backward algorithm}
+Pou¾ívá dva prùchody posloupností stavù -- dopøedu a zpìt (podle toho také vznikl jeho název). Nejdøíve projde celou sekvenci a urèí cenu cesty pøi daném prùchodu. Poté projde sekvencí zpìt a pøi ka¾dém kroku spoèítá pravdìpodobnost pozorování zbylých vstupních hodnot. Oba tyto prùchody jsou poté \uv{vyhlazeny} do spoleèného výsledku a tím je získáno rozdìlení mezi stavy v jednotlivých jednotkách èasu. Speciálním pøípadem je poté Baum-Welch algoritmus (ZJISTIT VICE??).
 
-\chapter{Nikdy to nebude naprosto dokonalé}
-Kdy¾ jsme u¾ napsali v¹e, o~èem jsme pøemý¹leli, udìláme si den nebo dva dny volna a~pak si pøeèteme sami rukopis znovu. Udìláme je¹tì poslední úpravy a~skonèíme. Jsme si vìdomi toho, ¾e v¾dy zùstane nìco nedokonèeno, v¾dy existuje lep¹í zpùsob, jak nìco vysvìtlit, ale ka¾dá etapa úprav musí být koneèná.
+\section{L-BFGS}
+L-BFGS (viz.\cite{Nash}) oznaèuje nízko pamì»ovou (Low memory) úpravu optimalizaèní metody BFGS (Broyden-Fletcher-Goldfarb-Shanno) z rodiny Quasi-Newtonových metod, urèenou k aproximaci inverzní Hessovy matice (ètvercová matice druhých parciálních derivací funkce -- popisuje místní zakøivení funkce o nìkolika promìnných). Optimalizací pro sní¾ení pamì»ové nároènosti je neukládání matice samotné, ale pouze ukládá historii zmìn.
 
+\section{Stochastic Gradient Descent}
 
-\chapter{Typografické a~jazykové zásady}
-Pøi tisku odborného textu typu {\it technická zpráva} (anglicky {\it technical report}), ke kterému patøí napøíklad i~text kvalifikaèních prací, se èasto volí formát A4 a~èasto se tiskne pouze po jedné stranì papíru. V~takovém pøípadì volte levý okraj v¹ech stránek o~nìco vìt¹í ne¾ pravý -- v~tomto místì budou papíry svázány a~technologie vazby si tento po¾adavek vynucuje. Pøi vazbì s~pevným høbetem by se levý okraj mìl dìlat o~nìco ¹ir¹í pro tlusté svazky, proto¾e se stránky budou hùøe rozevírat a~levý okraj se tak bude oku ménì odhalovat.
+\section{Regularizace L1}
 
-Horní a~spodní okraj volte stejnì veliký, pøípadnì poti¹tìnou èást posuòte mírnì nahoru (horní okraj men¹í ne¾ dolní). Poèítejte s~tím, ¾e pøi vazbì budou okraje mírnì oøíznuty.
-
-Pro sazbu na stránku formátu A4 je vhodné pou¾ívat pro základní text písmo stupnì (velikosti) 11 bodù. Volte ¹íøku sazby 15 a¾ 16 centimetrù a~vý¹ku 22 a¾ 23 centimetrù (vèetnì pøípadných hlavièek a~patièek). Proklad mezi øádky se volí 120 procent stupnì pou¾itého základního písma, co¾ je optimální hodnota pro rychlost ètení souvislého textu. V~pøípadì pou¾ití systému LaTeX ponecháme implicitní nastavení. Pøi psaní kvalifikaèní práce se øiïte pøíslu¹nými závaznými po¾adavky.
-
-Stupeò písma u~nadpisù rùzné úrovnì volíme podle standardních typografických pravidel. 
-Pro v¹echny uvedené druhy nadpisù se obvykle pou¾ívá polotuèné nebo tuèné písmo (jednotnì buï v¹ude polotuèné nebo v¹ude tuèné). Proklad se volí tak, aby se následující text bì¾ných odstavcù sázel pokud mo¾no na {\it pevný rejstøík}, to znamená jakoby na linky s~pøedem definovanou a~pevnou rozteèí.
-
-Uspoøádání jednotlivých èástí textu musí být pøehledné a~logické. Je tøeba odli¹it názvy kapitol a~podkapitol -- pí¹eme je malými písmeny kromì velkých zaèáteèních písmen. U~jednotlivých odstavcù textu odsazujeme první øádek odstavce asi o~jeden a¾ dva ètverèíky (v¾dy o~stejnou, pøedem zvolenou hodnotu), tedy pøibli¾nì o~dvì ¹íøky velkého písmene M základního textu. Poslední øádek pøedchozího odstavce a~první øádek následujícího odstavce se v~takovém pøípadì neoddìlují svislou mezerou. Proklad mezi tìmito øádky je stejný jako proklad mezi øádky uvnitø odstavce.
-
-Pøi vkládání obrázkù volte jejich rozmìry tak, aby nepøesáhly oblast, do které se tiskne text (tj. okraje textu ze v¹ech stran). Pro velké obrázky vyèleòte samostatnou stránku. Obrázky nebo tabulky o~rozmìrech vìt¹ích ne¾ A4 umístìte do písemné zprávy formou skládanky v¹ité do pøílohy nebo vlo¾ené do zálo¾ek na zadní desce.
-
-Obrázky i~tabulky musí být poøadovì oèíslovány. Èíslování se volí buï prùbì¾né v~rámci celého textu, nebo -- co¾ bývá praktiètìj¹í -- prùbì¾né v~rámci kapitoly. V~druhém pøípadì se èíslo tabulky nebo obrázku skládá z~èísla kapitoly a~èísla obrázku/tabulky v~rámci kapitoly -- èísla jsou oddìlena teèkou. Èísla podkapitol nemají na èíslování obrázkù a~tabulek ¾ádný vliv.
-
-Tabulky a~obrázky pou¾ívají své vlastní, nezávislé èíselné øady. Z toho vyplývá, ¾e v~odkazech uvnitø textu musíme kromì èísla udat i~informaci o~tom, zda se jedná o~obrázek èi tabulku (napøíklad ``... {\it viz tabulka 2.7} ...''). Dodr¾ování této zásady je ostatnì velmi pøirozené.
-
-Pro odkazy na stránky, na èísla kapitol a~podkapitol, na èísla obrázkù a~tabulek a~v~dal¹ích podobných pøíkladech vyu¾íváme speciálních prostøedkù DTP programu, které zajistí vygenerování správného èísla i~v~pøípadì, ¾e se text posune díky zmìnám samotného textu nebo díky úpravì parametrù sazby. Pøíkladem takového prostøedku v~systému LaTeX je odkaz na èíslo odpovídající umístìní znaèky v~textu, napøíklad návì¹tí ($\backslash${\tt ref\{navesti\}} -- podle umístìní návì¹tí se bude jednat o~èíslo kapitoly, podkapitoly, obrázku, tabulky nebo podobného èíslovaného prvku), na stránku, která obsahuje danou znaèku ($\backslash${\tt pageref\{navesti\}}), nebo na literární odkaz ($\backslash${\tt cite\{identifikator\}}).
-
-Rovnice, na které se budeme v~textu odvolávat, opatøíme poøadovými èísly pøi pravém okraji pøíslu¹ného øádku. Tato poøadová èísla se pí¹í v~kulatých závorkách. Èíslování rovnic mù¾e být prùbì¾né v~textu nebo v~jednotlivých kapitolách.
-
-Jste-li na pochybách pøi sazbì matematického textu, sna¾te se dodr¾et zpùsob sazby definovaný systémem LaTeX. Obsahuje-li va¹e práce velké mno¾ství matematických formulí, doporuèujeme dát pøednost pou¾ití systému LaTeX.
-
-Mezeru nedìláme tam, kde se spojují èíslice s~písmeny v~jedno slovo nebo v~jeden znak -- napøíklad {\it 25krát}.
-
-Èlenicí (interpunkèní) znaménka teèka, èárka, støedník, dvojteèka, otazník a~vykøièník, jako¾ i~uzavírací závorky a~uvozovky se pøimykají k~pøedcházejícímu slovu bez mezery. Mezera se dìlá a¾ za nimi. To se ov¹em netýká desetinné èárky (nebo desetinné teèky). Otevírací závorka a~pøední uvozovky se pøimykají k~následujícímu slovu a~mezera se vynechává pøed nimi -- (takto) a~``takto''.
-
-Pro spojovací a~rozdìlovací èárku a~pomlèku nepou¾íváme stejný znak. Pro pomlèku je vyhrazen jiný znak (del¹í). V~systému TeX (LaTeX) se spojovací èárka zapisuje jako jeden znak ``pomlèka'' (napøíklad ``Brno-mìsto''), pro sázení textu ve smyslu intervalu nebo dvojic, soupeøù a~podobnì se ve zdrojovém textu pou¾ívá dvojice znakù ``pomlèka'' (napøíklad ``zápas Sparta -- Slavie''; ``cena 23--25 korun''), pro výrazné oddìlení èásti vìty, pro výrazné oddìlení vlo¾ené vìty, pro vyjádøení nevyslovené my¹lenky a~v~dal¹ích situacích (viz Pravidla èeského pravopisu) se pou¾ívá nejdel¹í typ pomlèky, která se ve zdrojovém textu zapisuje jako trojice znakù ``pomlèka'' (napøíklad ``Dal¹í pojem --- jakkoliv se mù¾e zdát nevýznamný --- bude neformálnì definován v~následujícím odstavci.''). Pøi sazbì matematického mínus se pøi sazbì pou¾ívá rovnì¾ odli¹ný znak. V~systému TeX je ve zdrojovém textu zapsán jako normální mínus (tj. znak ``pomlèka''). Sazba v~matematickém prostøedí, kdy se vzoreèek uzavírá mezi dolary, zajistí vygenerování správného výstupu.
-
-Lomítko se pí¹e bez mezer. Napøíklad ¹kolní rok 2008/2009.
-
-Pravidla pro psaní zkratek jsou uvedena v~Pravidlech èeského pravopisu \cite{Pravidla}. I~z~jiných dùvodù je vhodné, abyste tuto knihu mìli po ruce. 
-
-
-\section{Co to je normovaná stránka?}
-Pojem {\it normovaná stránka} se vztahuje k~posuzování objemu práce, nikoliv k~poètu vyti¹tìných listù. Z historického hlediska jde o~poèet stránek rukopisu, který se psal psacím strojem na speciální pøedti¹tìné formuláøe pøi dodr¾ení prùmìrné délky øádku 60 znakù a~pøi 30 øádcích na stránku rukopisu. Vzhledem k~zápisu korekturních znaèek se pou¾ívalo øádkování 2 (ob jeden øádek). Tyto údaje (poèet znakù na øádek, poèet øádkù a~proklad mezi nimi) se nijak nevztahují ke koneènému vyti¹tìnému výsledku. Pou¾ívají se pouze pro posouzení rozsahu. Jednou normovanou stránkou se tedy rozumí 60*30 = 1800 znakù. Obrázky zaøazené do textu se zapoèítávají do rozsahu písemné práce odhadem jako mno¾ství textu, které by ve výsledném dokumentu potisklo stejnì velkou plochu.
-
-Orientaèní rozsah práce v~normostranách lze v~programu Microsoft Word zjistit pomocí funkce {\it Poèet slov} v~menu {\it Nástroje}, kdy¾ hodnotu {\it Znaky (vèetnì mezer)} vydìlíte konstantou 1800. Do rozsahu práce se zapoèítává pouze text uvedený v~jádru práce. Èásti jako abstrakt, klíèová slova, prohlá¹ení, obsah, literatura nebo pøílohy se do rozsahu práce nepoèítají. Je proto nutné nejdøíve oznaèit jádro práce a~teprve pak si nechat spoèítat poèet znakù. Pøibli¾ný rozsah obrázkù odhadnete ruènì. Podobnì lze postupovat i~pøi pou¾ití OpenOffice. Pøi pou¾ití systému LaTeX pro sazbu je situace trochu slo¾itìj¹í. Pro hrubý odhad poètu normostran lze vyu¾ít souèet velikostí zdrojových souborù práce podìlený konstantou cca 2000 (normálnì bychom dìlili konstantou 1800, jen¾e ve zdrojových souborech jsou i~vyznaèovací pøíkazy, které se do rozsahu nepoèítají). Pro pøesnìj¹í odhad lze pak vyextrahovat holý text z~PDF (napø. metodou cut-and-paste nebo {\it Save as Text...}) a~jeho velikost podìlit konstantou 1800. 
-
+\section{Regularizace L2}
 
 \chapter{Závìr}
-Závìreèná kapitola obsahuje zhodnocení dosa¾ených výsledkù se zvlá¹» vyznaèeným vlastním pøínosem studenta. Povinnì se zde objeví i zhodnocení z pohledu dal¹ího vývoje projektu, student uvede námìty vycházející ze zku¹eností s øe¹eným projektem a uvede rovnì¾ návaznosti na právì dokonèené projekty.
 
 %=========================================================================

@@ -8,11 +8,33 @@
 \providecommand{\selectlanguage}[1]{\relax}
 \providecommand{\eprint}[2][]{\url{#2}}
 
-\bibitem{Fink}
-Fink, G.~A.: \emph{Markov models for pattern recognition: from theory to
-  applications}. Springer, 2008, iSBN~978-3-540-71766-9.
+\bibitem{Kovar}
+J., K.: Skryté Markovské modely a neuronové sítì. {\tt
+  https://dip.felk.cvut.cz/browse/pdfcache/kovarj4\_2008dipl.pdf}, 2008.
+
+\bibitem{Lafferty}
+Lafferty, J.; McCallum, A.; Pereira, F.: Conditional Random Fields:
+  Probabilistic Models for Segmenting and Labeling Sequence Data. {\tt
+  http://www.cis.upenn.edu/~pereira/papers/crf.pdf}, 2001.
+
+\bibitem{Nash}
+Nash, S.~G.; Nocedal, J.: A Numerical Study of the Limited Memory BFGS Method
+  and the Truncated-Newton Method for Large Scale Optimization. {\tt
+  http://math.asu.edu/~jtaylor/teaching/Fall2010/APM530/papers/Nash91.pdf},
+  1991.
+
+\bibitem{csts}
+{WWW stránky}: Popis formátu CSTS. {\tt
+  http://ufal.mff.cuni.cz/pdt2.0/doc/data-formats/csts/html/DTD-HOME.html}.
+
+\bibitem{znacky}
+{WWW stránky}: Popis morfologických znaèek. {\tt
+  http://ucnk.ff.cuni.cz/bonito/znacky.php}.
 
 \bibitem{zdrojak}
 {WWW stránky}: Zdrojový kód. {\tt http://github.com/kanei/MoTag}.
+
+\bibitem{Morce}
+{WWW stránky}: Znaèkovaè Morèe. {\tt http://ufal.mff.cuni.cz/morce/}.
 
 \end{thebibliography}

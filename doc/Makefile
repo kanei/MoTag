@@ -4,6 +4,7 @@
 #===========================================
 # asi budete chtit prejmenovat:
 CO=projekt
+PARAMS=--shell-escape --synctex=1
 
 all: $(CO).pdf
 
@@ -13,10 +14,10 @@ $(CO).ps: $(CO).dvi
 	dvips $(CO)
 
 $(CO).pdf: clean
-	pdflatex $(CO)
+	pdflatex $(PARAMS) $(CO)
 	bibtex $(CO)
-	pdflatex $(CO)
-	pdflatex $(CO)
+	pdflatex $(PARAMS) $(CO)
+	pdflatex $(PARAMS) $(CO)
 
 $(CO).dvi: $(CO).tex $(CO).bib
 	latex $(CO)
@@ -28,7 +29,7 @@ desky:
 #	latex desky
 #	dvips desky
 #	dvipdf desky
-	pdflatex desky
+	pdflatex $(PARAMS) desky
 
 clean:
 	rm -f *.dvi *.log $(CO).blg $(CO).bbl $(CO).toc *.aux $(CO).out $(CO).lof
