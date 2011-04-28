@@ -107,7 +107,14 @@ I kdy¾ není HMM implementováno v ¾ádném z vyu¾itých programù, poskytuje základ p
 CRF mù¾eme popsat jako bezsmìrový grafický pravdìpodobnostní model (undirected probabilistic graphical model), ve kterém ka¾dý uzel (v na¹em pøípadì slovo) popisuje náhodnou promìnnou. CRF mù¾e také být vyjádøen jako model s koneèným poètem stavù a nenormalizovanými pravdìpodobnostmi pøechodù. V porovnání k HMM nemá jasnì dané hodnoty pøechodù mezi stavy a disponuje mo¾ností mnohonásobných funkcí, generujících rysy. Pøiná¹í také lep¹í výsledky ve zpracování dat se závislostmi vy¹¹ího øádu, které vìt¹inou lépe odpovídají reálnému modelu. Na rozdíl od generativních modelù také, jako¾to pravdìpodobnostní (conditional) model nemusí zkoumat v¹echny mo¾né sekvence pozorovaných prvkù (observations). Pro urèení parametrù tohoto modelu je v souèasné dobì nejvíce doporuèován algoritmus L-BFGS (Low-Memory BFGS), který poskytuje nejkvalitnìj¹í výsledky.
 
 \subsection{Label Bias problém}
-Problém ¹patného vyva¾ování znaèek (viz.\cite{Lafferty}) spoèívá v pøesunu pravdìpodobnostní hodnoty na dal¹í pozici v pøípadì pouze jediného pøechodu za ignorování pozorovaného prvku. Jak je ilustrováno na obrázku DOPLNIT!!, v pøípadì vstupní posloupnosti písmen t,i,k se v prvním kroku neumíme rozhodnout a vstupujeme do stavù 1 a 4 se stejnou pravdìpodobností. Nyní, i kdy¾ na vstupu je písmeno i, nemáme jinou mo¾nost, ne¾ pokraèovat do stavù 2, pøípadnì 5 za ignorování pozorovaného písmena. V pøípadì, ¾e by v trénovacích datech tedy pøevládal øetìzec \uv{tik} nad øetìzcem \uv{tak}, byly by oba tyto øetìzce v¾dy urèeny jako \uv{tik}. Toto je vy¾e¹eno algoritmem CRF pomocí ohodnocení pøechodù mezi stavy, kdy mù¾eme podle aktuálního pozorovaného prvku buï sní¾it, nebo zvý¹it koneènou pravdìpodobnost dané posloupnosti.
+Problém ¹patného vyva¾ování znaèek (viz.\cite{Lafferty}) spoèívá v pøesunu pravdìpodobnostní hodnoty na dal¹í pozici v pøípadì pouze jediného pøechodu za ignorování pozorovaného prvku. Jak je ilustrováno na obrázku ~\ref{fig:GrafLabelBias}, v pøípadì vstupní posloupnosti písmen t,i,k se v prvním kroku neumíme rozhodnout a vstupujeme do stavù 1 a 4 se stejnou pravdìpodobností. Nyní, i kdy¾ na vstupu je písmeno i, nemáme jinou mo¾nost, ne¾ pokraèovat do stavù 2, pøípadnì 5 za ignorování pozorovaného písmena. V pøípadì, ¾e by v trénovacích datech tedy pøevládal øetìzec \uv{tik} nad øetìzcem \uv{tak}, byly by oba tyto øetìzce v¾dy urèeny jako \uv{tik}. Toto je vy¾e¹eno algoritmem CRF pomocí ohodnocení pøechodù mezi stavy, kdy mù¾eme podle aktuálního pozorovaného prvku buï sní¾it, nebo zvý¹it koneènou pravdìpodobnost dané posloupnosti.
+
+\begin{figure}[ht!]
+	\centering
+		\includegraphics[width=\textwidth]{fig/LabelBias}
+		\caption{Ilustrace \uv{Label Bias} prolblému}
+		\label{fig:GrafLabelBias}
+\end{figure}
 
 \section{Viterbi algorithm}
 Byl navrhnut v roce 1967 Andrewem Viterbi jako dekódovací algoritmus pro konvoluèní kódy v telekomunikaèních sítích. Kvùli svému zamìøení na vyhledání nejpravdìpodobnìj¹í cesty sekvencí skrytých stavù (nejèastìji HMM) se v¹ak pou¾ívá v mnoha odvìtvích, jako zpracování signálù a také znaèkování jazyka. 
@@ -115,7 +122,8 @@ Byl navrhnut v roce 1967 Andrewem Viterbi jako dekódovací algoritmus pro konvolu
 Za pøedpokladu, ¾e vstupní data mají stejný poèet pozorovaných a skrytých stavù, obì posloupnosti jsou zarovnané a výpoèet v daném místì je závislý pouze na aktuálním a pøedchozím prvku, je pomocí získána tzv. Viterbiho cesta -- nejpravdìpodobnìj¹í cesta posloupností.  V ka¾dém kroku algoritmus vyhodnotí v¹echny cesty vedoucí k aktuálnímu stavu a ponechá pouze jednu, díky èemu¾ není nucen uchovávat v¹echny existující cesty, ale pouze jednu pro ka¾dý stav. Za pomocí uchovávaní ceny stavu se poka¾dé algoritmus rozhodne ze v¹ech mo¾ností pro dal¹í stav a ulo¾í kompletní cestu od zaèátku prùchodu posloupností.
 
 \section{Forward-backward algorithm}
-Pou¾ívá dva prùchody posloupností stavù -- dopøedu a zpìt (podle toho také vznikl jeho název). Nejdøíve projde celou sekvenci a urèí cenu cesty pøi daném prùchodu. Poté projde sekvencí zpìt a pøi ka¾dém kroku spoèítá pravdìpodobnost pozorování zbylých vstupních hodnot. Oba tyto prùchody jsou poté \uv{vyhlazeny} do spoleèného výsledku a tím je získáno rozdìlení mezi stavy v jednotlivých jednotkách èasu. Speciálním pøípadem je poté Baum-Welch algoritmus (ZJISTIT VICE??).
+Pou¾ívá dva prùchody posloupností stavù -- dopøedu a zpìt (podle toho také vznikl jeho název). Nejdøíve projde celou sekvenci a urèí cenu cesty pøi daném prùchodu. Poté projde sekvencí zpìt a pøi ka¾dém kroku spoèítá pravdìpodobnost pozorování zbylých vstupních hodnot. Oba tyto prùchody jsou poté \uv{vyhlazeny} do spoleèného výsledku a tím je získáno rozdìlení mezi stavy v jednotlivých jednotkách èasu. Speciálním pøípadem je poté Baum-Welch algoritmus.
+%TODO ZJISTIT VICE??
 
 \section{L-BFGS}
 L-BFGS (viz.\cite{Nash}) oznaèuje nízko pamì»ovou (Low memory) úpravu optimalizaèní metody BFGS (Broyden-Fletcher-Goldfarb-Shanno) z rodiny Quasi-Newtonových metod, urèenou k aproximaci inverzní Hessovy matice (ètvercová matice druhých parciálních derivací funkce -- popisuje místní zakøivení funkce o nìkolika promìnných). Optimalizací pro sní¾ení pamì»ové nároènosti je neukládání matice samotné, ale pouze ukládá historii zmìn.
@@ -125,6 +133,155 @@ L-BFGS (viz.\cite{Nash}) oznaèuje nízko pamì»ovou (Low memory) úpravu optimaliza
 \section{Regularizace L1}
 
 \section{Regularizace L2}
+
+\chapter{Informaèní systém}
+Z dùvodu velkého mno¾ství jednotlivých testù, rùzných nastavení a strojù, na kterých testování bì¾í, jsem se rozhodl vytvoøit za pomoci open-source CMS systému Drupal informaèní, který mi pomù¾e udr¾ovat si pøehled o v¹ech spu¹tìných testech a o jejich výsledcích. Systém byl vytvoøen jako modul, pou¾itelný na jakékoliv webové stránce, pou¾ívající k ulo¾ení informací databázi dané stránky (dle standardu systému Drupal). 
+
+Systém je rozdìlen na následujících 5 èástí: 
+\begin{enumerate}
+	\item Spu¹tìní nového testu
+	\item Dokonèení bì¾ícího testu
+	\item Zobrazení bì¾ících testù
+	\item Zobrazení dokonèených testù
+	\item Zobrazení náhledu na v¹echny testy a jejich rysy
+\end{enumerate}
+
+\section{Návrh databáze}
+Pro systém byla navr¾ena jednoduchá databáze, sestávající ze 4 tabulek a poskytující dostatek prostoru pro pøípadná roz¹íøení, o dal¹í rysy, nebo sledované výsledky.
+
+\section{Spu¹tìní testu}
+Pøi spu¹tìní se do systému zadávají následující data:
+\begin{itemize}
+	\item Název pou¾itého programu
+	\item Identifikátor poèítaèe, na kterém testování bì¾í
+	\item Popis testování
+	\item Typ regularizace
+	\item Poèet vstupních vìt pou¾itých pro testování
+	\item Poèet vstupních vìt pou¾itých pro evaluaci
+	\item Maximální poèet iterací
+	\item Epsilon
+	\item Pou¾ité rysy
+	\item Pou¾ité èásti znaèky
+\end{itemize}
+
+\section{Dokonèení testu}
+Pøi ukonèení testu se poté dodají informace, které pou¾ijeme pøi odvozování výsledkù a grafù. Mezi tyto informace patøí následující:
+\begin{itemize}
+	\item Poèet slov pou¾itých pøi trénování
+	\item Poèet unikátních znaèek v trénovacích datech
+	\item Poèet iterací
+	\item Èas zaèátku a èas konce trénování
+	\item Doba evaluace -- znaèkování
+	\item Poèet rysù na zaèátku a na konci
+	\item Velikost modelu
+	\item Procentuální úspì¹nost znaèkování u jednotlivých slov a u vìt
+\end{itemize}
+
+\section{Zobrazení bì¾ících a skonèených testù, zobrazení náhledu}
+Na tìchto stránkách si poté mù¾eme prohlédnout výsledky, které mù¾eme pozdìji pou¾ít k dal¹ím úèelùm. V prùbìhu testování je poté dùle¾itá stránka zobrazení náhledu, která nám zobrazuje, které testy ji¾ byly provedeny, nebo právì bì¾í, a dává nám tak jednoduchou mo¾nost rozmyslet, které testy by bylo vhodné spustit.
+
+\chapter{Prostøedí testù}
+\section{Operaèní systém}
+Aèkoliv v¹echny vyu¾ívané programy a skripty jsou multiplatformní, v¹echny testy byly spou¹tìny na operaèním systému Linux nainstalovaném na univerzitních strojích, ke kterým jsem se vzdálenì pøipojoval pøes ssh. 
+\section{Hardware}
+Testování probíhalo prùbì¾nì a¾ na 10 rùzných poèítaèích, kde tøi znich jsou dostupné pro v¹eobecné vyu¾ítí (Athena 1 -- 3) a zbylé jsou pøístupné pouze pro výzkum zpracování jazyka (Pcnlp1 -- 8, krom 2, na kterém bì¾í OS Windows). Z dùvodu rozdílného hardware na jednotlivých strojích se poté pøi testování projevují velké skoky ve výsledných èasech. V tabulce ~\ref{tab:PouziteStroje} je zobrazena struèná charakteristika jednotlivých strojù.
+%TODO Dopsat sem jejich vykon??
+\begin{figure}
+	\begin{center}
+		\begin{tabular}{|l|l|c|}
+			\hline
+			\multicolumn{1}{|c|}{Název} &
+			\multicolumn{1}{|c|}{CPU} & 
+			\multicolumn{1}{|c|}{Velikost Pamìti} \\
+			\hline
+			Athena 1 & 2 x Dual-Core AMD Opteron(tm) Processor 2220 @ 2,8GHz &
+			16GB \\
+			Athena 2 & 2 x Dual-Core AMD Opteron(tm) Processor 2220 @ 2,8GHz &
+			16GB \\
+			Athena 3 & 2 x Six-Core AMD Opteron(tm) Processor 2435 @ 2,6GHz &
+			64GB \\
+			Pcnlp 1 & Intel(R) Core(TM)2 Quad CPU Q6700 @ 2.66GHz &
+			4GB \\
+			Pcnlp 3 & Intel(R) Core(TM)2 Duo CPU E6750 @ 2.66GHz &
+			2GB \\
+			Pcnlp 4 & Intel(R) Core(TM)2 Duo CPU E6750 @ 2.66GHz &
+			2GB \\
+			Pcnlp 5 & Intel(R) Core(TM)2 Duo CPU E6750 @ 2.66GHz &
+			2GB \\
+			Pcnlp 6 & Intel(R) Core(TM)2 Duo CPU E6750 @ 2.66GHz &
+			2GB \\
+			Pcnlp 7 & Intel(R) Core(TM)2 Duo CPU E8400 @ 3.00GHz &
+			2GB \\
+			Pcnlp 8 & Intel(R) Core(TM)2 Duo CPU E8300 @ 2.83GHz &
+			2GB \\
+			\hline
+		\end{tabular}
+		\captionof{table}{Charakteristika stroujù pou¾itých pøi zpracování projektu}
+		\label{tab:PouziteStroje}
+	\end{center}
+\end{figure}
+
+\chapter{CRF++}
+\section{Popis programu}
+Program CRF++ je open-source implementací Conditional Random Fields, urèenou pro znaèkování sekvenèních dat. Nabízí se tedy jako jeden z kandidátù pro potøeby této práce. Program je napsán v jazyce C++ za pou¾ití STL knihovny. K urèení parametru pou¾ívá algoritmu L-BFGS. Implementuje také mo¾nost bigramù -- rysù, fungujících jako pøechod mezi pøedchozím a souèasným prvkem. Tato vlastnost je v¹ak z dùvodu velkého poètu znaèek vysoce nároèná.
+
+Nevýhodou programu je zdrojový kód bez jakýchkoliv komentáøù a tím pádem naprosto nevhodný k jakýmkoliv zásahùm, èí úpravám pro na¹e potøeby. Pøi vyu¾ití tohoto programu jsem se také potýkal s problémy s chybou SIGSEGV. Kód se zøejmì nebyl schopen vypoøádat s vysokým poètem unikátních znaèek a pøi pou¾ití v¹ech kategorii a vy¹¹ího poètu vstupù vyvolal zmínìnou vyjímku a ukonèil se.
+
+\section{Zpùsob testování}
+Pøi mo¾nosti poèítat s pøedchozím prvkem, urèeným algoritmem, se nabízí ji vyu¾ít v na¹em programu. Bohu¾el, s délkou èeské znaèky také pøichází kámen úrazu, kdy program nechápe \uv{smysl} pøedchozí znaèky, ale bere ji jako celek (z dùvodu optimalizací je øetìzec pøeveden na èíslo, se kterým jsou poté v¹echny operace mnohem rychlej¹í). Nemù¾e tedy vyu¾ít jednotlivých èástí èeské znaèky k vytvoøení samostatných pravidel. Tím se sni¾ují mo¾nosti zpracování a efektivity pou¾itých algoritmù, stejnì jako generování rysù. Pøi pokusech o vyøe¹ení tohoto problému jsem vytvoøil skript, který postupnì zpracovává èásti znaèky a poté je pou¾ívá pøi trénování dal¹ích krokù. Tento pøístup je v¹ak velmi krkolomný a celkovì nepøinesl markantní nárùst úspì¹nosti.
+
+\section{Znaèkování textu}
+V pøípadì tohoto programu se pravidla na tvorbu rysù pøedávají jako konfiguraèní soubor a proto je nutné v¹echny pøedbì¾né úpravy udìlat u¾ na vstupních datech. K tomuto úèelu byl vytvoøen skript v jazyce awk, který je poté volán z hlavního skriptu, starajícího se o celý prùbìh trénování. 
+
+Nastavení v konfiguraèním souboru jsou poté tvoøena písmenem, urèujícím, zda jde o unigram (vztahujícíc se pouze k souèasnému prvku posloupnosti), èi o bigram (vý¹e zmínìný pøechod mezi pøedchozím a aktuálním prvkem). Poté následuje dvouciferný identifikátor rysu, zajis»ující unikátnost vùèi ostatním definicím, dvojteèkou a øetìzcem definujícím pou¾itá vstupní data. K tomu je vyu¾íván zápis \%[x,y], kde x oznaèuje relativní pozici mezi slovy (0 oznaèuje aktuální, záporné èíslo pøedchozí a kladné následující prvek) a y oznaèuje sloupec vstupních dat, který má být pou¾it. Celé pravidlo poté mù¾e vypadat napø. takto: U01:\%[0,1].
+
+Jeliko¾ znaèkování probíhá v nìkolika krocích, kdy v ka¾dém z nich nám pøibude dal¹í sloupec a dal¹í souvislosti mezi daty, je nutno pøipravit pro ka¾dý krok samostatný konfiguraèní soubor. Také je dùle¾ité správnì jej nastavit pro co nejlep¹í výslednou úspì¹nost.
+
+Pro øízení procesu byl sepsán skript v jazyce BASH, který vyu¾ívá programu pro tvorbu vstupních dat, napsaného v jazyce C, pøevádìjícího øetìzce na èísla, a dal¹ího skriptu v jazyce awk urèeného ke koneèné analýze úspì¹nosti.
+
+\section{Pou¾ité rysy}
+Z dùvodu nìkolika-krokového charakteru testování se rysy velmi li¹í, veskrze jde v¹ak pouze o kombinace pøedchozích a aktuálních prvkù vstupních souborù. Také byly pou¾ity nìkolikanásobné rysy, skládající se zároveò ze dvou prvkù (minulá a souèasná znaèka apod.). Pro tyto pravidla mi povìt¹inou byly inspirací existující konfiguraèní soubory pou¾ívané pro trénování anglického jazyka, které byly souèástí pøíkladù pou¾itých v programu CRF++. Pro tvoøení rysù bylo pou¾ito: Tvar slova, Lemmata (slo¾enina v¹ech mo¾ných lemmat), èást znaèky, urèující slovní druh (pokud se shodovala ve v¹ech mo¾nostech vstupních dat) a prùbì¾nì získaných výsledkù.
+
+\section{Rozdìlení zpracování na kroky}
+Správné rozdìlení bylo testováno, motivací v¹ak bylo nejdøíve natrénovat nejdùle¾itìj¹í èásti znaèky a pokraèovat s ménì významnými sloupci. Pøi tomto testování se tedy bude moci ji¾ pou¾ít natrénovaných dat k lep¹ím výsledkùm. V prvním kroku proto bylo èasto pou¾ito slovního druhu a jeho detailu, v druhém rodu, osoby, pádu a ve tøetím nìkolika ze zbylých vlastností. 
+
+\section{Výsledky testování}
+Testù bylo vykonáno nìkolik desítek, vìt¹ina z nich v¹ak nepøiná¹ela ký¾ené výsledky. V tabulce ~\ref{tab:CRFVysledky} proto zahrnuji pouze vzorek dat s uspokojivými výsledky.
+
+\begin{figure}
+	\begin{center}
+		\begin{tabular}{|c|r|r|c|c|r|r|}
+			\hline
+			\multicolumn{1}{|c|}{Id testu} &
+			\multicolumn{1}{|c|}{Poèet vìt} & 
+			\multicolumn{1}{|c|}{Eta} &
+			\multicolumn{1}{|c|}{Krok è.} &
+			\multicolumn{1}{|c|}{Èásti znaèky} &
+			\multicolumn{1}{|c|}{Poèet pøíznakù} &
+			\multicolumn{1}{|c|}{Úspì¹nost} \\
+			\hline
+			1 & 3000 & 0.05  & 1 & 1100000000000000 & 1318350 & 94.099\% \\
+			  &      &       & 2 & 0010100100000000 & 2354463 & 59.105\% \\
+			  &      &       & 3 & 0001000010000000 & 299812  & 80.526\% \\
+			\hline
+			2 & 3000 & 0.005 & 1 & 1100000000000000 & 2065745 & 92.487\% \\
+		 	  &      &       & 2 & 0010100100000000 & 1716750 & 75.100\% \\
+			  &      &       & 3 & 0001000110000000 & 897138  & 87.055\% \\ 
+			\hline
+			2 & 5000 & 0.005 & 1 & 1100000000000000 & 1318350 & 94.312\% \\
+			  &      &       & 2 & 0010100000000000 & 1097024 & 71.303\% \\
+			  &      &       & 3 & 0001000110000000	& 596079  & 84.856\% \\
+			\hline
+		\end{tabular}
+		\captionof{table}{Výsledky testování pøi vyu¾ití programu CRF++}
+		\label{tab:CRFVysledky}
+	\end{center}
+\end{figure}
+
+\section{Odklon od programu}
+Ze v¹ech vý¹e zmínìných dùvodù (padání programu, nekomentovaného kódu, \ldots) a také po zkoumání dal¹ích existujících øe¹ení, o kterých jejich autoøi tvrdí, ¾e jejich díla jsou øádovì rychlej¹í, ne¾ CRF++, jsem se rozhodl tento program opustit a tím pádem jsem ze získaných dat nevyvodil ¾ádné závìry, nebo» by v koneèném dùsledku byly pouze zbyteènou prací, nemající vliv na závìreèný výsledek celé práce.
+
+
 
 \chapter{Závìr}
 
