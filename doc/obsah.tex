@@ -223,7 +223,7 @@ Testování probíhalo prùbì¾nì a¾ na 10 rùzných poèítaèích, kde tøi znich jsou dos
 
 \chapter{CRF++}
 \section{Popis programu}
-Program CRF++ je open-source implementací Conditional Random Fields, urèenou pro znaèkování sekvenèních dat. Nabízí se tedy jako jeden z kandidátù pro potøeby této práce. Program je napsán v jazyce C++ za pou¾ití STL knihovny. K urèení parametru pou¾ívá algoritmu L-BFGS. Implementuje také mo¾nost bigramù -- rysù, fungujících jako pøechod mezi pøedchozím a souèasným prvkem. Tato vlastnost je v¹ak z dùvodu velkého poètu znaèek vysoce nároèná.
+Program CRF++~\ref{crfpp} je open-source implementací Conditional Random Fields, urèenou pro znaèkování sekvenèních dat. Nabízí se tedy jako jeden z kandidátù pro potøeby této práce. Program je napsán v jazyce C++ za pou¾ití STL knihovny. K urèení parametru pou¾ívá algoritmu L-BFGS. Implementuje také mo¾nost bigramù -- rysù, fungujících jako pøechod mezi pøedchozím a souèasným prvkem. Tato vlastnost je v¹ak z dùvodu velkého poètu znaèek vysoce nároèná.
 
 Nevýhodou programu je zdrojový kód bez jakýchkoliv komentáøù a tím pádem naprosto nevhodný k jakýmkoliv zásahùm, èí úpravám pro na¹e potøeby. Pøi vyu¾ití tohoto programu jsem se také potýkal s problémy s chybou SIGSEGV. Kód se zøejmì nebyl schopen vypoøádat s vysokým poètem unikátních znaèek a pøi pou¾ití v¹ech kategorii a vy¹¹ího poètu vstupù vyvolal zmínìnou vyjímku a ukonèil se.
 
@@ -281,7 +281,205 @@ Testù bylo vykonáno nìkolik desítek, vìt¹ina z nich v¹ak nepøiná¹ela ký¾ené výsl
 \section{Odklon od programu}
 Ze v¹ech vý¹e zmínìných dùvodù (padání programu, nekomentovaného kódu, \ldots) a také po zkoumání dal¹ích existujících øe¹ení, o kterých jejich autoøi tvrdí, ¾e jejich díla jsou øádovì rychlej¹í, ne¾ CRF++, jsem se rozhodl tento program opustit a tím pádem jsem ze získaných dat nevyvodil ¾ádné závìry, nebo» by v koneèném dùsledku byly pouze zbyteènou prací, nemající vliv na závìreèný výsledek celé práce.
 
+\chapter{CRFSuite}
+\section{Popis programu}
+Program CRFSuite~\ref{crfsuite} je open-source implementací algoritmu Conditional Random Fields, urèený pro znaèkování sekvenèních dat. Je naprogramován v èistém C a dle jeho autora optimalizován pro co nejvy¹¹í rychlost za obìtování obecnosti. Jeho autorem je pak Ph.D Naoaki Okazakim pùsobícím na univerzitì v Tokyu. Program ke svému chodu vy¾aduje knihovnu libLBFGS od stejného autora, z èeho¾ vyplývá ¾e urèení parametru je vykonáno za pomoci algoritmu L-BFGS. V nastavení programu je v¹ak mo¾no tuto volbu zmìnit na SGD, které je dle poznámek inspirováno implementací pou¾itou v dal¹ím programu CRFSGD~\ref{crfsgd}. Pøi trénování je poté mo¾né vyu¾ít jednu z regularizací. V¹echny vyu¾ité algoritmy poté mohou být ovlivnìny mnoha dal¹ími nastaveními, ovlivòujícími od ukonèovacích podmínek po rùzné parametry mìnící jejich chování pøi trénování dat.
+\section{Znaèkování textu}
+Ke znaèkování je pou¾it skript v jazyce python, který se stará o analýzu vstupních dat, jejich úpravu a vytvoøení souboru, obsahujícího pøipravené znaèky pro externí program.
+ 
+Skript postupnì naèítá data ze vstupního souboru a vytváøí multidimenzionální pole pro pozdìj¹í zpracování. Pøi tomto kroku také provádí urèité pøídavné operace, které pomáhají rychlosti pozdìj¹ích krokù, jako pøed-generování pøípon slov, èím¾ urychluje pozdìj¹í zpracování. Z vytvoøených dat jsou poté budovány rysy podle námi zadaných pravidel. Jak je vyobrazeno v tabulce ~\ref{tab:VstupniData}, v na¹em pøípadì máme v ka¾dém øádku, reprezentujícím jedno slovo, ulo¾ených 5 sloupcù.
 
+\begin{figure}
+	\begin{center}
+		\begin{tabular}{|l|l|l|l|l|}
+			\hline
+			\multicolumn{1}{|c|}{Pozice 1} &
+			\multicolumn{1}{|c|}{Pozice 2} &
+			\multicolumn{1}{|c|}{Pozice 3} &
+			\multicolumn{1}{|c|}{Pozice 4} &
+			\multicolumn{1}{|c|}{Pozice 5} \\
+			\hline
+			Tvar slova &
+			Nemìnná èást znaèky & 
+			Mo¾ná lemmata & 
+			Pøípona slova &
+			Správná znaèka \\
+			\hline
+		\end{tabular}
+		\captionof{table}{Rozlo¾ení jednoho øádku vstupních dat}
+		\label{tab:VstupniData}
+	\end{center}
+\end{figure}
+
+Jako první poté, dle formátu cíleného programu, vypí¹e správnou znaèku, následovanou v¹emi rysy, tvoøenými podle zadaných pravidel. V¹echny rysy jsou tak vytvoøeny pøed samotným spu¹tìním testovacího programu a v prùbìhu testování se ji¾ nemìní -- mohou pouze být vypu¹tìny buï pøed samotným zaèátkem (kvùli minimálnímu limitu), nebo odstranìny pøi vykonávání regularizace.
+
+\section{Analýza pøed tvorbou znaèek}
+Jeliko¾ pro ka¾dé slovo máme ve vstupních datech dostupné v¹echny mo¾né znaèky, mù¾eme tyto informace vyu¾ít pro tvorby rysù pro dal¹í zpracování. Skript zkontroluje v¹echny mo¾nosti a vybere v¹echny sloupce znaèky, které se shodují. Dále spojí dohromady v¹echna mo¾ná lemmata a oddìlí je mezi sebou lomítkem. Vytvoøí se také øetìzec obsahující pøíponu, který pro v¹echna slova del¹í ne¾ 2 znaky ulo¾í øetìzec, tvoøený dvìma posledními znaky.
+
+\section{Pou¾ité rysy}
+V na¹em projektu jsou jednak vyu¾ívány klasické rysy, které se pou¾ívají prakticky ve v¹ech typických pøíkladech vyu¾ití poèítaèového uèení ( pøedchozí prvek, následující prvek,... ), jednak speciální, které mají smysl pouze pro znaèkování textu, èi dokonce pouze pro èeský jazyk jako takový (výèet v¹ech rysù viz. ~\ref{tab:SeznamRysu}). 
+
+V¹echny rysy dodr¾ují oznaèení, pou¾ívané ve vìt¹inì programù urèených k automatickému poèítaèovému uèení. Tímto je U na zaèátku, oznaèující unigram, co¾ znaèí, ¾e se pou¾ívá pouze prvek na aktuální pozici (prvek bigramu B je v implementaci programu CRFSuite vynechán). Za úvodním písmenem pak následuje = a èíslo rysu, urèené k odli¹ení rysù od sebe. Toto znaèení budeme vyu¾ívat i v této publikaci pro oznaèení a pozdìj¹í referenci na námi pou¾ité rysy.
+
+\begin{figure}
+	\begin{center}
+		\begin{tabular}{|c|l|}
+			\hline
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{Popis} \\
+			\hline
+			U00 & Slovní tvar na pozici x-2 \\
+			U01 & Slovní tvar na pozici x-1 \\
+			U02 & Slovní tvar na pozici x \\
+			U03 & Slovní tvar na pozici x+1 \\
+			U04 & Slovní tvar na pozici x+2 \\
+			U10 & Znaèka (spoleèná èást) na pozici x-2 \\
+			U11 & Znaèka (spoleèná èást) na pozici x-1 \\
+			U12 & Znaèka (spoleèná èást) na pozici x \\
+			U13 & Znaèka (spoleèná èást) na pozici x+1 \\
+			U14 & Znaèka (spoleèná èást) na pozici x+2 \\
+			U20 & Mo¾ná lemmata na pozici x-2 \\
+			U21 & Mo¾ná lemmata na pozici x-1 \\
+			U22 & Mo¾ná lemmata na pozici x \\
+			U23 & Mo¾ná lemmata na pozici x+1 \\
+			U24 & Mo¾ná lemmata na pozici x+2 \\
+			U30 & Pøípona na pozici x-2 \\
+			U31 & Pøípona na pozici x-1 \\
+			U32 & Pøípona na pozici x \\
+			U33 & Pøípona na pozici x+1 \\
+			U34 & Pøípona na pozici x+2 \\
+			U40 & Pøedpona -- první písmeno slova \\
+			U41 & Pøedpona -- první dvì písmena slova \\
+			U42 & Pøedpona -- první tøi písmena slova \\
+			U43 & Koncovka -- poslední písmeno slova \\
+			U50 & Velikost písmen -- v¹echny malé, v¹echny velké, první velké \\
+			U51 & Èíslo, oznaèující pozici ve vìtì \\
+			U52 & Délka slova \\
+			U53 & Znaèka nejbli¾¹ího slovesa ( vyhledáváno dopøedu i dozadu) \\
+			\hline
+		\end{tabular}
+		\footnotetext[1]{x oznaèuje aktuální pozici ve vìtì}
+		\captionof{table}{Seznam rysù pou¾itých pøi testování programem CRFSuite}
+		\label{tab:SeznamRysu}
+	\end{center}
+\end{figure}
+
+\section{Pou¾ití pouze èásti znaèky}
+Z dùvodu u¹etøení èasu a teoretické jednodu¹¹í mo¾nosti natrénování (odvozování pravidel od men¹ího poètu celkových znaèek a tím pádem vy¹¹ího poètu podobných znaèek, poskytujícím vy¹¹í pravdìpodobnost ovlivnìní modelu) byly pøi testování spou¹tìny testy s ne v¾dy kompletní znaèkou, ale pouze s jejími nejdùle¾itìj¹ími èástmi. Je nutno v¹ak vìdìt, pro jaký konkrétní úèel by mìl program slou¾it -- v pøípadì nutnosti komplexních informacích o slovech by tento pøístup k problému byl nevhodný. Proto se také budu sna¾it v testování k tomuto pøihlédnout a provézt testy jak s kompletní, tak s omezenou znaèkou a výsledky mezi sebou porovnat. 
+%TODO Upravit text!!
+
+\section{Zpùsob testování}
+Z dùvodu kvalitních výsledkù a rychlosti této implementace byla hlavní èást celé práce provedena za pou¾ití tohoto programu a je mu tedy vìnováno mnohem více prostoru, ne¾ pøedchozímu CRF++. Pro urychlení celého testování jsem také vytvoøil øadu nástrojù, které mi celý proces zjednodu¹ily a dovolily mi více se zamìøit na analýzu výsledkù, ne¾ na testování samotné.
+
+\subsection{Skripty}
+Pro testování jsem vytvoøil skript v jazyce BASH, starající se o celý prùbìh testu~\ref{tab:PrubehTestovani} a ulehèující nastavení celé procedury a èitelnost pou¾itých parametrù. V hlavièce jsou definovány základní údaje a nastavení, které jsou poté pou¾ity v tìle pro postupné spou¹tìní jednotlivých pøíkazù. V prùbìhu této operace jsou poté logovány v¹echny dùle¾ité údaje, které jsou potom lehce pøístupné k následujícímu zpracování. Tento skript je poté naklonován pro ka¾dý vyu¾ívaný poèítaè a tím je poskytnuta zpìtná mo¾nost kontroly nastavených údajù a vyhnutí se chyb spojených s prací na více strojích najednou. Stejný pøístup byl aplikován i na skript, generující data z csts souboru. Ten je tedy také nakopírován pro ka¾dý poèítaè a jeho parametry jsou v¾dy lehce dohledatelné. Pro dvojí kontrolu je v¹ak pøípadný seznam vynechaných rysù pøepsán i do hlavního skriptu.
+
+\begin{figure}
+	\begin{center}
+		\begin{tabular}{|c|l|l|}
+			\hline
+			\multicolumn{1}{|c|}{Èíslo kroku} &
+			\multicolumn{1}{|c|}{Program} &
+			\multicolumn{1}{|c|}{Popis kroku} \\
+			\hline
+			1 & Øídící skript & Spu¹tìní konverzního skriptu pro trénovací data \\
+			2 & Konverzní skript & Vygenerování trénovacích dat \\
+			3 & Øídící skript & Spu¹tìní programu CRFSuite s trénovacími daty \\
+			4 & CRFSuite learn & Naètení vstupních dat \\
+			5 & CRFSuite learn & Natrénování \\
+			6 & CRFSuite learn & Vytvoøení modelu \\
+			7 & Øídící skript & Spu¹tìní konverzního skriptu pro testovací data \\
+			8 & Konverzní skript & Vygenerování testovacích dat \\
+			9 & CRFSuite tag & Naètení vstupních dat \\ 
+			10 & CRFSuite tag & Provedení jedné iterace a vypsání výsledku a statistik \\
+			11 & Øídící skript & Odeslání emalu se zprávou \\
+			\hline
+		\end{tabular}
+		\captionof{table}{Prùbìh testování a popis jednotlivých akcí}
+		\label{tab:PrubehTestovani}
+	\end{center}
+\end{figure}
+
+\subsection{Spu¹tìní}
+S pou¾itím vytvoøených nástrojù je poté spu¹tìní testování velmi lehkou a rychlou zále¾itostí. Nejdøíve je v python souboru (pojmenovaném jako \texttt{[jméno stroje].py}) nastaveno, které rysy mají být pou¾ity. Poté se v bash scriptu ([jméno stroje].sh) nastaví poèet vìt pro trénování a testování, maximální poèet iterací, epsilon, regularizace a dal¹í pøípadné parametry. Dále je nutno upravit pomocí programu ulimit limity zdrojù, dostupných pro ná¹ program -- jedná se konkrétnì o maximální velikost stacku, maximální èas cpu a maximální velikost virtuální pamìti. Ke spou¹tìní skriptu je poté pou¾it program nohup, zaji¹»ující pøetrvávající bìh programu i po odpojení se od vzdáleného poèítaèe. 
+
+\subsubsection*{Pøíklad:}
+
+\begin{verbatim}
+		$ nohup ./[název stroje].sh \&
+		$ nohup ./pcnlp3.sh \&
+\end{verbatim}
+
+Po dokonèení procesu poté skript ode¹le email na nastavenou emailovou adresu a ve slo¾ce pøibudou dva soubory: \texttt{[název stroje].log} s údaji o trénování a \texttt{[název stroje].result} s údaji o výsledku trénování.
+
+\section{Testy}
+S kombinacemi tìchto rysù a dal¹ích vlastností testování, jako poètem pou¾itých slov a zpùsoby spou¹tìní daného programu, poté byly spou¹tìny testy, studující vyu¾itelnost a pøínos jednotlivých znaèek pro testování.
+
+Pøed zapoèatím øádného testování a analýzy výsledkù bylo potøeba se rozhodnout s jakými parametry bude testování provádìno. Program CRFSuite nabízí velké mno¾ství rùzných voleb ovlivòujících vlastní algoritmus, nebo podmínky pro ukonèení. Pro tuto práci jsem se rozhodl zpracovávat testy za pomoci regularizace L1 a L2, kdy první zmínìná postupnì odebírá nevyu¾ívané rysy a tím sni¾uje koneènou velikost modelu a èas testování. Regularizace L2 naproti tomu zachovává i méòì vyu¾ívané/u¾iteèné rysy a tím pádem je v koneèném dùsledku pøesnìj¹í za cenu vìt¹í èasové a datové nároènosti. Pro rozhodnutí se, kterou ze zmínìných voleb vyu¾ít jsem vytvoøil skupinu testù porovnávající výsledky.
+
+Dal¹í volbou byl zpùsob ukonèení trénování -- nabízely se dvì mo¾nosti: Buï ukonèení po urèitém poètu iterací, nebo pøi dosa¾ení hodnoty epsilon, urèující rozdíl mezi úspì¹ností dvou po sobì následujících iterací. 
+
+Jako dal¹í problém se poté ukázal poèet testovacích vzorkù, kde pøi pou¾ití vìt¹ího poètu, ne¾ 7000 program CRFSuite z nezji¹tìných dùvodù odmítl vydat jakékoliv výsledky a zøejmì se zacyklil pøi vnitøní chybì. Vlastní proces stále visel v systému, nejevil v¹ak ¾ádné známky aktivity a proto musel být ruènì ukonèen (nejdéle jsem na dokonèení èekal v rámci dnù, i kdy¾ pro poèet 7000 se doba vìt¹inou pohybuje v øádu nìkolika desítek minut). Pro pøesnìj¹í mìøení by tedy zøejmì bylo výhodnìj¹í výsledky je¹tì validovat oproti dal¹ím vzorkùm dat, pro základní porovnání výkonnosního pøínosu jednotlivých rysù by v¹ak mìl být tento poèet naprosto dostaèujícím.
+
+Pøi provedení v¹ech testù pùjde vidìt, ¾e èasy trénování a testování nerostou podle nároènosti úlohy, ale jsou urèeny zdánlivì náhodnými hodnotami. Toto je v¹ak samozøejmì zpùsobeno trénováním na nìkolika rùzných strojích, poskytujících diametrálnì odli¹ný výpoèetní výkon. V závìru se pokusím urèit konstantu, urèující výkon jednotlivých strojù a tím alespoò nastínit rozdíly mezi jednotlivými zpracováními. Doba zpravování v¹ak ani v tomto pøípadì nejspí¹e neporoste lineárnì, nebo» je ovlivnìna i dal¹ími faktory, napøíklad mo¾ností, ¾e na daných strojích v prùbìhu mého testování probíhaly i jiné procesy, které mohly ovlivnit vytí¾ení procesorù.
+
+\subsection{Závislost úspì¹nosti na poètu vstupních vìt pøi regularizaci L1 a konstantnímu poètu iterací}
+
+\subsubsection*{Pøíprava:}
+Nejdøíve bylo tøeba rozhodnout, jaký poèet iterací bude vhodný pro proces testování. Po nìkolika pokusných testech se jako nejlep¹í ukázalo èíslo 50. Okolo této hodnoty program ji¾ zaèal pùlit kroky algoritmu pro vy¹¹í pøesnost a tím se exponencionálnì zvy¹ovala nároènost ka¾dého dal¹ího kroku aproximace parametru. Pro dokonèení 60. iterace proto bylo èas vzrostl øádovì 3krát, zatím co úspì¹nost se zvý¹ila pouze minimálnì. Z dùvodu rozumného vyu¾ití prostøedkù jsem se tedy rozhodl pro testování ohranièit maximální poèet iterací èíslem 50. V prùbìhu testování jsem toto omezení pøehodnotil a zaèal vyu¾ívat ohranièení pomocí minimální zmìny, které by teoreticky mìlo ménì omezovat pøípadnou vy¹¹í efektivitu pøi vyu¾ití jiných pøíznakù.
+
+\subsubsection*{Konstantní podmínky:}
+\emph{Maximální poèet iterací:} 50\\
+\emph{Èásti znaèky:} 1 -- 5 a 8 -- 9\\
+\emph{Poèet vìt pøi testování úspì¹nosti: }7000\\
+\emph{Regularizace:} L1\\
+
+\begin{landscape}
+\begin{table}
+	\begin{center}
+		\begin{tabular}{|c|r|r|r|r|r|r|r|r|}
+
+			\hline
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Testovací} &
+			\multicolumn{1}{|c|}{Trénovací} &
+			\multicolumn{1}{|c|}{Velikost} &
+			\multicolumn{1}{|c|}{Úvodní} &
+			\multicolumn{1}{|c|}{Koneèný} &
+			\multicolumn{1}{|c|}{Úspì¹nost} &
+			\multicolumn{1}{|c|}{Úspì¹nost} \\
+
+			\multicolumn{1}{|c|}{vstupních vìt} &
+			\multicolumn{1}{|c|}{unik. znaèek} &
+			\multicolumn{1}{|c|}{èas} &
+			\multicolumn{1}{|c|}{èas} &
+			\multicolumn{1}{|c|}{modelu} &
+			\multicolumn{1}{|c|}{poèet rysù} &
+			\multicolumn{1}{|c|}{poèet rysù} &
+			\multicolumn{1}{|c|}{znaèek} &
+			\multicolumn{1}{|c|}{vìt} \\
+			\hline
+5000  & 671 & 5h 30m  & 304s & 4751828B  & 558871  & 113149 & 91.04\% & 34.70\% \\
+10000 & 792 & 20h 47m & 646s & 8326164B  & 905326  & 200613 & 92.65\% & 43.02\% \\
+15000 & 811 & 23h 46m & 544s & 10990504B & 1202680 & 266245 & 87.90\% &  7.73\% \\
+20000 &	792 & 33h 41m & 527s & 13706360B & 1464587 & 334939 & 88.37\% &  8.07\% \\
+25000	811	45h 25m	504s	17140200B	1724528	423649	88.68%	8.20\% \\
+30000	822	37h 56m	421s	18953540B	1968646	461337	88.71%	7.99\% \\
+35000	833	56h 44m	590s	22744448B	2260670	564590	89.38%	10.26\% \\
+40000	843	66h 54m	604s	23583752B	2488724	586499	90.12%	15.69\% \\
+45000	849	128h 26m	718s	27177664B	2716001	680082	90.62%	18.99\% \\
+50000	854	199h 44m	738s	28602144B	2924981	717070	89.45%	6.85\% \\
+55000	867	90h 22m	591s	30087008B	3140944	758370	94.74%	53.77\% \\
+60000 &	870	111h 35m	696s	34118604B	3329504	863220	89.63%	8.05\% \\
+
+			\hline
+		\end{tabular}
+		\captionof{table}{Prùbìh testování a popis jednotlivých akcí}
+		\label{tab:PrubehTestovani}
+	\end{center}
+\end{table}
+\end{landscape}
 
 \chapter{Závìr}
 

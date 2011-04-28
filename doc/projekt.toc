@@ -34,4 +34,15 @@
 \contentsline {section}{\numberline {6.5}Rozd\v elen\IeC {\'\i } zpracov\'an\IeC {\'\i } na kroky}{15}{section.6.5}
 \contentsline {section}{\numberline {6.6}V\'ysledky testov\'an\IeC {\'\i }}{15}{section.6.6}
 \contentsline {section}{\numberline {6.7}Odklon od programu}{15}{section.6.7}
-\contentsline {chapter}{\numberline {7}Z\'av\v er}{17}{chapter.7}
+\contentsline {chapter}{\numberline {7}CRFSuite}{17}{chapter.7}
+\contentsline {section}{\numberline {7.1}Popis programu}{17}{section.7.1}
+\contentsline {section}{\numberline {7.2}Zna\v ckov\'an\IeC {\'\i } textu}{17}{section.7.2}
+\contentsline {section}{\numberline {7.3}Anal\'yza p\v red tvorbou zna\v cek}{18}{section.7.3}
+\contentsline {section}{\numberline {7.4}Pou\v zit\'e rysy}{18}{section.7.4}
+\contentsline {section}{\numberline {7.5}Pou\v zit\IeC {\'\i } pouze \v c\'asti zna\v cky}{18}{section.7.5}
+\contentsline {section}{\numberline {7.6}Zp\r usob testov\'an\IeC {\'\i }}{18}{section.7.6}
+\contentsline {subsection}{\numberline {7.6.1}Skripty}{18}{subsection.7.6.1}
+\contentsline {subsection}{\numberline {7.6.2}Spu\v st\v en\IeC {\'\i }}{20}{subsection.7.6.2}
+\contentsline {section}{\numberline {7.7}Testy}{20}{section.7.7}
+\contentsline {subsection}{\numberline {7.7.1}Z\'avislost \'usp\v e\v snosti na po\v ctu vstupn\IeC {\'\i }ch v\v et p\v ri regularizaci L1 a konstantn\IeC {\'\i }mu po\v ctu iterac\IeC {\'\i }}{21}{subsection.7.7.1}
+\contentsline {chapter}{\numberline {8}Z\'av\v er}{23}{chapter.8}
