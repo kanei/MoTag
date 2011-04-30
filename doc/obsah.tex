@@ -149,16 +149,16 @@ L-BFGS (viz.\cite{Nash}) oznaèuje nízko pamì»ovou (Low memory) úpravu optimaliza
 \label{sec:l2}
 
 \chapter{Informaèní systém}
-Z dùvodu velkého mno¾ství jednotlivých testù, rùzných nastavení a strojù, na kterých testování bì¾í, jsem se rozhodl vytvoøit za pomoci open-source CMS systému Drupal informaèní, který mi pomù¾e udr¾ovat si pøehled o v¹ech spu¹tìných testech a o jejich výsledcích. Systém byl vytvoøen jako modul, pou¾itelný na jakékoliv webové stránce, pou¾ívající k ulo¾ení informací databázi dané stránky (dle standardu systému Drupal). 
+Z dùvodu velkého mno¾ství jednotlivých testù, rùzných nastavení a strojù, na kterých testování bì¾í, jsem se rozhodl vytvoøit za pomoci open-source CMS systému Drupal informaèní, který mi pomù¾e udr¾ovat si pøehled o v¹ech spu¹tìných testech a o jejich výsledcích. Systém byl vytvoøen jako modul, pou¾itelný na jakékoliv webové stránce, pou¾ívající k ulo¾ení informací databázi dané stránky (dle standardu systému Drupal).
 
-Systém je rozdìlen na následujících 5 èástí: 
-\begin{enumerate}
+\paragraph{Systém je rozdìlen na 5 èástí}
+\begin{itemize}
 	\item Spu¹tìní nového testu
 	\item Dokonèení bì¾ícího testu
 	\item Zobrazení bì¾ících testù
 	\item Zobrazení dokonèených testù
 	\item Zobrazení náhledu na v¹echny testy a jejich rysy
-\end{enumerate}
+\end{itemize}
 
 \section{Návrh databáze}
 Pro systém byla navr¾ena jednoduchá databáze, sestávající ze 4 tabulek a poskytující dostatek prostoru pro pøípadná roz¹íøení, o dal¹í rysy, nebo sledované výsledky.
@@ -842,6 +842,8 @@ Pro výbìr nejménì vhodných pravidel pou¾ijeme tabulku~\ref{tab:SrovnaniL1}, pøes
 
 Po pøefiltrování nám zùstalo 6 pravidel (viz. tabulka~\ref{tab:NevhodneL1}). Dle testù jsou nejménì pøínosná pravidla popisující pøíponu slova na pozici [x+1] a slovní tvar na pozici [x+2]. Pøi vynechání v¹ech tìchto pravidel ubereme ze vstupního modelu pøes pùl milionu rysù a teoreticky bychom mìli získat témìø jedno procento úspì¹nosti urèení jednotlivých slov (vzhledem k náhodnému urèení konstanty 89 je toto v¹ak velmi zavádìjící). 
 
+Naopak nejvíce pøínosné se zdá být pravidlo popisující znaèku nejbli¾¹ího slovesa. Ostatní prvky, které se ukázaly být dùle¾ité v druhém testu, vyu¾ívajícím regularizaci L2, v tomto pøípadì jsou ovlivnìny chybou a proto je tì¾ké rozhodnout, za mají pro testování stejný pøínos.
+
 \begin{table}
 	\begin{center}
 		\begin{tabular}{|c|l|r|r|r|r|}
@@ -879,6 +881,24 @@ Po pøefiltrování nám zùstalo 6 pravidel (viz. tabulka~\ref{tab:NevhodneL1}). Dle
 \end{table}
 
 \subsection{Porovnávání úspì¹nosti pøi vynechání urèitých pravidel rysù a pøi regularizaci L2}
+
+\subsubsection*{Pøíprava}
+Pøi tomto testu byla vyu¾ita stejná pravidla, jako pøi tom pøedchozím - budou tedy postupnì spou¹tìny testy a po jednom budou vypou¹tìna v¹echna pravidla pro generování rysù. Výsledky budou porovnány s referenèními hodnotami, tvoøenými výsledkem se v¹emi pravidly a poté bude spu¹tìno nìkolik testù, vynechávajících nejménì u¾iteèná pravidla.
+
+\subsubsection*{Konstantní podmínky}
+\emph{Delta:} 0.1\\
+\emph{Èásti znaèky:} 1 -- 5 a 8 -- 9\\
+\emph{Poèet vìt pøi testování úspì¹nosti: }7000\\
+\emph{Regularizace:} L2
+
+\subsubsection*{Vyhodnocení}
+Pøi zobrazení výsledkù v tabulce~\ref{tab:FeaturesL2} jsem se rozhodl kompletnì vynechat zobrazení poètu pøíznakù, nebo» je závislé pouze na daném rysu a kvùli vyu¾ití regularizace L2 nemìnné. V¹echny hodnoty jsou tedy ji¾ popsány v tabulkách~\ref{tab:FeaturesL1}~a~\ref{tab:SrovnaniL1}.
+
+Pøi pohledu na výsledky, obzvlá¹tì ty zachycené v tabulce~\ref{tab:SrovnaniL2}, jde vidìt, ¾e jednotlivá pravidla mají na výsledek testu mnohem vìt¹í vliv, ne¾ v pøede¹lém pøípadì. Pøi vynechání nìkterých pravidel úspì¹nost klesá a¾ k hranici 90\% a naopak u jiných stoupá a¾ témìø k 94\%. Co je v¹ak pøekvapivé, ¾e pøi vynechání vìt¹iny pravidel se koneèná úspì¹nost zvý¹ila. Mohlo by se tedy zdát, ¾e celý model by bylo nejlep¹í otestovat s mno¾inou pouze 8 pravidel, jejich¾ vypu¹tìní mìlo na výsledek záporný vliv, bychom mìli získat nejlep¹í výsledky. Nejsilnìj¹í vliv na kvalitu modelu má podle tabulky~\ref{tab:VhodneL2} pravidlo urèující spoleèné sloupce znaèky na aktuální pozici, následované znaèkou nejbli¾¹ího slovesa a slovním tvarem pøedcházejícího prvku, kde po vynechání kteréhokoliv ze zmínìných pravidel klesá úspì¹nost o více ne¾ 2 procenta. Poté následuje výrazný propad a¾ k hranici 0.5\% a zbylým pravidlùm.
+
+Naproti tomu, jak je vyobrazeno v tabulce~\ref{tab:NevhodneL2}, nejhùøe dopadlo pravidlo se spoleènoou znaèkou následujícího prvku, oba nadcházející slovní tvary (na pozici +1 a +2) a v¹echna mo¾ná lemmata na pozici +1, kdy po vynechání tìchto prvkù stoupla koneèná úspì¹nost o více ne¾ jedno procento. Tato pravidla jsou následována dal¹ími 8mi pravidly se zmìnou vìt¹í ne¾ pùl procenta a zbylými pravidly klesajícími a¾ k nule. Z tabulky lze také vyèíst, ¾e teoretický zisk, pøi vynechání v¹ech nevhodných znaèek, je témìø 12 procent, co¾ je samozøejmì hloupost, nebo» bychom poté dosáhli více ne¾ stoprocentní úspì¹nosti, bude v¹ak zajímavé pozorovat, jaký rozdíl pøinese vynechání jednotlivých skupin pravidel.
+
+Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou dal¹ích, nejménì vhodných rysù do testování. Budeme tedy pracovat s tøemi/pìti/sedmi a devíti nejhor¹ími rysy a porovnáme jejich výsledky. %TODO pøepsat
 
 \begin{table}
 	\begin{center}
@@ -932,7 +952,149 @@ Po pøefiltrování nám zùstalo 6 pravidel (viz. tabulka~\ref{tab:NevhodneL1}). Dle
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù vynechání pøíznakù pøi regularizaci L2 a konstantním delta}
-		\label{tab:FeaturesL2}
+		\label{tab:FeaturesL2}		
+	\end{center}
+\end{table}
+%TODO DOplnit hodnoty U50
+\begin{table}
+	\begin{center}
+		\begin{tabular}{|c|l|r|r|r|r|r|}
+			\hline
+			\multicolumn{1}{|c|}{} &
+			\multicolumn{1}{|c|}{Popis} &
+			\multicolumn{1}{|c|}{Zm. vel.} &
+			\multicolumn{1}{|c|}{Zm. úsp.} \\
+
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{pravidla} &
+			\multicolumn{1}{|c|}{modelu} &
+			\multicolumn{1}{|c|}{slov} \\
+
+			\multicolumn{1}{|c|}{} &
+			\multicolumn{1}{|c|}{} &
+			\multicolumn{1}{|c|}{(76 697 368B)} &
+			\multicolumn{1}{|c|}{(92.17\%)} \\
+			\hline
+			U00 & Slovní tvar [-2] & -8 363 256B & -0.11\% \\ 
+			U01 & Slovní tvar [-1] & -7 986 148B & -2.11\% \\ 
+			U02 & Slovní tvar [0] & -5 918 732B & 0.64\% \\ 
+			U03 & Slovní tvar [+1] & -7 579 904B & 1.04\% \\ 
+			U04 & Slovní tvar [+2] & -7 579 904B & 1.17\% \\ 
+			U10 & Spoleèná znaèka [-2] & - 718 600B & 0.08\% \\ 
+			U11 & Spoleèná znaèka [-1] & - 508 744B & -0.29\% \\ 
+			U12 & Spoleèná znaèka [0] & - 74 640B & -3.76\% \\ 
+			U13 & Spoleèná znaèka [+1] & - 496 552B & 1.37\% \\ 
+			U14 & Spoleèná znaèka [+2] & - 703 720B & 0.66\% \\ 
+			U20 & Mo¾ná lemmata [-2] & -5 983 720B & 0.48\% \\ 
+			U21 & Mo¾ná lemmata [-1] & -5 561 716B & 0.47\% \\ 
+			U22 & Mo¾ná lemmata [0] & -4 140 296B & 0.35\% \\ 
+			U23 & Mo¾ná lemmata [+1] & -5 709 856B & 1.02\% \\ 
+			U24 & Mo¾ná lemmata [+2] & -6 190 056B & 0.50\% \\ 
+			U30 & Pøípona slova [-2] & -1 103 896B & 0.57\% \\ 
+			U31 & Pøípona slova [-1] & - 847 312B & 0.63\% \\ 
+			U32 & Pøípona slova [0] & - 223 644B & -0.52\% \\ 
+			U33 & Pøípona slova [+1] & - 855 848B & 0.86\% \\ 
+			U34 & Pøípona slova [+2] & -1 086 620B & -0.57\% \\ 
+			U40 & První písmeno & - 200 380B & -0.10\% \\ 
+			U41 & První dvì písmena & - 866 244B & 0.23\% \\ 
+			U42 & První tøi písmena & -1 948 452B & 0.71\% \\ 
+			U43 & Poslední písmeno & -1 170 080B & 0.21\% \\ 
+			U50 & Velikost písmen & -76 697 368B & -92.17\% \\ 
+			U51 & Pozice ve vìtì & - 453 628B & 0.09\% \\ 
+			U52 & Délka slova & - 86 072B & 0.89\% \\ 
+			U53 & Znaèka nejbl. slovesa & - 244 600B & -2.13\% \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Srovnání výsledkù jednotlivých pravidel s referenèními daty pøi regularizaci L2}
+		\caption*{Legenda: \\
+			\\
+			\begin{tabularx}{\textwidth}{|l|X|}
+				\hline
+				Zm. vel. modelu & Zmìna velikosti modelu -- rozdíl mezi referenèní a aktuální velikostí, kladná hodnota znaèí zvìt¹ení souboru, záporná pak zmen¹ení. \\
+				Zm. úsp. slov & Zmìna úspì¹nosti urèení jednotlivých slov -- rozdíl mezi referenèní a aktuální úspì¹ností, kladná hodnota znaèí zlep¹ení, záporná zhor¹ení.\\
+				\hline
+			\end{tabularx}
+		}
+		\label{tab:SrovnaniL2}
+	\end{center}
+\end{table}
+
+\begin{table}
+	\begin{center}
+		\begin{tabular}{|c|l|r|r|r|r|}
+			\hline
+			\multicolumn{1}{|c|}{} &
+			\multicolumn{1}{|c|}{Popis} &
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Zm. vel.} &
+			\multicolumn{1}{|c|}{Zm. úsp.} \\
+
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{pravidla} &
+			\multicolumn{1}{|c|}{rysù} &
+			\multicolumn{1}{|c|}{modelu} &
+			\multicolumn{1}{|c|}{slov} \\
+
+			\hline 
+			U12 & Spoleèná znaèka [0] &  2 196 & - 74 640B & -3.76\% \\ 
+			U53 & Znaèka nejbl. slovesa &  10 102 & - 244 600B & -2.13\% \\ 
+			U01 & Slovní tvar [-1] &  181 706 & -7 986 148B & -2.11\% \\ 
+			U34 & Pøípona slova [+2] &  42 945 & -1 086 620B & -0.57\% \\ 
+			U32 & Pøípona slova [0] &  6 848 & - 223 644B & -0.52\% \\ 
+			U11 & Spoleèná znaèka [-1] &  20 282 & - 508 744B & -0.29\% \\ 
+			U00 & Slovní tvar [-2] &  206 833 & -8 363 256B & -0.11\% \\ 
+			U40 & První písmeno &  8 169 & - 200 380B & -0.10\% \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Pravidla s kladným efektem, seøazená podle zmìny ú¹pì¹nosti}
+		\label{tab:VhodneL2}
+	\end{center}
+\end{table}
+
+\begin{table}
+	\begin{center}
+		\begin{tabular}{|c|l|r|r|r|r|}
+			\hline
+			\multicolumn{1}{|c|}{} &
+			\multicolumn{1}{|c|}{Popis} &
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Zm. vel.} &
+			\multicolumn{1}{|c|}{Zm. úsp.} \\
+
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{pravidla} &
+			\multicolumn{1}{|c|}{rysù} &
+			\multicolumn{1}{|c|}{modelu} &
+			\multicolumn{1}{|c|}{slov} \\
+
+			\hline 
+			U13 & Spoleèná znaèka [+1] &  19 776 & - 496 552B & 1.37\% \\ 
+			U04 & Slovní tvar [+2] &  175 053 & -7 579 904B & 1.17\% \\ 
+			U03 & Slovní tvar [+1] &  175 053 & -7 579 904B & 1.04\% \\ 
+			U23 & Mo¾ná lemmata [+1] &  151 355 & -5 709 856B & 1.02\% \\ 
+			U52 & Délka slova &  3 542 & - 86 072B & 0.89\% \\ 
+			U33 & Pøípona slova [+1] &  33 256 & - 855 848B & 0.86\% \\ 
+			U42 & První tøi písmena &  63 397 & -1 948 452B & 0.71\% \\ 
+			U14 & Spoleèná znaèka [+2] &  28 410 & - 703 720B & 0.66\% \\ 
+			U02 & Slovní tvar [0] &  93 515 & -5 918 732B & 0.64\% \\ 
+			U31 & Pøípona slova [-1] &  32 870 & - 847 312B & 0.63\% \\ 
+			U30 & Pøípona slova [-2] &  43 638 & -1 103 896B & 0.57\% \\ 
+			U24 & Mo¾ná lemmata [+2] &  174 076 & -6 190 056B & 0.50\% \\ 
+			U20 & Mo¾ná lemmata [-2] &  165 890 & -5 983 720B & 0.48\% \\ 
+			U21 & Mo¾ná lemmata [-1] &  143 299 & -5 561 716B & 0.47\% \\ 
+			U22 & Mo¾ná lemmata [0] &  83 030 & -4 140 296B & 0.35\% \\ 
+			U41 & První dvì písmena &  32 709 & - 866 244B & 0.23\% \\ 
+			U43 & Poslední písmeno &  46 198 & -1 170 080B & 0.21\% \\ 
+			U51 & Pozice ve vìtì &  18 563 & - 453 628B & 0.09\% \\ 
+			U10 & Spoleèná znaèka [-2] &  29 032 & - 718 600B & 0.08\% \\ 
+			\hline
+			 & Celkem & 1 512 662 & -57 914 588B & 11.97\% \\ 
+			\hline
+			 & Teoretický výsledek &  479 081 & 18 688 032B & 104.14\% \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Pravidla se záporným efektem, seøazená podle zmìny ú¹pì¹nosti}
+		\label{tab:NevhodneL2}
 	\end{center}
 \end{table}
 
