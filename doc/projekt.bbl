@@ -23,18 +23,4 @@ Nash, S.~G.; Nocedal, J.: A Numerical Study of the Limited Memory BFGS Method
   http://math.asu.edu/~jtaylor/teaching/Fall2010/APM530/papers/Nash91.pdf},
   1991.
 
-\bibitem{csts}
-{WWW stránky}: Popis formátu CSTS. {\tt
-  http://ufal.mff.cuni.cz/pdt2.0/doc/data-formats/csts/html/DTD-HOME.html}.
-
-\bibitem{znacky}
-{WWW stránky}: Popis morfologických znaèek. {\tt
-  http://ucnk.ff.cuni.cz/bonito/znacky.php}.
-
-\bibitem{zdrojak}
-{WWW stránky}: Zdrojový kód. {\tt http://github.com/kanei/MoTag}.
-
-\bibitem{Morce}
-{WWW stránky}: Znaèkovaè Morèe. {\tt http://ufal.mff.cuni.cz/morce/}.
-
 \end{thebibliography}

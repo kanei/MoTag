@@ -3,35 +3,37 @@
 
 \chapter{Úvod}
 \label{chap:uvod}
-Tato práce pojednává o vyu¾ití existujících øe¹ení, vyu¾ívajících algoritmù automatického poèítaèového uèení (Conditional Random Fields s vyu¾ítím algoritmù Limited-memory BFGS a Stochastic Gradient Descent) a porovnání výsledkù s existujícími øe¹eními, kterými v na¹em pøípadì je program Morèe vyvíjený na pra¾ské Univerzitì Karlovì, pou¾ívající Hidden Markov Model. Z existujících øe¹ení poté byly vybrány programy CRF++ a CrfSuite.
+Tato práce pojednává o vyu¾ití existujících øe¹ení, vyu¾ívajících algoritmù automatického strojového uèení (Conditional Random Fields s vyu¾ítím algoritmù Limited-memory BFGS a Stochastic Gradient Descent) a porovnání výsledkù s existujícími øe¹eními, kterými v na¹em pøípadì je program \emph{Morèe}~\footnote[1]{Stránky programu: http://ufal.mff.cuni.cz/morce/} vyvíjený na pra¾ské Univerzitì Karlovì, pou¾ívající Hidden Markov Model. Z existujících øe¹ení poté byly vybrány programy \emph{CRF++} a \emph{CrfSuite}.
 
-V dokumentu bude nejdøíve popsáno samotné znaèkování èe¹tiny a jeho pravidla, a potí¾e, které jsou s ním spojeny v porovnání s jinými, jednodu¹¹ími jazyky. Dále budou rozebrány matematické modely a algoritmy, které jsou pou¾ity pøi procesu uèení. K celému procesu bylo potøeba vytvoøit nìkolik nástrojù, buï konvertujících vstupní data pro jednotlivé programy, nebo ulehèujících vlastní proces testování. Mezi tyto patøí skritpy napsané v jazyce Python a bash a informaèní systém, starající se o správu bì¾ících a dokonèených testù a informací o nich, implementovaný za pomocí PHP, SQL a HTML, postavený na open-source CMS systému Drupal. Ve¹kerý kód byl spravován pomocí verzovacího systému GIT a je veøejnì dostupný na internetu\cite{zdrojak}.
+V dokumentu bude nejdøíve popsáno samotné znaèkování èe¹tiny a jeho pravidla, a potí¾e, které jsou s ním spojeny v porovnání s jinými, jednodu¹¹ími jazyky. Dále budou rozebrány matematické modely a algoritmy, které jsou pou¾ity pøi procesu uèení. K celému procesu bylo potøeba vytvoøit nìkolik nástrojù, buï konvertujících vstupní data pro jednotlivé programy, nebo ulehèujících vlastní proces testování. Mezi tyto patøí skritpy napsané v jazyce \emph{Python} a \emph{BASH} a informaèní systém, starající se o správu bì¾ících a dokonèených testù a informací o nich, implementovaný za pomocí \emph{PHP}, \emph{SQL} a \emph{HTML}, postavený na open-source CMS\footnote[2]{Z angl. content management system - software pro správu obsahu} systému \emph{Drupal}\footnote[3]{Stránky programu: http://www.drupal.org}. Ve¹kerý kód byl spravován pomocí verzovacího systému \emph{GIT}\footnote[4]{Stránky programu: http://git-scm.com/} a je veøejnì dostupný na internetu\footnote[5]{Adresa repozitáøe: http://github.com/kanei/MoTag}.
 
 Nejdùle¾itìj¹í èástí dokumentù pak jsou výsledky testování, zpracovávaného na ¹kolních strojích pøes vzdálený pøistup. Testy byly provedeny z mnoha rùzných úhlù pohledu na efektivitu a jsou doplnìny o tabulky a grafy. 
+
+\pagebreak
 
 \section{Termíny}
 \label{sec:terminy}
 Pro dal¹í text definujeme následující termíny:
 \begin{itemize}
 	\item \textbf{Znaèka} -- \textit{angl. Label} -- øetìzec popisující vlastnost
- 		daného prvku, v na¹em pøípadì urèení mluvnických tøíd.
+ 		daného prvku, v na¹em pøípadì urèení mluvnických tøíd
 	\item \textbf{Rys} -- \textit{angl. Feature} -- prvek pou¾ívaný pøi trénování,
-		specifikující vlastnost daného prvku ve vstupních datech.
+		specifikující vlastnost daného prvku ve vstupních datech
 	\item \textbf{Vlastnost} -- \textit{angl. Atribut} -- pravidlo pro generování
 		jednotlivých rysù 
 	\item \textbf{Lemma} -- základní podoba slova (slovníkový tvar)
-	\item \textbf{Delta} -- rozdíl v celkové pravdìpodobnosti mezi dvoumi po soubì jdoucími iteracemi
+	\item \textbf{Delta} -- rozdíl v celkové pravdìpodobnosti mezi dvìmi po sobì jdoucími iteracemi
 \end{itemize}
 \chapter{Znaèkování èeského jazyka}
 \label{chap:znackovani}
 \section{Proè znaèkovat jazyk}
-V èeském jazyce má mnoho slov tzv. homonymní tvar -- jedno slovo mù¾e být v rùzných pøípadech naprosto odli¹ným slovním druhem, nebo mít odli¹né urèení slovních kategorií. Pøi strojové analýze textu, pøekladech apod. je proto dùle¾ité, abychom byli schopni tyto kategorie rozli¹ovat a pøiøazovat jednotlivým slovùm jejich správnou znaèku.
+V èeském jazyce má mnoho slov tzv. homonymní tvar -- jedno slovo mù¾e být v rùzných pøípadech naprosto odli¹ným slovním druhem, nebo mít odli¹né urèení slovních kategorií (napø. pila, kolem, ...). Pøi strojové analýze textu, pøekladech apod. je proto dùle¾ité, abychom byli schopni tyto kategorie rozli¹ovat a pøiøazovat jednotlivým slovùm jejich správnou znaèku.
 
 \section{Co je to znaèkování}
 Proces, pøi kterém je slovu, pøiøazena  znaèka obsahující jeho popis z mluvnického hlediska. Tento proces je èasto rozdìlen na nìkolik krokù, kdy slovu nejdøíve pøiøadíme v¹echny mo¾né znaèky a poté teprve vybereme tu správnou. V této práci se budeme zabývat pouze druhým krokem a v¹echna vstupní data proto ji¾ budou mít nastavena mno¾inu v¹ech znaèek, pøipadajících v úvahu. 
 
 \section{Kategorie popisované znaèkou v èeském jazyce}
-Ka¾dé slovo èeského jazyka má mnoho kategorií, do kterých mù¾e být zaøazeno -- od slovního druhu po slovesný vid. V poèítaèovém zpracování jazyka lze pou¾ít nìkolika rùzných pøístupù k ulo¾ení tìchto informací. V na¹em pøípadì bude struktura znaèek odpovídat systému\cite{znacky} pou¾ívanému na pra¾ské Univerzitì Karlovì. Tento systém se skládá ze 16 pozic (viz. tabulka ~\ref{tab:PopisZnacek}).
+Ka¾dé slovo èeského jazyka má mnoho kategorií, do kterých mù¾e být zaøazeno -- od slovního druhu po slovesný vid. Ve strojovém zpracování jazyka lze pou¾ít nìkolika rùzných pøístupù k ulo¾ení tìchto informací. V na¹em pøípadì bude struktura znaèek odpovídat systému\footnote[1]{Popis morfologických znaèek: http://ucnk.ff.cuni.cz/bonito/znacky.php} pou¾ívanému na pra¾ské Univerzitì Karlovì. Tento systém se skládá ze 16 pozic (viz. tabulka~\ref{tab:PopisZnacek}).
 \begin{center}
 	\begin{tabular}{|c|l|}
 		\hline
@@ -62,20 +64,20 @@ Ka¾dé slovo èeského jazyka má mnoho kategorií, do kterých mù¾e být zaøazeno -- o
 \section{Problémy pøi znaèkování}
 Zatímco v angliètinì pøi pouhém oznaèkování slov s jednoznaènou znaèkou dosáhneme úspì¹nosti kolem 90\%, v èeském jazyce je situace mnohem slo¾itìj¹í. Kvùli vý¹e zmínìné homonymii a mno¾ství kategorii, do kterých v èeském jazyce slova mù¾eme zaøadit, bychom se v na¹em pøípadì k 90\% urèitì ani nepøiblí¾ili. V angliètinì se proto také pou¾ívá pouze tøí-pozicová znaèka, která velmi ulehèuje práci ve¹kerým automatickým programùm. Pøi takto nízkém poètu je také velmi nízká pamì»ová nároènost a poèet mo¾ných pøechodù není tak vysoký. Naproti tomu v èe¹tinì je kvùli 16 pozicím mo¾no získat celkový poèet znaèek v øádu tisícù a tím se neúmìrnì zvy¹uje èasová i pamì»ová nároènost celého procesu znaèkování. Z tohoto dùvodu jsem se pokou¹el tuto nároènost sní¾it vypu¹tìním ménì dùle¾itých kategorií a tím sní¾it celkový poèet variant k èíslu nepøevy¹ujícímu jeden tisíc. Nároènost na procesorový èas se tím razantnì sní¾ila a dala mi tak ¹anci otestovat mnohem vìt¹í mno¾ství kombinací rysù a nastavení programù.
 \section{Data}
-K trénování a následné evaluaci výsledkù máme k dispozici okolo 77 000 vìt. Data jsou získána z korpusu PDT 2.0 a ulo¾ena ve formátu dat CSTS\cite{csts}. Pomocí skriptù napsaných pøevá¾nì v jazyce python jsou poté tato data pøevedena do formátu kompatibilního s pou¾itými programy.
+K trénování a následné evaluaci výsledkù máme k dispozici okolo 77 000 vìt. Data jsou získána z korpusu \emph{PDT 2.0}\footnote[1]{Stránky PDT 2.0: http://ufal.mff.cuni.cz/pdt2.0/} a ulo¾ena ve formátu dat \emph{CSTS}\footnote[1]{Definice: http://ufal.mff.cuni.cz/pdt2.0/doc/data-formats/csts/html/DTD-HOME.html}. Pomocí skriptù napsaných pøevá¾nì v jazyce \emph{Python} jsou poté tato data pøevedena do formátu kompatibilního s pou¾itými programy.
 \section{Existující øe¹ení pro znaèkování èeského jazyka}
-Pro porovnání výsledkù tohoto projektu byl pou¾it program Morèe\cite{Morce} vytvoøený na Ústavu formální a aplikované lingvistiky na Univerzitì Karlovì v Praze. K trénování je vyu¾íván Skrytý Markovùv Model s pou¾itím Prùmìrovaného perceptronu. Vstupními daty je korpus PDT 2.0 s údaji ve formátu CSTS. Podle dostupných údajù program dosahuje úspì¹nosti od 95 do 96 procent je tudí¾ nejpøesnìj¹ím znaèkovacím programem pro zpracování èeského jazyka. Z dùvodu pou¾ití stejných dat tedy nebude problém porovnat koneènou úspì¹nost námi pou¾ité implementace s úspì¹ností programu Morèe.
+Pro porovnání výsledkù tohoto projektu byl pou¾it program \emph{Morèe} vytvoøený na Ústavu formální a aplikované lingvistiky na Univerzitì Karlovì v Praze. K trénování je vyu¾íván skrytý markovský model s pou¾itím prùmìrovaného perceptronu. Vstupními daty je korpus \emph{PDT 2.0} s údaji ve formátu \emph{CSTS}. Podle dostupných údajù program dosahuje úspì¹nosti od 95 do 96 procent je tudí¾ nejpøesnìj¹ím znaèkovacím programem pro zpracování èeského jazyka. Z dùvodu pou¾ití stejných dat tedy nebude problém porovnat koneènou úspì¹nost námi pou¾ité implementace s úspì¹ností programu \emph{Morèe}.
 
-\chapter{Pou¾ité algoritmy}
+\chapter{Popis algoritmù a modelù}
 \label{chap:algoritmy}
 
-Pro odli¹ení od existujících øe¹ení byl vybrán algoritmus Conditional Random Fields (Podmínìná náhodná pole), roz¹iøující Hidden Markov Model a tím nabízející vý¹¹í úèinnost na vstupních datech. Pro lep¹í pochopení CRF je potøeba nejdøíve porozumìt zpùsobu, jakým pracuje algoritmus HMM. V mnoha existujících øe¹eních se poté pro urèení parametrù pou¾ívají rùzné algoritmy od Viterbi algorithm, pou¾ívaného ji¾ od 60. let minulého století, pøes Forward-Backward algorithm, jeho modifikaci Baum-Welch algorithm a¾ po \uv{nejmodernìj¹í} zástupce, kterými jsou Low Memory BFGS a Stochastic Gradient Descent, poskytující nejlep¹í výsledky, nebo vysoké sní¾ení pamì»ové a èasové nároènosti.
+Pro odli¹ení od existujících øe¹ení byl vybrán algoritmus Conditional Random Fields (CRF), roz¹iøující Hidden Markov Model a tím nabízející vý¹¹í úèinnost na vstupních datech. Pro lep¹í pochopení CRF je potøeba nejdøíve porozumìt zpùsobu, jakým pracuje algoritmus HMM. V mnoha existujících øe¹eních se poté pro urèení parametrù pou¾ívají rùzné algoritmy od Viterbiho algoritmu, pou¾ívaného ji¾ od 60. let minulého století, pøes Forward-Backward algoritmus, jeho modifikaci Baum-Welchùv algoritmus a¾ po \uv{nejmodernìj¹í} zástupce, kterými jsou Low Memory BFGS a Stochastic Gradient Descent, poskytující nejlep¹í výsledky, nebo vysoké sní¾ení pamì»ové a èasové nároènosti.
 
-Celý proces poté probíhá za tzv. Supervised Learning (uèení se pod dohledem), kdy programu nejdøíve pøedlo¾íme ji¾ správnì oznaèená data a necháme jej, aby se pomocí jednoho z vý¹e zmínìných algoritmù nauèil správné parametry modelu (CRF nebo HMM). Takto získaný model poté aplikujeme na men¹í skupinu dat, pomocí které poté urèíme koneènou úspì¹nost celého procesu.
+Celý proces poté probíhá za tzv. Supervised Learning (uèení s uèitelem), kdy programu nejdøíve pøedlo¾íme ji¾ správnì oznaèená data a necháme jej, aby se pomocí jednoho z vý¹e zmínìných algoritmù nauèil správné parametry modelu (CRF nebo HMM). Takto získaný model poté aplikujeme na men¹í skupinu dat, pomocí které poté urèíme koneènou úspì¹nost celého procesu.
 
 \section{Hiden Markov Model (HMM)}
 \label{sec:hmm}
-Skrytý Markovský model (viz.\cite{Kovar}), pojmenovaný po ruském matematikovi Andreyi Markovi, oznaèuje statistický model urèený pro popis posloupnosti obsahující Markovské stavy. Tìmi máme na mysli takový stav, pro nì¾ je dùle¾itá pouze blízká minulost (v na¹em pøípadì pouze nìkolik pøedchozích stavù -- znaèek) a vzdálená minulost je zanedbána. Ve zpracování jazyka se èasto omezuje zpracování pouze na dvì pøedchozí znaèky.
+Skrytý markovský model (viz.~\cite{Kovar}), pojmenovaný po ruském matematikovi Andreyi Markovi, oznaèuje statistický model urèený pro popis posloupnosti obsahující Markovské stavy. Tìmi máme na mysli takový stav, pro nì¾ je dùle¾itá pouze blízká minulost (v na¹em pøípadì pouze nìkolik pøedchozích stavù -- znaèek) a vzdálená minulost je zanedbána. Ve zpracování jazyka se èasto omezuje zpracování pouze na dvì pøedchozí znaèky.
 
 Zatímco u klasického Markovského modelu známe posloupnost vstupních hodnot, v na¹em pøípadì známe pouze posloupnost hodnot výsledných (slovních tvarù). V ka¾dém kroku je poté ulo¾ena hodnota pravdìpodobnosti pøechodu do mo¾ných následujících stavù a hodnota pravdìpodobnosti vygenerování urèitého výstupu (znaèky). Celý proces je zachycen na obrázku ~\ref{fig:GrafHMM}.
 
@@ -115,7 +117,7 @@ I kdy¾ není HMM implementováno v ¾ádném z vyu¾itých programù, poskytuje základ p
 CRF mù¾eme popsat jako bezsmìrový grafický pravdìpodobnostní model (undirected probabilistic graphical model), ve kterém ka¾dý uzel (v na¹em pøípadì slovo) popisuje náhodnou promìnnou. CRF mù¾e také být vyjádøen jako model s koneèným poètem stavù a nenormalizovanými pravdìpodobnostmi pøechodù. V porovnání k HMM nemá jasnì dané hodnoty pøechodù mezi stavy a disponuje mo¾ností mnohonásobných funkcí, generujících rysy. Pøiná¹í také lep¹í výsledky ve zpracování dat se závislostmi vy¹¹ího øádu, které vìt¹inou lépe odpovídají reálnému modelu. Na rozdíl od generativních modelù také, jako¾to pravdìpodobnostní (conditional) model nemusí zkoumat v¹echny mo¾né sekvence pozorovaných prvkù (observations). Pro urèení parametrù tohoto modelu je v souèasné dobì nejvíce doporuèován algoritmus L-BFGS (Low-Memory BFGS), který poskytuje nejkvalitnìj¹í výsledky.
 
 \subsection{Label Bias problém}
-Problém ¹patného vyva¾ování znaèek (viz.\cite{Lafferty}) spoèívá v pøesunu pravdìpodobnostní hodnoty na dal¹í pozici v pøípadì pouze jediného pøechodu za ignorování pozorovaného prvku. Jak je ilustrováno na obrázku ~\ref{fig:GrafLabelBias}, v pøípadì vstupní posloupnosti písmen t,i,k se v prvním kroku neumíme rozhodnout a vstupujeme do stavù 1 a 4 se stejnou pravdìpodobností. Nyní, i kdy¾ na vstupu je písmeno i, nemáme jinou mo¾nost, ne¾ pokraèovat do stavù 2, pøípadnì 5 za ignorování pozorovaného písmena. V pøípadì, ¾e by v trénovacích datech tedy pøevládal øetìzec \uv{tik} nad øetìzcem \uv{tak}, byly by oba tyto øetìzce v¾dy urèeny jako \uv{tik}. Toto je vy¾e¹eno algoritmem CRF pomocí ohodnocení pøechodù mezi stavy, kdy mù¾eme podle aktuálního pozorovaného prvku buï sní¾it, nebo zvý¹it koneènou pravdìpodobnost dané posloupnosti.
+Problém ¹patného vyva¾ování znaèek (viz.~\cite{Lafferty}) spoèívá v pøesunu pravdìpodobnostní hodnoty na dal¹í pozici v pøípadì pouze jediného pøechodu za ignorování pozorovaného prvku. Jak je ilustrováno na obrázku ~\ref{fig:GrafLabelBias}, v pøípadì vstupní posloupnosti písmen t,i,k se v prvním kroku neumíme rozhodnout a vstupujeme do stavù 1 a 4 se stejnou pravdìpodobností. Nyní, i kdy¾ na vstupu je písmeno i, nemáme jinou mo¾nost, ne¾ pokraèovat do stavù 2, pøípadnì 5 za ignorování pozorovaného písmena. V pøípadì, ¾e by v trénovacích datech tedy pøevládal øetìzec \uv{tik} nad øetìzcem \uv{tak}, byly by oba tyto øetìzce v¾dy urèeny jako \uv{tik}. Toto je vy¾e¹eno algoritmem CRF pomocí ohodnocení pøechodù mezi stavy, kdy mù¾eme podle aktuálního pozorovaného prvku buï sní¾it, nebo zvý¹it koneènou pravdìpodobnost dané posloupnosti.
 
 \begin{figure}[ht!]
 	\centering
@@ -126,18 +128,18 @@ Problém ¹patného vyva¾ování znaèek (viz.\cite{Lafferty}) spoèívá v pøesunu pravd
 
 \section{Viterbi algorithm}
 \label{sec:viterbi}
-Byl navrhnut v roce 1967 Andrewem Viterbi jako dekódovací algoritmus pro konvoluèní kódy v telekomunikaèních sítích. Kvùli svému zamìøení na vyhledání nejpravdìpodobnìj¹í cesty sekvencí skrytých stavù (nejèastìji HMM) se v¹ak pou¾ívá v mnoha odvìtvích, jako zpracování signálù a také znaèkování jazyka. 
+Byl navrhnut v roce 1967 Andrewem Viterbim jako dekódovací algoritmus pro konvoluèní kódy v telekomunikaèních sítích. Kvùli svému zamìøení na vyhledání nejpravdìpodobnìj¹í cesty sekvencí skrytých stavù (nejèastìji HMM) se v¹ak pou¾ívá v mnoha odvìtvích, jako zpracování signálù a také znaèkování jazyka. 
 
 Za pøedpokladu, ¾e vstupní data mají stejný poèet pozorovaných a skrytých stavù, obì posloupnosti jsou zarovnané a výpoèet v daném místì je závislý pouze na aktuálním a pøedchozím prvku, je pomocí získána tzv. Viterbiho cesta -- nejpravdìpodobnìj¹í cesta posloupností.  V ka¾dém kroku algoritmus vyhodnotí v¹echny cesty vedoucí k aktuálnímu stavu a ponechá pouze jednu, díky èemu¾ není nucen uchovávat v¹echny existující cesty, ale pouze jednu pro ka¾dý stav. Za pomocí uchovávaní ceny stavu se poka¾dé algoritmus rozhodne ze v¹ech mo¾ností pro dal¹í stav a ulo¾í kompletní cestu od zaèátku prùchodu posloupností.
 
 \section{Forward-backward algorithm}
 \label{sec:forw-back}
-Pou¾ívá dva prùchody posloupností stavù -- dopøedu a zpìt (podle toho také vznikl jeho název). Nejdøíve projde celou sekvenci a urèí cenu cesty pøi daném prùchodu. Poté projde sekvencí zpìt a pøi ka¾dém kroku spoèítá pravdìpodobnost pozorování zbylých vstupních hodnot. Oba tyto prùchody jsou poté \uv{vyhlazeny} do spoleèného výsledku a tím je získáno rozdìlení mezi stavy v jednotlivých jednotkách èasu. Speciálním pøípadem je poté Baum-Welch algoritmus.
+Pou¾ívá dva prùchody posloupností stavù -- dopøedu a zpìt (podle toho také vznikl jeho název). Nejdøíve projde celou sekvenci a urèí cenu cesty pøi daném prùchodu. Poté projde sekvencí zpìt a pøi ka¾dém kroku spoèítá pravdìpodobnost pozorování zbylých vstupních hodnot. Oba tyto prùchody jsou poté \uv{vyhlazeny} do spoleèného výsledku a tím je získáno rozdìlení mezi stavy v jednotlivých jednotkách èasu. Speciálním pøípadem je poté Baum-Welchùv algoritmus.
 %TODO ZJISTIT VICE??
 
 \section{L-BFGS}
 \label{sec:lbfgs}
-L-BFGS (viz.\cite{Nash}) oznaèuje nízko pamì»ovou (Low memory) úpravu optimalizaèní metody BFGS (Broyden-Fletcher-Goldfarb-Shanno) z rodiny Quasi-Newtonových metod, urèenou k aproximaci inverzní Hessovy matice (ètvercová matice druhých parciálních derivací funkce -- popisuje místní zakøivení funkce o nìkolika promìnných). Optimalizací pro sní¾ení pamì»ové nároènosti je neukládání matice samotné, ale pouze ukládá historii zmìn.
+L-BFGS (viz.~\cite{Nash}) oznaèuje nízko pamì»ovou (Low memory) úpravu optimalizaèní metody BFGS (Broyden-Fletcher-Goldfarb-Shanno) z rodiny Quasi-Newtonových metod, urèenou k aproximaci inverzní Hessovy matice\footnote[1]{ètvercová matice druhých parciálních derivací funkce -- popisuje místní zakøivení funkce o nìkolika promìnných}. Optimalizací pro sní¾ení pamì»ové nároènosti je neukládání matice samotné, ale pouze ukládá historii zmìn.
 
 \section{Stochastic Gradient Descent}
 \label{sec:sgd}
@@ -149,7 +151,7 @@ L-BFGS (viz.\cite{Nash}) oznaèuje nízko pamì»ovou (Low memory) úpravu optimaliza
 \label{sec:l2}
 
 \chapter{Informaèní systém}
-Z dùvodu velkého mno¾ství jednotlivých testù, rùzných nastavení a strojù, na kterých testování bì¾í, jsem se rozhodl vytvoøit za pomoci open-source CMS systému Drupal informaèní, který mi pomù¾e udr¾ovat si pøehled o v¹ech spu¹tìných testech a o jejich výsledcích. Systém byl vytvoøen jako modul, pou¾itelný na jakékoliv webové stránce, pou¾ívající k ulo¾ení informací databázi dané stránky (dle standardu systému Drupal).
+Z dùvodu velkého mno¾ství jednotlivých testù, rùzných nastavení a strojù, na kterých testování bì¾í, jsem se rozhodl vytvoøit za pomoci open-source CMS \emph{Drupal} informaèní systém, který pomù¾e udr¾ovat pøehled o v¹ech spu¹tìných testech a o jejich výsledcích. Systém byl vytvoøen jako modul, pou¾itelný na jakékoliv webové stránce, pou¾ívající k ulo¾ení informací databázi dané stránky (dle standardu pou¾itého systému).
 
 \paragraph{Systém je rozdìlen na 5 èástí}
 \begin{itemize}
@@ -167,7 +169,7 @@ Pro systém byla navr¾ena jednoduchá databáze, sestávající ze 4 tabulek a poskytu
 Pøi spu¹tìní se do systému zadávají následující data:
 \begin{itemize}
 	\item Název pou¾itého programu
-	\item Identifikátor poèítaèe, na kterém testování bì¾í
+	\item Identifikátor stroje, na kterém testování bì¾í
 	\item Popis testování
 	\item Typ regularizace
 	\item Poèet vstupních vìt pou¾itých pro testování
@@ -197,9 +199,9 @@ Na tìchto stránkách si poté mù¾eme prohlédnout výsledky, které mù¾eme pozdìji po
 \chapter{Prostøedí testù a pou¾itý software}
 \label{chap:prostredi}
 \section{Operaèní systém}
-Aèkoliv v¹echny vyu¾ívané programy a skripty jsou multiplatformní, v¹echny testy byly spou¹tìny na operaèním systému Linux nainstalovaném na univerzitních strojích, ke kterým jsem se vzdálenì pøipojoval pøes ssh. 
+Aèkoliv v¹echny vyu¾ívané programy a skripty jsou multiplatformní, v¹echny testy byly spou¹tìny na operaèním systému \emph{Linux} nainstalovaném na univerzitních strojích, ke kterým jsem se vzdálenì pøipojoval pøes ssh. 
 \section{Hardware}
-Testování probíhalo prùbì¾nì a¾ na 10 rùzných poèítaèích, kde tøi znich jsou dostupné pro v¹eobecné vyu¾ítí (Athena 1 -- 3) a zbylé jsou pøístupné pouze pro výzkum zpracování jazyka (Pcnlp1 -- 8, krom 2, na kterém bì¾í OS Windows). Z dùvodu rozdílného hardware na jednotlivých strojích se poté pøi testování projevují velké skoky ve výsledných èasech. V tabulce ~\ref{tab:PouziteStroje} je zobrazena struèná charakteristika jednotlivých strojù.
+Testování probíhalo prùbì¾nì a¾ na 10 rùzných poèítaèích, kde tøi znich jsou dostupné pro v¹eobecné vyu¾ítí (\emph{athena1} -- \emph{athena3}) a zbylé jsou pøístupné pouze pro výzkum zpracování jazyka (\emph{pcnlp1} -- \emph{pcnlp8}, kromì \emph{pcnlp2}, na kterém bì¾í OS \emph{Windows}). Z dùvodu rozdílného hardware na jednotlivých strojích se poté pøi testování projevují velké skoky ve výsledných èasech. V tabulce ~\ref{tab:PouziteStroje} je zobrazena struèná charakteristika jednotlivých strojù.
 %TODO Dopsat sem jejich vykon??
 \begin{figure}
 	\begin{center}
@@ -240,24 +242,24 @@ Testování probíhalo prùbì¾nì a¾ na 10 rùzných poèítaèích, kde tøi znich jsou dos
 
 \section{CRF++}
 \label{sec:crfpp}
-Program CRF++~\ref{crfpp} je open-source implementací Conditional Random Fields, urèenou pro znaèkování sekvenèních dat. Nabízí se tedy jako jeden z kandidátù pro potøeby této práce. Program je napsán v jazyce C++ za pou¾ití STL knihovny. K urèení parametru pou¾ívá algoritmu L-BFGS. Implementuje také mo¾nost bigramù -- rysù, fungujících jako pøechod mezi pøedchozím a souèasným prvkem. Tato vlastnost je v¹ak z dùvodu velkého poètu znaèek vysoce nároèná.
+Program \emph{CRF++}\footnote[1]{Stránky programu: http://crfpp.sourceforge.net/} je open-source implementací Conditional Random Fields, urèenou pro znaèkování sekvenèních dat. Program je napsán v jazyce \emph{C++} za pou¾ití \emph{STL} knihovny\footnote[2]{Knihovna, pøidávající do jazyka \emph{C++} kontejnery, iterátory apod.}. K urèení parametru pou¾ívá algoritmu L-BFGS. Implementuje také mo¾nost bigramù -- rysù, fungujících jako pøechod mezi pøedchozím a souèasným prvkem. Tato vlastnost je v¹ak z dùvodu velkého poètu znaèek vysoce nároèná.
 
-Nevýhodou programu je zdrojový kód bez jakýchkoliv komentáøù a tím pádem naprosto nevhodný k jakýmkoliv zásahùm, èí úpravám pro na¹e potøeby. Pøi vyu¾ití tohoto programu jsem se také potýkal s problémy s chybou SIGSEGV. Kód se zøejmì nebyl schopen vypoøádat s vysokým poètem unikátních znaèek a pøi pou¾ití v¹ech kategorii a vy¹¹ího poètu vstupù vyvolal zmínìnou vyjímku a ukonèil se.
+Nevýhodou programu je zdrojový kód bez jakýchkoliv komentáøù a tím pádem naprosto nevhodný k jakýmkoliv zásahùm, èí úpravám pro na¹e potøeby. Pøi vyu¾ití tohoto programu jsem se také potýkal s problémy s programem, zasílajícím zprávu \emph{SIGSEGV}. Kód se zøejmì nebyl schopen vypoøádat s vysokým poètem unikátních znaèek a pøi pou¾ití v¹ech kategorii a vy¹¹ího poètu vstupù vyvolal zmínìnou vyjímku a ukonèil se.
 
 \subsection{Zpùsob testování}
 Pøi mo¾nosti poèítat s pøedchozím prvkem, urèeným algoritmem, se nabízí ji vyu¾ít v na¹em programu. Bohu¾el, s délkou èeské znaèky také pøichází kámen úrazu, kdy program nechápe \uv{smysl} pøedchozí znaèky, ale bere ji jako celek (z dùvodu optimalizací je øetìzec pøeveden na èíslo, se kterým jsou poté v¹echny operace mnohem rychlej¹í). Nemù¾e tedy vyu¾ít jednotlivých èástí èeské znaèky k vytvoøení samostatných pravidel. Tím se sni¾ují mo¾nosti zpracování a efektivity pou¾itých algoritmù, stejnì jako generování rysù. Pøi pokusech o vyøe¹ení tohoto problému jsem vytvoøil skript, který postupnì zpracovává èásti znaèky a poté je pou¾ívá pøi trénování dal¹ích krokù. Tento pøístup je v¹ak velmi krkolomný a celkovì nepøinesl markantní nárùst úspì¹nosti.
 
 \subsection{Znaèkování textu}
-V pøípadì tohoto programu se pravidla na tvorbu rysù pøedávají jako konfiguraèní soubor a proto je nutné v¹echny pøedbì¾né úpravy udìlat u¾ na vstupních datech. K tomuto úèelu byl vytvoøen skript v jazyce awk, který je poté volán z hlavního skriptu, starajícího se o celý prùbìh trénování. 
+V pøípadì \emph{CRF++} se pravidla na tvorbu rysù pøedávají jako konfiguraèní soubor a proto je nutné v¹echny pøedbì¾né úpravy udìlat u¾ na vstupních datech. K tomuto úèelu byl vytvoøen skript v jazyce \emph{AWK}, který je poté volán z hlavního skriptu, starajícího se o celý prùbìh trénování. 
 
-Nastavení v konfiguraèním souboru jsou poté tvoøena písmenem, urèujícím, zda jde o unigram (vztahujícíc se pouze k souèasnému prvku posloupnosti), èi o bigram (vý¹e zmínìný pøechod mezi pøedchozím a aktuálním prvkem). Poté následuje dvouciferný identifikátor rysu, zajis»ující unikátnost vùèi ostatním definicím, dvojteèkou a øetìzcem definujícím pou¾itá vstupní data. K tomu je vyu¾íván zápis \%[x,y], kde x oznaèuje relativní pozici mezi slovy (0 oznaèuje aktuální, záporné èíslo pøedchozí a kladné následující prvek) a y oznaèuje sloupec vstupních dat, který má být pou¾it. Celé pravidlo poté mù¾e vypadat napø. takto: U01:\%[0,1].
+Nastavení v konfiguraèním souboru jsou poté tvoøena písmenem, urèujícím, zda jde o unigram (vztahující se pouze k souèasnému prvku posloupnosti), èi o bigram (vý¹e zmínìný pøechod mezi pøedchozím a aktuálním prvkem). Poté následuje dvouciferný identifikátor rysu, zajis»ující unikátnost vùèi ostatním definicím, dvojteèkou a øetìzcem definujícím pou¾itá vstupní data. K tomu je vyu¾íván zápis \%[x,y], kde x oznaèuje relativní pozici mezi slovy (0 oznaèuje aktuální, záporné èíslo pøedchozí a kladné následující prvek) a y oznaèuje sloupec vstupních dat, který má být pou¾it. Celé pravidlo poté mù¾e vypadat napø. takto: U01:\%[0,1].
 
 Jeliko¾ znaèkování probíhá v nìkolika krocích, kdy v ka¾dém z nich nám pøibude dal¹í sloupec a dal¹í souvislosti mezi daty, je nutno pøipravit pro ka¾dý krok samostatný konfiguraèní soubor. Také je dùle¾ité správnì jej nastavit pro co nejlep¹í výslednou úspì¹nost.
 
-Pro øízení procesu byl sepsán skript v jazyce BASH, který vyu¾ívá programu pro tvorbu vstupních dat, napsaného v jazyce C, pøevádìjícího øetìzce na èísla, a dal¹ího skriptu v jazyce awk urèeného ke koneèné analýze úspì¹nosti.
+Pro øízení procesu byl sepsán skript v jazyce \emph{BASH}, který vyu¾ívá programu pro tvorbu vstupních dat, napsaného v jazyce C, pøevádìjícího øetìzce na èísla, a dal¹ího skriptu v jazyce \emph{AWK} urèeného ke koneèné analýze úspì¹nosti.
 
 \subsection{Pou¾ité rysy}
-Z dùvodu nìkolika-krokového charakteru testování se rysy velmi li¹í, veskrze jde v¹ak pouze o kombinace pøedchozích a aktuálních prvkù vstupních souborù. Také byly pou¾ity nìkolikanásobné rysy, skládající se zároveò ze dvou prvkù (minulá a souèasná znaèka apod.). Pro tyto pravidla mi povìt¹inou byly inspirací existující konfiguraèní soubory pou¾ívané pro trénování anglického jazyka, které byly souèástí pøíkladù pou¾itých v programu CRF++. Pro tvoøení rysù bylo pou¾ito: Tvar slova, Lemmata (slo¾enina v¹ech mo¾ných lemmat), èást znaèky, urèující slovní druh (pokud se shodovala ve v¹ech mo¾nostech vstupních dat) a prùbì¾nì získaných výsledkù.
+Z dùvodu nìkolika-krokového charakteru testování se rysy velmi li¹í, veskrze jde v¹ak pouze o kombinace pøedchozích a aktuálních prvkù vstupních souborù. Také byly pou¾ity nìkolikanásobné rysy, skládající se zároveò ze dvou prvkù (minulá a souèasná znaèka apod.). Pro tyto pravidla mi povìt¹inou byly inspirací existující konfiguraèní soubory pou¾ívané pro trénování anglického jazyka, které byly souèástí pøíkladù pou¾itých v programu \emph{CRF++}. Pro tvoøení rysù byl pou¾it tvar slova, lemmata (slo¾enina v¹ech mo¾ných lemmat), èást znaèky urèující slovní druh (pokud se shodovala ve v¹ech mo¾nostech vstupních dat) a prùbì¾nì získaných výsledkù.
 
 \subsection{Rozdìlení zpracování na kroky}
 Správné rozdìlení bylo testováno, motivací v¹ak bylo nejdøíve natrénovat nejdùle¾itìj¹í èásti znaèky a pokraèovat s ménì významnými sloupci. Pøi tomto testování se tedy bude moci ji¾ pou¾ít natrénovaných dat k lep¹ím výsledkùm. V prvním kroku proto bylo èasto pou¾ito slovního druhu a jeho detailu, v druhém rodu, osoby, pádu a ve tøetím nìkolika ze zbylých vlastností. 
@@ -290,22 +292,19 @@ Testù bylo vykonáno nìkolik desítek, vìt¹ina z nich v¹ak nepøiná¹ela ký¾ené výsl
 			  &      &       & 3 & 0001000110000000	& 596079  & 84.856\% \\
 			\hline
 		\end{tabular}
-		\captionof{table}{Výsledky testování pøi vyu¾ití programu CRF++}
+		\captionof{table}{Výsledky testování pøi vyu¾ití programu \emph{CRF++}}
 		\label{tab:CRFVysledky}
 	\end{center}
 \end{table}
-
-\subsection{Odklon od programu}
-Ze v¹ech vý¹e zmínìných dùvodù (padání programu, nekomentovaného kódu, \ldots) a také po zkoumání dal¹ích existujících øe¹ení, o kterých jejich autoøi tvrdí, ¾e jejich díla jsou øádovì rychlej¹í, ne¾ CRF++, jsem se rozhodl tento program opustit a tím pádem jsem ze získaných dat nevyvodil ¾ádné závìry, nebo» by v koneèném dùsledku byly pouze zbyteènou prací, nemající vliv na závìreèný výsledek celé práce.
 
 \pagebreak
 
 \section{CRFSuite}
 \label{sec:crfsuite}
-Program CRFSuite~\ref{crfsuite} je open-source implementací algoritmu Conditional Random Fields, urèený pro znaèkování sekvenèních dat. Je naprogramován v èistém C a dle jeho autora optimalizován pro co nejvy¹¹í rychlost za obìtování obecnosti. Jeho autorem je pak Ph.D Naoaki Okazakim pùsobícím na univerzitì v Tokyu. Program ke svému chodu vy¾aduje knihovnu libLBFGS od stejného autora, z èeho¾ vyplývá ¾e urèení parametru je vykonáno za pomoci algoritmu L-BFGS. V nastavení programu je v¹ak mo¾no tuto volbu zmìnit na SGD, které je dle poznámek inspirováno implementací pou¾itou v dal¹ím programu CRFSGD~\ref{crfsgd}. Pøi trénování je poté mo¾né vyu¾ít jednu z regularizací. V¹echny vyu¾ité algoritmy poté mohou být ovlivnìny mnoha dal¹ími nastaveními, ovlivòujícími od ukonèovacích podmínek po rùzné parametry mìnící jejich chování pøi trénování dat.
+Program \emph{CRFSuite}\footnote[1]{Stránky programu: http://www.chokkan.org/software/crfsuite/} je open-source implementací algoritmu Conditional Random Fields, urèený pro znaèkování sekvenèních dat. Je naprogramován v èistém C a dle jeho autora optimalizován pro co nejvy¹¹í rychlost za obìtování obecnosti. Jeho autorem je Ph.D Naoaki Okazakim pùsobící na univerzitì v Tokyu. Program ke svému chodu vy¾aduje knihovnu libLBFGS\footnote[1]{Stránky knihovny: http://www.chokkan.org/software/liblbfgs/} od stejného autora, z èeho¾ vyplývá ¾e urèení parametru je vykonáno za pomoci algoritmu L-BFGS. V nastavení programu je v¹ak mo¾no tuto volbu zmìnit na SGD, které je dle poznámek inspirováno implementací pou¾itou v dal¹ím programu CRFSGD\footnote[2]{Algoritmus SGD, jeho implementace a pøíklady jejího pou¾ití: http://leon.bottou.org/projects/sgd}. Pøi trénování je poté mo¾né vyu¾ít jednu z regularizací. V¹echny vyu¾ité algoritmy poté mohou být ovlivnìny mnoha dal¹ími nastaveními, ovlivòujícími od ukonèovacích podmínek po rùzné parametry mìnící jejich chování pøi trénování dat.
 
 \subsection{Znaèkování textu}
-Ke znaèkování je pou¾it skript v jazyce python, který se stará o analýzu vstupních dat, jejich úpravu a vytvoøení souboru, obsahujícího pøipravené znaèky pro externí program.
+Ke znaèkování je pou¾it skript v jazyce \emph{python}, který se stará o analýzu vstupních dat, jejich úpravu a vytvoøení souboru, obsahujícího pøipravené znaèky pro externí program.
  
 Skript postupnì naèítá data ze vstupního souboru a vytváøí multidimenzionální pole pro pozdìj¹í zpracování. Pøi tomto kroku také provádí urèité pøídavné operace, které pomáhají rychlosti pozdìj¹ích krokù, jako pøed-generování pøípon slov, èím¾ urychluje pozdìj¹í zpracování. Z vytvoøených dat jsou poté budovány rysy podle námi zadaných pravidel. Jak je vyobrazeno v tabulce ~\ref{tab:VstupniData}, v na¹em pøípadì máme v ka¾dém øádku, reprezentujícím jedno slovo, ulo¾ených 5 sloupcù.
 
@@ -333,13 +332,13 @@ Skript postupnì naèítá data ze vstupního souboru a vytváøí multidimenzionální po
 
 Jako první poté, dle formátu cíleného programu, vypí¹e správnou znaèku, následovanou v¹emi rysy, tvoøenými podle zadaných pravidel. V¹echny rysy jsou tak vytvoøeny pøed samotným spu¹tìním testovacího programu a v prùbìhu testování se ji¾ nemìní -- mohou pouze být vypu¹tìny buï pøed samotným zaèátkem (kvùli minimálnímu limitu), nebo odstranìny pøi vykonávání regularizace.
 
-\subsection{Analýza pøed tvorbou znaèek}
+\subsection{Pøedzpracování dat}
 Jeliko¾ pro ka¾dé slovo máme ve vstupních datech dostupné v¹echny mo¾né znaèky, mù¾eme tyto informace vyu¾ít pro tvorby rysù pro dal¹í zpracování. Skript zkontroluje v¹echny mo¾nosti a vybere v¹echny sloupce znaèky, které se shodují. Dále spojí dohromady v¹echna mo¾ná lemmata a oddìlí je mezi sebou lomítkem. Vytvoøí se také øetìzec obsahující pøíponu, který pro v¹echna slova del¹í ne¾ 2 znaky ulo¾í øetìzec, tvoøený dvìma posledními znaky.
 
 \subsection{Pou¾ité rysy}
-V na¹em projektu jsou jednak vyu¾ívány klasické rysy, které se pou¾ívají prakticky ve v¹ech typických pøíkladech vyu¾ití poèítaèového uèení ( pøedchozí prvek, následující prvek,... ), jednak speciální, které mají smysl pouze pro znaèkování textu, èi dokonce pouze pro èeský jazyk jako takový (výèet v¹ech rysù viz. tabulka ~\ref{tab:SeznamRysu}). 
+V této práci jsou jednak vyu¾ívány klasické rysy, které se pou¾ívají prakticky ve v¹ech typických pøíkladech vyu¾ití strojového uèení ( pøedchozí prvek, následující prvek,... ), jednak speciální, které mají smysl pouze pro znaèkování textu, èi dokonce pouze pro èeský jazyk jako takový (výèet v¹ech rysù viz. tabulka ~\ref{tab:SeznamRysu}). 
 
-V¹echny rysy dodr¾ují oznaèení, pou¾ívané ve vìt¹inì programù urèených k automatickému poèítaèovému uèení. Tímto je U na zaèátku, oznaèující unigram, co¾ znaèí, ¾e se pou¾ívá pouze prvek na aktuální pozici (prvek bigramu B je v implementaci programu CRFSuite vynechán). Za úvodním písmenem pak následuje = a èíslo rysu, urèené k odli¹ení rysù od sebe. Toto znaèení budeme vyu¾ívat i v této publikaci pro oznaèení a pozdìj¹í referenci na námi pou¾ité rysy.
+V¹echny rysy dodr¾ují oznaèení, pou¾ívané ve vìt¹inì programù urèených k automatickému strojovému uèení. Tímto je U na zaèátku, oznaèující unigram, co¾ znaèí, ¾e se pou¾ívá pouze prvek na aktuální pozici (prvek bigramu B je v implementaci programu \emph{CRFSuite} vynechán). Za úvodním písmenem pak následuje = a èíslo rysu, urèené k odli¹ení rysù od sebe. Toto znaèení budeme vyu¾ívat i v této publikaci pro oznaèení a pozdìj¹í referenci na námi pou¾ité rysy.
 
 \begin{table}[htbp]
 	\begin{center}
@@ -379,20 +378,20 @@ V¹echny rysy dodr¾ují oznaèení, pou¾ívané ve vìt¹inì programù urèených k automat
 			\hline
 		\end{tabular}
 		\footnotetext[1]{x oznaèuje aktuální pozici ve vìtì}
-		\captionof{table}{Seznam rysù pou¾itých pøi testování programem CRFSuite}
+		\captionof{table}{Seznam rysù pou¾itých pøi testování programem \emph{CRFSuite}}
 		\label{tab:SeznamRysu}
 	\end{center}
 \end{table}
 
 \subsection{Pou¾ití pouze èásti znaèky}
-Z dùvodu u¹etøení èasu a teoretické jednodu¹¹í mo¾nosti natrénování (odvozování pravidel od men¹ího poètu celkových znaèek a tím pádem vy¹¹ího poètu podobných znaèek, poskytujícím vy¹¹í pravdìpodobnost ovlivnìní modelu) byly pøi testování spou¹tìny testy s ne v¾dy kompletní znaèkou, ale pouze s jejími nejdùle¾itìj¹ími èástmi. Je nutno v¹ak vìdìt, pro jaký konkrétní úèel by mìl program slou¾it -- v pøípadì nutnosti komplexních informacích o slovech by tento pøístup k problému byl nevhodný. Proto se také budu sna¾it v testování k tomuto pøihlédnout a provézt testy jak s kompletní, tak s omezenou znaèkou a výsledky mezi sebou porovnat. 
+Z dùvodu u¹etøení èasu a teoretické jednodu¹¹í mo¾nosti natrénování (odvozování pravidel od men¹ího poètu celkových znaèek a tím pádem vy¹¹ího poètu podobných znaèek, poskytujícím vy¹¹í pravdìpodobnost ovlivnìní modelu) byly pøi testování spou¹tìny testy s ne v¾dy kompletní znaèkou, ale pouze s jejími nejdùle¾itìj¹ími èástmi. Je nutno v¹ak vìdìt, pro jaký konkrétní úèel by mìl program slou¾it -- v pøípadì nutnosti komplexních informacích o slovech by tento pøístup k problému byl nevhodný. Proto se také budu sna¾it v provézt testy jak s kompletní, tak s omezenou znaèkou a výsledky mezi sebou porovnat. 
 %TODO Upravit text!!
 
 \subsection{Zpùsob testování}
-Z dùvodu kvalitních výsledkù a rychlosti této implementace byla hlavní èást celé práce provedena za pou¾ití tohoto programu a je mu tedy vìnováno mnohem více prostoru, ne¾ pøedchozímu CRF++. Pro urychlení celého testování jsem také vytvoøil øadu nástrojù, které mi celý proces zjednodu¹ily a dovolily mi více se zamìøit na analýzu výsledkù, ne¾ na testování samotné.
+Z dùvodu kvalitních výsledkù a rychlosti této implementace byla hlavní èást celé práce provedena za pou¾ití tohoto programu a je mu tedy vìnováno mnohem více prostoru, ne¾ pøedchozímu \emph{CRF++}. Pro urychlení celého testování jsem také vytvoøil øadu nástrojù, které mi celý proces zjednodu¹ily a dovolily mi více se zamìøit na analýzu výsledkù, ne¾ na testování samotné.
 
 \subsubsection{Skripty}
-Pro testování jsem vytvoøil skript v jazyce BASH, starající se o celý prùbìh testu (viz. tabulka ~\ref{tab:PrubehTestovani}) a ulehèující nastavení celé procedury a èitelnost pou¾itých parametrù. V hlavièce jsou definovány základní údaje a nastavení, které jsou poté pou¾ity v tìle pro postupné spou¹tìní jednotlivých pøíkazù. V prùbìhu této operace jsou poté logovány v¹echny dùle¾ité údaje, které jsou potom lehce pøístupné k následujícímu zpracování. Tento skript je poté naklonován pro ka¾dý vyu¾ívaný poèítaè a tím je poskytnuta zpìtná mo¾nost kontroly nastavených údajù a vyhnutí se chyb spojených s prací na více strojích najednou. Stejný pøístup byl aplikován i na skript, generující data z csts souboru. Ten je tedy také nakopírován pro ka¾dý poèítaè a jeho parametry jsou v¾dy lehce dohledatelné. Pro dvojí kontrolu je v¹ak pøípadný seznam vynechaných rysù pøepsán i do hlavního skriptu.
+Pro testování jsem vytvoøil skript v jazyce BASH, starající se o celý prùbìh testu (viz. tabulka ~\ref{tab:PrubehTestovani}) a ulehèující nastavení celé procedury a èitelnost pou¾itých parametrù. V hlavièce jsou definovány základní údaje a nastavení, které jsou poté pou¾ity v tìle pro postupné spou¹tìní jednotlivých pøíkazù. V prùbìhu této operace jsou poté logovány v¹echny dùle¾ité údaje, které jsou potom lehce pøístupné k následujícímu zpracování. Tento skript je poté naklonován pro ka¾dý vyu¾ívaný poèítaè a tím je poskytnuta zpìtná mo¾nost kontroly nastavených údajù a vyhnutí se chyb spojených s prací na více strojích najednou. Stejný pøístup byl aplikován i na skript, generující data z \emph{CSTS} souboru. Ten je tedy také nakopírován pro ka¾dý poèítaè a jeho parametry jsou v¾dy lehce dohledatelné. Pro dvojí kontrolu je v¹ak pøípadný seznam vynechaných rysù pøepsán i do hlavního skriptu.
 
 \begin{table}[bp]
 	\begin{center}
@@ -421,7 +420,7 @@ Pro testování jsem vytvoøil skript v jazyce BASH, starající se o celý prùbìh tes
 \end{table}
 
 \subsubsection{Spu¹tìní}
-S pou¾itím vytvoøených nástrojù je poté spu¹tìní testování velmi lehkou a rychlou zále¾itostí. Nejdøíve je v python souboru (pojmenovaném jako \texttt{[jméno stroje].py}) nastaveno, které rysy mají být pou¾ity. Poté se v bash scriptu ([jméno stroje].sh) nastaví poèet vìt pro trénování a testování, maximální poèet iterací, epsilon, regularizace a dal¹í pøípadné parametry. Dále je nutno upravit pomocí programu ulimit limity zdrojù, dostupných pro ná¹ program -- jedná se konkrétnì o maximální velikost stacku, maximální èas cpu a maximální velikost virtuální pamìti. Ke spou¹tìní skriptu je poté pou¾it program nohup, zaji¹»ující pøetrvávající bìh programu i po odpojení se od vzdáleného poèítaèe. 
+S pou¾itím vytvoøených nástrojù je poté spu¹tìní testování velmi lehkou a rychlou zále¾itostí. Nejdøíve je v konverzním skriptu (napsaném v jazyce \emph{Python}) souboru (pojmenovaném jako \texttt{[jméno stroje].py}) nastaveno, které rysy mají být pou¾ity. Poté se v bash scriptu ([jméno stroje].sh) nastaví poèet vìt pro trénování a testování, maximální poèet iterací, epsilon, regularizace a dal¹í pøípadné parametry. Dále je nutno upravit pomocí programu ulimit limity zdrojù, dostupných pro ná¹ program -- jedná se konkrétnì o maximální velikost zásobníku, maximální pøidìlený èas CPU a maximální velikost virtuální pamìti. Ke spou¹tìní skriptu je poté pou¾it program \emph{nohup}, zaji¹»ující pøetrvávající bìh programu i po odpojení se od vzdáleného poèítaèe. 
 
 \subsubsection*{Pøíklad:}
 
@@ -434,18 +433,16 @@ Po dokonèení procesu poté skript ode¹le email na nastavenou emailovou adresu a v
 
 \chapter{Testy}
 \label{chap:testy}
-Pøed zapoèatím øádného testování a analýzy výsledkù bylo potøeba se rozhodnout s jakými parametry bude testování provádìno. V¹echny následující testy jsou provedeny v programu CRFSuite, který, jak je zmínìno vý¹e, pro tento projekt pøiná¹í mnohem vhodnìj¹í prostøedí. Program nabízí velké mno¾ství nastavení ovlivòujícího vlastní algoritmus urèení parametru, nebo podmínky pro jeho ukonèení. Pro tuto práci jsem se rozhodl zpracovávat testy za pou¾ití regularizace L1 (viz. podkapitola~\ref{sec:l1}) a L2 (viz. podkapitola~\ref{sec:l2}) a poté porovnat jejich výsledky. Vìt¹ina testù je zpracována s vyu¾itím algoritmu L-BFGS (viz. podkapitola~\ref{sec:lbfgs}), v prùbìhu práce jsem v¹ak objevil, ¾e algoritmus SGD (viz. podkapitola~\ref{sec:sgd}) poskytuje lep¹í výsledky za ni¾¹í èas. Bohu¾el v¹ak ji¾ bylo pozdì na zmìnu metodiky a vìt¹ina testù ji¾ byla zpracována, do práce je tak pøidáno krátké srovnání mezi výsledky obou zmínìnych algoritmù a pravidla, zji¹tìná pro L-BFGS budou aplikována i na SGD. %TODO smazat SGD pokud jsem to nestihl
+Pøed zapoèatím øádného testování a analýzy výsledkù bylo potøeba se rozhodnout s jakými parametry bude testování provádìno. V¹echny následující testy jsou provedeny v programu \emph{CRFSuite}, který, jak je zmínìno vý¹e, pro tento projekt pøiná¹í mnohem vhodnìj¹í prostøedí. Program nabízí velké mno¾ství nastavení ovlivòujícího vlastní algoritmus urèení parametru, nebo podmínky pro jeho ukonèení. Pro tuto práci jsem se rozhodl zpracovávat testy za pou¾ití regularizace L1 (viz. podkapitola~\ref{sec:l1}) a L2 (viz. podkapitola~\ref{sec:l2}) a poté porovnat jejich výsledky. Vìt¹ina testù je zpracována s vyu¾itím algoritmu L-BFGS (viz. podkapitola~\ref{sec:lbfgs}), v prùbìhu práce jsem v¹ak objevil, ¾e algoritmus SGD (viz. podkapitola~\ref{sec:sgd}) poskytuje lep¹í výsledky za ni¾¹í èas. Bohu¾el v¹ak ji¾ bylo pozdì na zmìnu metodiky a vìt¹ina testù ji¾ byla zpracována, do práce je tak pøidáno krátké srovnání mezi výsledky obou zmínìnych algoritmù a pravidla, zji¹tìná pro L-BFGS budou aplikována i na SGD. %TODO smazat SGD pokud jsem to nestihl
 
 Dal¹í volbou byl zpùsob ukonèení trénování -- nabízely se dvì mo¾nosti: Buï ukonèení po urèitém poètu iterací, nebo pøi dosa¾ení hodnoty delta, urèující rozdíl mezi úspì¹ností dvou po sobì následujících iterací. Která z nich je kvalitnìj¹i se te¾ce posuzuje, v pozdìj¹ích fázích zpracování jsem se v¹ak rozhodl, ¾e zpracování pomocí hodnoty delta poskytuje vìt¹í procesu testování vy¹¹í variabilitu a tím mo¾nost správnì vyu¾ít aktuálního nastavení (co¾ bylo pozdìji potvrzeno mnohem vy¹¹í poètem iterací pøi regularizaci L2 namísto L1)
 
-Jako dal¹í problém se poté ukázal poèet testovacích vzorkù, kde pøi pou¾ití vìt¹ího poètu, ne¾ 7000 program CRFSuite z nezji¹tìných dùvodù odmítl vydat jakékoliv výsledky a zøejmì se zacyklil pøi vnitøní chybì. Vlastní proces stále visel v systému, nejevil v¹ak ¾ádné známky aktivity a proto musel být ruènì ukonèen (nejdéle jsem na dokonèení èekal v rámci dnù, i kdy¾ pro poèet 7000 se doba vìt¹inou pohybuje v øádu nìkolika desítek minut). Pro pøesnìj¹í mìøení by tedy zøejmì bylo výhodnìj¹í výsledky je¹tì validovat oproti dal¹ím vzorkùm dat, pro základní porovnání výkonnosního pøínosu jednotlivých rysù by v¹ak mìl být tento poèet naprosto dostaèujícím.
-
-Pøi provedení v¹ech testù pùjde vidìt, ¾e èasy trénování a testování nerostou podle nároènosti úlohy, ale jsou urèeny zdánlivì náhodnými hodnotami. Toto je v¹ak samozøejmì zpùsobeno trénováním na nìkolika rùzných strojích, poskytujících diametrálnì odli¹ný výpoèetní výkon. V závìru se pokusím urèit konstantu, urèující výkon jednotlivých strojù a tím alespoò nastínit rozdíly mezi jednotlivými zpracováními. Doba zpravování v¹ak ani v tomto pøípadì nejspí¹e neporoste lineárnì, nebo» je ovlivnìna i dal¹ími faktory, napøíklad mo¾ností, ¾e na daných strojích v prùbìhu mého testování probíhaly i jiné procesy, které mohly ovlivnit vytí¾ení procesorù.
+Jako dal¹í problém se poté ukázal poèet testovacích vzorkù, kde pøi pou¾ití vìt¹ího poètu, ne¾ 7000 program \emph{CRFSuite} z nezji¹tìných dùvodù odmítl vydat jakékoliv výsledky a zøejmì se zacyklil pøi vnitøní chybì. Vlastní proces stále visel v systému, nejevil v¹ak ¾ádné známky aktivity a proto musel být ruènì ukonèen. Pro pøesnìj¹í mìøení by tedy zøejmì bylo výhodnìj¹í výsledky je¹tì validovat oproti dal¹ím vzorkùm dat, pro základní porovnání výkonnostního pøínosu jednotlivých rysù by v¹ak mìl být tento poèet naprosto dostaèujícím.
 
 \section{Závislost úspì¹nosti na poètu vstupních vìt}
 Následující testy se zabývají analýzou ideálního poètu vìt pro pou¾ití v dal¹ích èástech projektu. Je nutno získat takovou hodnotu, která bude poskytovat jednak kvalitní, jednak èasovì akceptovatelné výsledky, které poskytnou mo¾nost zpracovat v¹echny èasovì nároèné testy na daném poètu strojù.
 
-\subsection{Pøi konstantním poètu iterací a regularizaci L1}
+\subsection{Konstantní poèet iterací a regularizace L1}
 
 \subsubsection*{Pøíprava:}
 Nejdøíve bylo tøeba rozhodnout, jaký poèet iterací bude vhodný pro proces testování. Po nìkolika pokusných testech se jako nejlep¹í ukázalo èíslo 50. Okolo této hodnoty program ji¾ zaèal pùlit kroky algoritmu pro vy¹¹í pøesnost a tím se exponencionálnì zvy¹ovala nároènost ka¾dého dal¹ího kroku aproximace parametru. Pro dokonèení 60. iterace proto bylo èas vzrostl øádovì 3krát, zatím co úspì¹nost se zvý¹ila pouze minimálnì. Z dùvodu rozumného vyu¾ití prostøedkù jsem se tedy rozhodl pro testování ohranièit maximální poèet iterací èíslem 50. V prùbìhu testování jsem toto omezení pøehodnotil a zaèal vyu¾ívat ohranièení pomocí minimální zmìny, které by teoreticky mìlo ménì omezovat pøípadnou vy¹¹í efektivitu pøi vyu¾ití jiných pøíznakù.
@@ -458,7 +455,7 @@ Nejdøíve bylo tøeba rozhodnout, jaký poèet iterací bude vhodný pro proces testov
 \emph{Regularizace:} L1
 
 \subsubsection*{Vyhodnocení}
-Jak lze vidìt v tabulce~\ref{tab:RegL1KonstIter}, pøi prvních dvou testech (5000 a 10 000 vstupních vìt) a také v pøedposledním testu (55000 vìt) se s nejvìt¹í pravdìpodobností vyskytla chyba v programu CRFSuite, projevující se nezvykle vysokými hodnotami úspì¹nosti. Vìt¹inu z tìchto podezøelých testù jsem spou¹tìl znovu, nebo» jsem pøedpokládal chybu na své stranì. Ani po pøetestování\footnote[1]{Pro ovìøení byly zvovu provedeny testy s následujícím poètem vìt: 5 000, 10 000, 55 000, 50 000} se v¹ak daná hodnota nezmìnila. Testy jsem zkou¹el spou¹tìt i na jiných strojích, co¾ ale na výsledcích nic nezmìnilo. Tyto podivné výsledky se pozdìji vyskytují i v dal¹ích testech. 
+Jak lze vidìt v tabulce~\ref{tab:RegL1KonstIter}, pøi prvních dvou testech (5000 a 10 000 vstupních vìt) a také v pøedposledním testu (55000 vìt) se s nejvìt¹í pravdìpodobností vyskytla chyba v programu \emph{CRFSuite}, projevující se nezvykle vysokými hodnotami úspì¹nosti. Ani po pøetestování\footnote[1]{Pro ovìøení byly zvovu provedeny testy s následujícím poètem vìt: 5 000, 10 000, 55 000, 50 000} na odli¹ných strojích v¹ak výsledky nezmìnily. Tyto anomální hodnoty se pozdìji vyskytují i v dal¹ích testech. 
 
 Nebýt tøech podivných výsledkù, je jasnì vidìt stoupající tendence testù a¾ k 50 000 vìt. Od této úrovnì u¾ se poté úspì¹nost spí¹e sni¾uje -- co¾ mù¾e být zpùsobeno omezením maximálního poètu iterací na 50. 
 
@@ -489,18 +486,18 @@ Z rozdílu mezi poètem úvodních a koneèných rysù lze dobøe pozorovat pøínost vyu¾
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			5000 & 671 & 5h 30m & 4751828B & 558871 & 113149 & 91.04\% & 34.70\% \\ 
-			10000 & 743 & 20h 47m & 8326164B & 905326 & 200613 & 92.65\% & 43.02\% \\ 
-			15000 & 769 & 23h 46m & 10990504B & 1202680 & 266245 & 87.90\% & 7.73\% \\ 
-			20000 & 792 & 33h 41m & 13706360B & 1464587 & 334939 & 88.37\% & 8.07\% \\ 
-			25000 & 811 & 45h 25m & 17140200B & 1724528 & 423649 & 88.68\% & 8.20\% \\ 
-			30000 & 822 & 37h 56m & 18953540B & 1968646 & 461337 & 88.71\% & 7.99\% \\ 
-			35000 & 833 & 56h 44m & 22744448B & 2260670 & 564590 & 89.38\% & 10.26\% \\ 
-			40000 & 843 & 66h 54m & 23583752B & 2488724 & 586499 & 90.12\% & 15.69\% \\ 
-			45000 & 849 & 128h 26m & 27177664B & 2716001 & 680082 & 90.62\% & 18.99\% \\
-			50000 & 854 & 199h 44m & 28602144B & 2924981 & 717070 & 89.45\% & 6.85\% \\ 
-			55000 & 867 & 90h 22m & 30087008B & 3140944 & 758370 & 94.74\% & 53.77\% \\ 
-			60000 & 870 & 111h 35m & 34118604B & 3329504 & 863220 & 89.63\% & 8.05\% \\
+			5000 & 671 & 5h 30m & 4 751KB & 558871 & 113149 & 91.04\% & 34.70\% \\ 
+			10000 & 743 & 20h 47m & 8 326KB & 905326 & 200613 & 92.65\% & 43.02\% \\ 
+			15000 & 769 & 23h 46m & 10 990KB & 1202680 & 266245 & 87.90\% & 7.73\% \\ 
+			20000 & 792 & 33h 41m & 13 706KB & 1464587 & 334939 & 88.37\% & 8.07\% \\ 
+			25000 & 811 & 45h 25m & 17 140KB & 1724528 & 423649 & 88.68\% & 8.20\% \\ 
+			30000 & 822 & 37h 56m & 18 953KB & 1968646 & 461337 & 88.71\% & 7.99\% \\ 
+			35000 & 833 & 56h 44m & 22 744KB & 2260670 & 564590 & 89.38\% & 10.26\% \\ 
+			40000 & 843 & 66h 54m & 23 583KB & 2488724 & 586499 & 90.12\% & 15.69\% \\ 
+			45000 & 849 & 128h 26m & 27 177KB & 2716001 & 680082 & 90.62\% & 18.99\% \\
+			50000 & 854 & 199h 44m & 28 602KB & 2924981 & 717070 & 89.45\% & 6.85\% \\ 
+			55000 & 867 & 90h 22m & 30 087KB & 3140944 & 758370 & 94.74\% & 53.77\% \\ 
+			60000 & 870 & 111h 35m & 34 118KB & 3329504 & 863220 & 89.63\% & 8.05\% \\
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù pøi regularizaci L1 a konstantním poètu iterací}
@@ -508,7 +505,7 @@ Z rozdílu mezi poètem úvodních a koneèných rysù lze dobøe pozorovat pøínost vyu¾
 	\end{center}
 \end{table}
 
-\subsection{Pøi konstantním poètu iterací a regularizaci L1}
+\subsection{Konstantní poèet iterací a regularizace L1}
 
 \subsubsection*{Pøíprava:}
 V tomto pøípadì jsem vyu¾il stejných pravidel, jako u minulého testu, pouze jsem zmìnil regularizaci pro získání výsledkù k porovnání. Pouze jsem pøehodnotil velikost kroku mezi jednotlivými testy, kterou jsem v tomto pøípadì zvý¹il z 5 na 10 tisíc vìt a tím sní¾il celkový èas testu.
@@ -544,13 +541,13 @@ Jak je popsáno v podkapitole~\ref{sec:l2}, pøi regularizaci L2 je zachováván kon
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			10000 & 743 & 15h 56m & 36244240B & 905326 & 91.97\% & 40.64\% \\ 
-			20000 & 792 & 44h 30m & 57072452B & 1464587 & 92.78\% & 45.28\% \\ 
-			30000 & 822 & 42h 26m & 76697368B & 2002356 & 93.51\% & 48.41\% \\ 
-			40000 & 843 & 84h 50m & 94190136B & 2488724 & 93.61\% & 49.06\% \\ 
-			50000 & 854 & 128h 19m & 109663924B & 2924981 & 93.83\% & 50.26\% \\ 
-			60000 & 870 & 181h 14m & 123654348B & 3329504 & 94.04\% & 51.09\% \\ 
-			70000 & 881 & 191h 8m & 136263364B & 3697048 & 94.05\% & 51.52\% \\ 
+			10000 & 743 & 15h 56m & 36 244KB & 905326 & 91.97\% & 40.64\% \\ 
+			20000 & 792 & 44h 30m & 57 072KB & 1464587 & 92.78\% & 45.28\% \\ 
+			30000 & 822 & 42h 26m & 76 697KB & 2002356 & 93.51\% & 48.41\% \\ 
+			40000 & 843 & 84h 50m & 94 190KB & 2488724 & 93.61\% & 49.06\% \\ 
+			50000 & 854 & 128h 19m & 109 663KB & 2924981 & 93.83\% & 50.26\% \\ 
+			60000 & 870 & 181h 14m & 123 654KB & 3329504 & 94.04\% & 51.09\% \\ 
+			70000 & 881 & 191h 8m & 136 263KB & 3697048 & 94.05\% & 51.52\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù pøi regularizaci L2 a konstantním poètu iterací}
@@ -558,7 +555,7 @@ Jak je popsáno v podkapitole~\ref{sec:l2}, pøi regularizaci L2 je zachováván kon
 	\end{center}
 \end{table}
 
-\subsection{Pøi konstantním poètu iterací - srovnání mezi L1 a L2}
+\subsection{Konstantní poèet iterací - srovnání mezi L1 a L2}
 U L2 je v porovnání s regularizací L1 (viz. tabulky~\ref{tab:L1L2KonstIterData}~a~\ref{tab:L1L2KonstIterEval}) úspì¹nost v rámci jednotlivých slov vy¹¹í o nìkolik procent a u celých vìt je rozdíl dokonce nìkolik desítek procent (nepoèítáme-li výsledky zpùsobené anomálií vyskytující se pøi nìkterých výsledcích u L1). Toto zlep¹ení je v¹ak vykoupeno skuteèností, ¾e velikost modelu je v prùmìru 4krát vy¹¹í a doba testování ze zvý¹ila pøibli¾nì o polovinu. Je tedy otázkou, zda je pro nás tato skuteènost akceptovatelná a zda nám stojí o zvý¹ení úspì¹nosti o nìkolik procent, nebo zda dáme pøednost malému modelu a rychlej¹ímu zpracování -- to u¾ by v¹ak zále¾elo na konkrétním vyu¾ití programu. Pøekvapivì se v¹ak nijak nezvý¹ila doba trénování, kdy rozdíl není jednoznaènì viditelný z dùvodu rozdílu ve výkonnosti jednotlivých strojù.
 
 Ze srovnání lze mimochodem vypozorovat, ¾e nekonsistentní výsledky z testu s regularizací L1 se velmi pøibli¾ují výsledkùm s regularizací L2. 
@@ -618,12 +615,12 @@ Ze srovnání lze mimochodem vypozorovat, ¾e nekonsistentní výsledky z testu s reg
 			\multicolumn{1}{|c|}{vìt} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			10000 & 8 326 164B & 36 244 240B & 92.65\% & 91.97\% & 43.02\% & 40.64\% \\ 
-			20000 & 1 3706 360B & 57 072 452B & 88.37\% & 92.78\% & 8.07\% & 45.28\% \\ 
-			30000 & 18 953 540B & 76 697 368B & 88.71\% & 93.51\% & 7.99\% & 48.41\% \\ 
-			40000 & 23 583 752B & 941 901 36B & 90.12\% & 93.61\% & 15.69\% & 49.06\% \\ 
-			50000 & 28 602 144B & 109 663 924B & 89.45\% & 93.83\% & 6.85\% & 50.26\% \\ 
-			60000 & 34 118 604B & 123 654 348B & 89.63\% & 94.04\% & 8.05\% & 51.09\% \\ 
+			10000 & 8 326 164B & 36 244KB & 92.65\% & 91.97\% & 43.02\% & 40.64\% \\ 
+			20000 & 1 3706 360B & 57 072KB & 88.37\% & 92.78\% & 8.07\% & 45.28\% \\ 
+			30000 & 18 953 540B & 76 697KB & 88.71\% & 93.51\% & 7.99\% & 48.41\% \\ 
+			40000 & 23 583 752B & 94 190KB & 90.12\% & 93.61\% & 15.69\% & 49.06\% \\ 
+			50000 & 28 602 144B & 109 663KB & 89.45\% & 93.83\% & 6.85\% & 50.26\% \\ 
+			60000 & 34 118 604B & 123 654KB & 89.63\% & 94.04\% & 8.05\% & 51.09\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Srovnání mezi L1 a L2 pøi konstantním poètu iterací (data)}
@@ -633,7 +630,7 @@ Ze srovnání lze mimochodem vypozorovat, ¾e nekonsistentní výsledky z testu s reg
 
 \pagebreak
 
-\subsection{Pøi konstantním delta a regularizaci L1}
+\subsection{Konstantní delta a regularizace L1}
 
 \subsubsection*{Pøíprava}
 Nejdøíve jsem se rozhodl uskuteènit skupinu testù se sni¾ující se hodnotou delta od 0.1 po 0.0001, po spu¹tìní testù a dokonèení pouze dvou z nich, kdy od hodnoty 0.001 ji¾ byla podmínka ukonèení  pøíli¹ nároèná a proces testování by trval øádovì mìsíce, jsem se rozhodl od tohoto testu upustit. Zároveò hodnota 0.1 poskytovala kvalitní výsledky v rozumném èase a poèet iterací okolo 50, co¾ nám nabízí rozumné srovnání s pøedchozím zpùsobem testování.
@@ -671,11 +668,11 @@ V tomto testu se opìt ve velkém projevila chyba pøi regularizaci L1, kdy 2 z pìt
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			10000 & 47 & 19h 20m & 8722904B & 905326 & 209912 & 92.61\% & 43.12\% \\ 
-			20000 & 50 & 58h 54m & 13706360B & 1464587 & 334939 & 88.37\% & 8.07\% \\ 
-			30000 & 51 & 107h 55m & 19722532B & 2002356 & 488244 & 93.50\% & 46.25\% \\ 
-			40000 & 55 & 155h 57m & 22254268B & 2488724 & 551872 & 89.67\% & 11.26\% \\ 
-			50000 & 53 & 110h 58m & 2777452B & 2924981 & 696340 & 89.42\% & 6.79\% \\ 
+			10000 & 47 & 19h 20m & 8 722KB & 905326 & 209912 & 92.61\% & 43.12\% \\ 
+			20000 & 50 & 58h 54m & 13 706KB & 1464587 & 334939 & 88.37\% & 8.07\% \\ 
+			30000 & 51 & 107h 55m & 19 722KB & 2002356 & 488244 & 93.50\% & 46.25\% \\ 
+			40000 & 55 & 155h 57m & 22 254KB & 2488724 & 551872 & 89.67\% & 11.26\% \\ 
+			50000 & 53 & 110h 58m & 27 773KB & 2924981 & 696340 & 89.42\% & 6.79\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù pøi regularizaci L1 a konstantním poètu iterací}
@@ -683,15 +680,15 @@ V tomto testu se opìt ve velkém projevila chyba pøi regularizaci L1, kdy 2 z pìt
 	\end{center}
 \end{table}
 
-\subsection{Pøi konstantním delta a regularizaci L1}
+\subsection{Konstantní delta a regularizace L1}
 
-\subsection{Pøi konstantním delta - srovnání mezi L1 a L2} 
+\subsection{Konstantní delta - srovnání mezi L1 a L2} 
 
 \pagebreak
 
 \subsection{S vyu¾itím algoritmu SGD}
 \subsubsection*{Pøíprava}
-Algoritmus Stochastic Gradient Descent (více informací v podkapitole~\ref{sec:sgd}) bohu¾el vìt¹inu èasu projektu stál mimo mùj zájem. Pøi jeho vyzkou¹ení jsem v¹ak byl pøekvapen jeho velmi kvalitními výsledky a rychlým zpracováním. Pouze jsem tedy zpracoval nìkolik rychlých testù, abych zjistil mo¾nosti jeho vyu¾ití. Nejdøíve jsem spustil tøi testy pro zji¹tìní vhodné hodnoty delta a poté 5 testù s poètem vstupních vìt pohybujícím se mezi 10 a 50 tisíci vzorkù, abych mohl jeho výsledky porovnat se zpracováním za pomoci algoritmu L-BFGS. Pou¾itý program CRFSuite podporuje v pøípadì pou¾ití tohoto algoritmu pouze regularizaci L2 a není tedy nutno zrcadlit testy na jakékoliv jiné varianty.
+Algoritmus Stochastic Gradient Descent (více informací v podkapitole~\ref{sec:sgd}) bohu¾el vìt¹inu èasu projektu stál mimo mùj zájem. Pøi jeho vyzkou¹ení jsem v¹ak byl pøekvapen jeho velmi kvalitními výsledky a rychlým zpracováním. Pouze jsem tedy zpracoval nìkolik rychlých testù, abych zjistil mo¾nosti jeho vyu¾ití. Nejdøíve jsem spustil tøi testy pro zji¹tìní vhodné hodnoty delta a poté 5 testù s poètem vstupních vìt pohybujícím se mezi 10 a 50 tisíci vzorkù, abych mohl jeho výsledky porovnat se zpracováním za pomoci algoritmu L-BFGS. Pou¾itý program \emph{CRFSuite} podporuje v pøípadì pou¾ití tohoto algoritmu pouze regularizaci L2 a není tedy nutno zrcadlit testy na jakékoliv jiné varianty.
 
 \subsubsection*{Konstantní podmínky:}
 \emph{Algoritmus:} SGD\\
@@ -723,14 +720,43 @@ Jako pøi v¹ech ostatních testech, i v tomto pøípadì se zvy¹ováním pøesnosti a po
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			10000 & 27 & 8h 37m & 36244240B & 905326 & 92.34\% & 42.85\% \\
-			20000 & 29 & 21h 40m & 57072452B & 1464587 & 93.33\% & 48.67\% \\ 
-			30000 & 35 & 30h 13m & 76696816B & 2002349 & 93.96\% & 51.60\% \\ 
-			40000 & 36 & 41h 25m & 94190136B & 2488724 & 94.31\% & 53.45\% \\ 
+			10000 & 27 & 8h 37m & 36 244KB & 905326 & 92.34\% & 42.85\% \\
+			20000 & 29 & 21h 40m & 57 072KB & 1464587 & 93.33\% & 48.67\% \\ 
+			30000 & 35 & 30h 13m & 76 696KB & 2002349 & 93.96\% & 51.60\% \\ 
+			40000 & 36 & 41h 25m & 94 190KB & 2488724 & 94.31\% & 53.45\% \\ 
 			\hline
 		\end{tabular}
-		\captionof{table}{Výsledky testù pøi algoritmu SGD, regularizaci L2 a konstantním delta}
+		\captionof{table}{Závislost úspì¹nosti na poètu vstupních vìt pøi algoritmu SGD, regularizaci L2 a konstantním delta}
 		\label{tab:SGDRegL2KonstDel}
+	\end{center}
+\end{table}
+
+\begin{table}[bp]
+	\begin{center}
+		\begin{tabular}{|c|r|r|r|r|r|r|r|r|}
+
+			\hline
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Doba} &
+			\multicolumn{1}{|c|}{Velikost} &
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Úsp.} &
+			\multicolumn{1}{|c|}{Úsp.} \\
+
+			\multicolumn{1}{|c|}{iterací} &
+			\multicolumn{1}{|c|}{trénování} &
+			\multicolumn{1}{|c|}{modelu} &
+			\multicolumn{1}{|c|}{rysù} &
+			\multicolumn{1}{|c|}{slov} &
+			\multicolumn{1}{|c|}{vìt} \\
+			\hline
+			35 & 30h 13m & 76 696KB & 2002349 & 93.96\% & 51.60\% \\ 
+			57 & 48h 38m & 76 696KB & 2002356 & 94.01\% & 52.16\% \\ 
+			57 & 52h 10m & 76 696KB & 2002350 & 94.01\% & 52.16\% \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Závislost úspì¹nosti na hodnotì delta pøi algoritmu SGD, regularizaci L2 a konstantním poètu vìt (30 000)}
+		\label{tab:SGDRegL2}
 	\end{center}
 \end{table}
 
@@ -784,36 +810,36 @@ Tuènì vyznaèené záznamy v tabulce jsou poté ty, u kterých se projevila anomálie 
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			- & 51 & 56h 53m & 19722532B & 2002356 & 488244 & 93.50\% & 46.25\% \\ 
+			- & 51 & 56h 53m & 19 722KB & 2002356 & 488244 & 93.50\% & 46.25\% \\ 
 			\hline
-			U00 & 52 & 66h 26m & 20448468B & 1795523 & 517260 & 88.94\% & 8.54\% \\ 
-			U01 & 53 & 54h 50m & 17981732B & 1820650 & 448183 & 94.15\% & 51.47\% \\ 
-			U02 & 51 & 87h 46m & 16350192B & 1908841 & 415861 & 92.30\% & 35.52\% \\ 
-			U03 & 54 & 70h 7m & 16607456B & 1827303 & 414097 & 88.98\% & 8.16\% \\ 
-			U04 & 52 & 83h 49m & 16794864B & 1797529 & 417891 & 89.26\% & 10.58\% \\ 
-			U10 & 52 & 75h 0m & 17564028B & 1973324 & 427379 & 94.02\% & 50.21\% \\ 
-			U11 & 52 & 82h 55m & 19037288B & 1982074 & 549159 & 88.95\% & 8.37\% \\ 
-			U12 & 55 & 77h 2m & 23358588B & 2000160 & 549160 & 91.75\% & 38.07\% \\ 
-			U13 & 52 & 113h 12m & 17389268B & 1982580 & 426650 & 88.91\% & 7.67\% \\ 
-			U14 & 52 & 58h 7m & 17847076B & 1973946 & 434700 & 88.93\% & 8.03\% \\ 
-			U20 & 50 & 83h 45m & 18678928B & 1836466 & 464943 & 88.89\% & 8.59\% \\ 
-			U21 & 52 & 77h 52m & 17532072B & 1859057 & 434576 & 93.36\% & 44.68\% \\ 
-			U22 & 53 & 87h 11m & 16573736B & 1919326 & 419928 & 88.95\% & 7.81\% \\ 
-			U23 & 55 & 52h 54m & 16751732B & 1851001 & 413535 & 89.10\% & 8.59\% \\ 
-			U24 & 52 & 83h 25m & 17933572B & 1828280 & 446111 & 88.99\% & 8.31\% \\ 
-			U30 & 50 & 50h 15m & 19175560B & 1958718 & 466492 & 89.08\% & 8.83\% \\ 
-			U31 & 51 & 121h 18m & 19211260B & 1969486 & 469025 & 88.90\% & 8.26\% \\ 
-			U32 & 53 & 82h 12m & 19290324B & 1995508 & 474503 & 88.82\% & 8.00\% \\ 
-			U33 & 51 & 78h 14m & 17678220B & 1969100 & 431720 & 89.37\% & 11.19\% \\ 
-			U34 & 51 & 103h 53m & 19382824B & 1959411 & 475058 & 89.01\% & 8.29\% \\ 
-			U40 & 52 & 86h 0m & 19246347B & 1998814 & 449381 & 88.97\% & 7.78\% \\ 
-			U41 & 53 & 104h 4m & 19012256B & 1969647 & 463998 & 89.06\% & 8.41\% \\ 
-			U42 & 53 & 77h 5m & 18186320B & 1938959 & 444168 & 88.99\% & 8.23\% \\ 
-			U43 & 54 & 120h 38m & 18580128B & 1999796 & 455661 & 88.88\% & 8.37\% \\ 
-			U50 & 51 & 80h 57m & 17576144B & 2000853 & 431772 & 88.96\% & 8.04\% \\ 
-			U51 & 53 & 52h 39m & 17419752B & 1983793 & 424259 & 92.61\% & 37.42\% \\ 
-			U52 & 52 & 95h 39m & 18321732B & 1998814 & 449381 & 88.97\% & 7.78\% \\ 
-			U53 & 53 & 71h 45m & 18361820B & 1992254 & 450316 & 88.72\% & 8.16\% \\ 
+			U00 & 52 & 66h 26m & 20 448KB & 1795523 & 517260 & 88.94\% & 8.54\% \\ 
+			U01 & 53 & 54h 50m & 17 981KB & 1820650 & 448183 & 94.15\% & 51.47\% \\ 
+			U02 & 51 & 87h 46m & 16 350KB & 1908841 & 415861 & 92.30\% & 35.52\% \\ 
+			U03 & 54 & 70h 7m & 16 607KB & 1827303 & 414097 & 88.98\% & 8.16\% \\ 
+			U04 & 52 & 83h 49m & 16 794KB & 1797529 & 417891 & 89.26\% & 10.58\% \\ 
+			U10 & 52 & 75h 0m & 17 564KB & 1973324 & 427379 & 94.02\% & 50.21\% \\ 
+			U11 & 52 & 82h 55m & 19 037KB & 1982074 & 549159 & 88.95\% & 8.37\% \\ 
+			U12 & 55 & 77h 2m & 23 358KB & 2000160 & 549160 & 91.75\% & 38.07\% \\ 
+			U13 & 52 & 113h 12m & 17 389KB & 1982580 & 426650 & 88.91\% & 7.67\% \\ 
+			U14 & 52 & 58h 7m & 17 847KB & 1973946 & 434700 & 88.93\% & 8.03\% \\ 
+			U20 & 50 & 83h 45m & 18 678KB & 1836466 & 464943 & 88.89\% & 8.59\% \\ 
+			U21 & 52 & 77h 52m & 17 532KB & 1859057 & 434576 & 93.36\% & 44.68\% \\ 
+			U22 & 53 & 87h 11m & 16 573KB & 1919326 & 419928 & 88.95\% & 7.81\% \\ 
+			U23 & 55 & 52h 54m & 16 751KB & 1851001 & 413535 & 89.10\% & 8.59\% \\ 
+			U24 & 52 & 83h 25m & 17 933KB & 1828280 & 446111 & 88.99\% & 8.31\% \\ 
+			U30 & 50 & 50h 15m & 19 175KB & 1958718 & 466492 & 89.08\% & 8.83\% \\ 
+			U31 & 51 & 121h 18m & 19 211KB & 1969486 & 469025 & 88.90\% & 8.26\% \\ 
+			U32 & 53 & 82h 12m & 19 290KB & 1995508 & 474503 & 88.82\% & 8.00\% \\ 
+			U33 & 51 & 78h 14m & 17 678KB & 1969100 & 431720 & 89.37\% & 11.19\% \\ 
+			U34 & 51 & 103h 53m & 19 382KB & 1959411 & 475058 & 89.01\% & 8.29\% \\ 
+			U40 & 52 & 86h 0m & 19 246KB & 1998814 & 449381 & 88.97\% & 7.78\% \\ 
+			U41 & 53 & 104h 4m & 19 012KB & 1969647 & 463998 & 89.06\% & 8.41\% \\ 
+			U42 & 53 & 77h 5m & 18 186KB & 1938959 & 444168 & 88.99\% & 8.23\% \\ 
+			U43 & 54 & 120h 38m & 18 580KB & 1999796 & 455661 & 88.88\% & 8.37\% \\ 
+			U50 & 51 & 80h 57m & 17 576KB & 2000853 & 431772 & 88.96\% & 8.04\% \\ 
+			U51 & 53 & 52h 39m & 17 419KB & 1983793 & 424259 & 92.61\% & 37.42\% \\ 
+			U52 & 52 & 95h 39m & 18 321KB & 1998814 & 449381 & 88.97\% & 7.78\% \\ 
+			U53 & 53 & 71h 45m & 18 361KB & 1992254 & 450316 & 88.72\% & 8.16\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù vynechání pøíznakù pøi regularizaci L1 a konstantním delta}
@@ -987,34 +1013,34 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 			\hline
 			- & 85 & 68h 18m & 76 697 368B & 92.17\% & 37.81\% \\ 
 			\hline
-			U00 & 92 & 97h 42m & 68 334 112B & 92.06\% & 37.18\% \\ 
-			U01 & 89 & 94h 11m & 68 711 220B & 90.06\% & 23.14\% \\ 
-			U02 & 89 & 111h 48m & 70 778 636B & 92.81\% & 43.13\% \\ 
-			U03 & 93 & 110h 56m & 69 117 464B & 93.21\% & 45.61\% \\ 
-			U04 & 89 & 74h 25m & 69 117 464B & 93.34\% & 46.75\% \\ 
-			U10 & 87 & 74h 2m & 75 978 768B & 92.25\% & 38.21\% \\ 
-			U11 & 87 & 78h 34m & 76 188 624B & 91.88\% & 36.02\% \\ 
-			U12 & 106 & 109h 0m & 76 622 728B & 88.41\% & 21.38\% \\ 
-			U13 & 85 & 117h 7m & 76 200 816B & 93.54\% & 48.15\% \\ 
-			U14 & 84 & 132h 24m & 75 993 648B & 92.83\% & 42.47\% \\ 
-			U20 & 90 & 88h 28m & 70 713 648B & 92.65\% & 41.10\% \\ 
-			U21 & 86 & 103h 12m & 71 135 652B & 92.64\% & 41.96\% \\ 
-			U22 & 87 & 145h 2m & 72 557 072B & 92.52\% & 40.71\% \\ 
-			U23 & 86 & 0h 0m & 70 987 512B & 93.19\% & 45.22\% \\ 
-			U24 & 85 & 0h 0m & 70 507 312B & 92.67\% & 40.78\% \\ 
-			U30 & 82 & 137h 37m & 75 593 472B & 92.74\% & 41.84\% \\ 
-			U31 & 84 & 84h 49m & 75 850 056B & 92.80\% & 42.09\% \\ 
-			U32 & 87 & 71h 9m & 76 473 724B & 91.65\% & 32.23\% \\ 
-			U33 & 85 & 110h 53m & 75 841 520B & 93.03\% & 44.06\% \\ 
-			U34 & 82 & 85h 21m & 75 610 748B & 91.60\% & 32.17\% \\ 
-			U40 & 85 & 81h 29m & 76 496 988B & 92.07\% & 36.79\% \\ 
-			U41 & 86 & 94h 15m & 75 831 124B & 92.40\% & 39.32\% \\ 
-			U42 & 87 & 69h 2m & 74 748 916B & 92.88\% & 43.22\% \\ 
-			U43 & 85 & 154h 52m & 75 527 288B & 92.38\% & 39.52\% \\ 
-			U50 &  &  &  &  &  \\ 
-			U51 & 89 & 97h 36m & 76 243 740B & 92.26\% & 38.77\% \\ 
-			U52 & 81 & 82h 28m & 76 611 296B & 93.06\% & 44.39\% \\ 
-			U53 & 85 & 71h 54m & 76 452 768B & 90.04\% & 24.93\% \\ 
+			U00 & 92 & 97h 42m & 68 334KB & 92.06\% & 37.18\% \\ 
+			U01 & 89 & 94h 11m & 68 711KB & 90.06\% & 23.14\% \\ 
+			U02 & 89 & 111h 48m & 70 778KB & 92.81\% & 43.13\% \\ 
+			U03 & 93 & 110h 56m & 69 117KB & 93.21\% & 45.61\% \\ 
+			U04 & 89 & 74h 25m & 69 117KB & 93.34\% & 46.75\% \\ 
+			U10 & 87 & 74h 2m & 75 978KB & 92.25\% & 38.21\% \\ 
+			U11 & 87 & 78h 34m & 76 188KB & 91.88\% & 36.02\% \\ 
+			U12 & 106 & 109h 0m & 76 622KB & 88.41\% & 21.38\% \\ 
+			U13 & 85 & 117h 7m & 76 200KB & 93.54\% & 48.15\% \\ 
+			U14 & 84 & 132h 24m & 75 993KB & 92.83\% & 42.47\% \\ 
+			U20 & 90 & 88h 28m & 70 713KB & 92.65\% & 41.10\% \\ 
+			U21 & 86 & 103h 12m & 71 135KB & 92.64\% & 41.96\% \\ 
+			U22 & 87 & 145h 2m & 72 557KB & 92.52\% & 40.71\% \\ 
+			U23 & 86 & 0h 0m & 70 987KB & 93.19\% & 45.22\% \\ 
+			U24 & 85 & 0h 0m & 70 507KB & 92.67\% & 40.78\% \\ 
+			U30 & 82 & 137h 37m & 75 593KB & 92.74\% & 41.84\% \\ 
+			U31 & 84 & 84h 49m & 75 850KB & 92.80\% & 42.09\% \\ 
+			U32 & 87 & 71h 9m & 76 473KB & 91.65\% & 32.23\% \\ 
+			U33 & 85 & 110h 53m & 75 841KB & 93.03\% & 44.06\% \\ 
+			U34 & 82 & 85h 21m & 75 610KB & 91.60\% & 32.17\% \\ 
+			U40 & 85 & 81h 29m & 76 496KB & 92.07\% & 36.79\% \\ 
+			U41 & 86 & 94h 15m & 75 831KB & 92.40\% & 39.32\% \\ 
+			U42 & 87 & 69h 2m & 74 748KB & 92.88\% & 43.22\% \\ 
+			U43 & 85 & 154h 52m & 75 527KB & 92.38\% & 39.52\% \\ 
+			U50 & 84 & 183h 48m & 76 661KB & 90.43\% & 25.11\% \\
+			U51 & 89 & 97h 36m & 76 243KB & 92.26\% & 38.77\% \\ 
+			U52 & 81 & 82h 28m & 76 611KB & 93.06\% & 44.39\% \\ 
+			U53 & 85 & 71h 54m & 76 452KB & 90.04\% & 24.93\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù vynechání pøíznakù pøi regularizaci L2 a konstantním delta}
@@ -1169,10 +1195,79 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 \subsection{Srovnání mezi L1 a L2}
 
 \section{Vyu¾ití zji¹tìných poznatkù pro zlep¹ení úspì¹nosti testování}
+Tato skupina testù se zaobírá vyu¾itím zji¹tìných údajù k vlastnímu zlep¹ení výsledkù algoritmù. Za pomocí vynechávání pravidel pro generování rysù, která podávala nejhor¹í výsledky, bude v nìkolika specifikovaných krocích (v¾dy nìkolik dal¹ích pravidel bude pøidáno do vynechané mno¾iny) provádìno testování a získané výsledky budou porovnávány s nejkvalitnìj¹ím výsledkem z pùvodního testu.
 
 \subsection{Pøi regularizaci L1}
+Pro tyto testy byly nakonec pou¾ity pouze dva kroky: bez tøí a ¹esti nejménì vhodných pravidel. Takto malý poèet testù byl zpùsoben anomáliemi pøi regularizaci L1 a nepøesvìdèívými výsledky po jejich provedení. Pøi vynechání prvních tøech pravidel se úspì¹nost zvý¹ila o 28 setin procenta, pøi dal¹ích tøech se ale ji¾ sní¾ila pod úroveò úspì¹nosti s vynecháním pouze jediného prvku. Zøejmì byl bylo mo¾né je¹tì provézt nìkolik dal¹ích testù za pøidání dal¹ích prvkù k prvnímu kroku, z èasových dùvodù v¹ak byla vypoèetní síla pøesunuta na testy s vy¹¹í hodnotou. Jediná pøínosná èást pøi tomto nastavení by tedy mohla být velikost modelu, která se nakonec pohybuje okolo 16MB a je tedy mnohem ni¾¹í, ne¾ konkurenèní regularizaci. Více podrobností v tabulkách~\ref{tab:KrokyL1}~a~{tab:NevhodneTestL1}.
+
+\begin{table}
+	\begin{center}
+		\begin{tabular}{|l|l|}
+			\hline
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{Vynechaná pravidla}\\
+			\hline 
+			ID & Vynechaná pravidla \\ 
+			Krok 1 & U04 U23 U33 \\ 
+			Krok 2 & U04 U23 U30 U33 U34 U41 \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Výèet krokù a jednotlivých vynechaných pravidel}
+		\label{tab:KrokyL1}
+	\end{center}
+\end{table}
+
+\begin{table}
+	\begin{center}
+		\begin{tabular}{|c|r|r|r|r|r|r|r}
+			\hline
+			\multicolumn{1}{|c|}{} &
+			\multicolumn{1}{|c|}{Doba} &
+			\multicolumn{1}{|c|}{Velikost} &
+			\multicolumn{1}{|c|}{Úvodní} &
+			\multicolumn{1}{|c|}{Koneèný} &
+			\multicolumn{1}{|c|}{Úsp.} &
+			\multicolumn{1}{|c|}{Úsp.} \\
+
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{trénování} &
+			\multicolumn{1}{|c|}{modelu} &
+			\multicolumn{1}{|c|}{poèet rysù} &
+			\multicolumn{1}{|c|}{poèet rysù} &
+			\multicolumn{1}{|c|}{slov} &
+			\multicolumn{1}{|c|}{vìt} \\
+			\hline 
+			U33 & 78h 14m & 17 678 220B & 1 969 100 &  431 720 & 89.37\% & 11.19\% \\ 
+			Krok 1 & 46h 17m & 16 552 380B & 1 612 918 &  413 408 & 89.65\% & 13.92\% \\ 
+			Krok 2 & 46h 15m & 14 796 028B & 1 493 626 &  354 589 & 88.99\% & 8.00\% \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Výsledky pøi vynechání nejménì vhodných pravidel porovnané s referenèní hodnotou}
+		\label{tab:NevhodneTestL1}
+	\end{center}
+\end{table}
 
 \subsection{Pøi regularizaci L2}
+V tomto zpracování budou popsány výsledky s pou¾itím algoritmu L-BFGS i SGD a budou vzájemnì porovnány.
+\begin{table}
+	\begin{center}
+		\begin{tabular}{|l|l|}
+			\hline
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{Vynechaná pravidla}\\
+			\hline 
+			ID & Vynechaná pravidla \\ 
+			Krok 1 & U03 U04 U13 \\ 
+			Krok 2 & U03 U04 U13 U23 U52 \\ 
+			Krok 3 & U03 U04 U13 U23 U33 U42 U52 \\ 
+			Krok 4 & U02 U03 U04 U13 U14 U23 U33 U42 U52 \\ 
+			Krok 5 & U02 U03 U04 U13 U14 U20 U23 U24 U30 U31U33 U42 U52 \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Výèet krokù a jednotlivých vynechaných pravidel}
+		\label{tab:KrokyL2}
+	\end{center}
+\end{table}
 
 \subsection{Se zpracováním algoritmem SGD}
 \chapter{Závìr}
