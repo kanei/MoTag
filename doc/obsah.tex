@@ -77,9 +77,34 @@ Celý proces poté probíhá za tzv. Supervised Learning (uèení s uèitelem), kdy pro
 
 \section{Hiden Markov Model (HMM)}
 \label{sec:hmm}
+\paragraph*{Základní informace}
 Skrytý markovský model (viz.~\cite{Kovar}), pojmenovaný po ruském matematikovi Andreyi Markovi, oznaèuje statistický model urèený pro popis posloupnosti obsahující Markovské stavy. Tìmi máme na mysli takový stav, pro nì¾ je dùle¾itá pouze blízká minulost (v na¹em pøípadì pouze nìkolik pøedchozích stavù -- znaèek) a vzdálená minulost je zanedbána. Ve zpracování jazyka se èasto omezuje zpracování pouze na dvì pøedchozí znaèky.
 
-Zatímco u klasického Markovského modelu známe posloupnost vstupních hodnot, v na¹em pøípadì známe pouze posloupnost hodnot výsledných (slovních tvarù). V ka¾dém kroku je poté ulo¾ena hodnota pravdìpodobnosti pøechodu do mo¾ných následujících stavù a hodnota pravdìpodobnosti vygenerování urèitého výstupu (znaèky). Celý proces je zachycen na obrázku ~\ref{fig:GrafHMM}.
+\paragraph*{Definice}
+HMM je koneèným automatem, vyjádøeným jako $(A, B, \Pi)$, kde $A$ popisuje hodnoty pravdìpodobnosti pøechody, $B$ hodnoty pravdìpodobnosti generování (výstupu) $\Pi$ hodnoty pravdìpodobnosti úvodního stavu $ B $. Mno¾ina skrytých stavù $ Q $ a seznam výstupních hodnot (pozorování) $ O $ jsou známy a nejsou tedy zahrnuty do definice. Aktuální stav není pozorovatelný a místo toho ka¾dý stav s urèitou pravdìpodobností($B$) generuje výstup.
+\begin{gather}
+	\Lambda = (A, B, \Pi)\\
+	\Pi = {p_i = P(q_i[t = 1])}\\
+	Q = {q_i}, i=1,...,N
+\end{gather}
+$N$ oznaèuje poèet skrytých stavù.
+\begin{equation}
+	A = \{a_{ij} = P(q_j[t+1] | q_i[t])\}
+\end{equation}
+$P(a|b)$ je pravdìpodobnost $a$ za pøedpokladu $b$, $t$ vyjadøuje èas a $q_i$ je prvkem z mno¾iny $Q$. 
+
+A je tedy pravdìpodobnost, ¾e následující stav je $q_j$ za pøedpokladu, ¾e aktuálním stavem je $q_i$.
+\begin{equation}
+	O = \{ o_k \}, k = 1,...,M\\
+\end{equation}
+$M$ oznaèuje poèet pozorovaných(vstupních) hodnot.
+
+\begin{equation}
+	B = \{ b_{ik} = b_i(o_k) = P(o_k | q_i) \}
+\end{equation}
+$o_k$ je prvkem mno¾iny $O$.
+
+$O$ je tedy pravdìpodobnost, ¾e výstup je $o_k$ za pøedpokladu, ¾e aktuálním stavem je $q_i$
 
 \begin{figure}[ht!]
 	\centering
@@ -88,33 +113,47 @@ Zatímco u klasického Markovského modelu známe posloupnost vstupních hodnot, v na
 		\label{fig:GrafHMM}
 \end{figure}
 
-Z tohoto ukázkového pøíkladu mù¾eme vyvodit, ¾e pøi posloupnosti pozorovaných tvarù ètverec, kosoètverec, kruh, trojúhelník, mù¾e \uv{skrytá} vstupní posloupnost mít jednu z podob zobrazených v tabulce ~\ref{tab:HMMPrechody}.
-\begin{figure}
+
+\begin{figure}[ht]
 	\begin{center}
-		\begin{tabular}{|c c c c|}
+		\begin{tabular}{|c|}
 			\hline
-			1 & 2 & 1 & 1 \\
+			Stav 1~$\rightarrow$~Stav 2~$\rightarrow$~Stav 1~$\rightarrow$~Stav 1 \\
 			\hline
-			1 & 2 & 1 & 2 \\ 
+			Stav 1~$\rightarrow$~Stav 2~$\rightarrow$~Stav 1~$\rightarrow$~Stav 2 \\ 
 			\hline
-			1 & 2 & 2 & 1 \\ 
+			Stav 1~$\rightarrow$~Stav 2~$\rightarrow$~Stav 2~$\rightarrow$~Stav 1 \\ 
 			\hline
-			1 & 2 & 2 & 3 \\
+			Stav 1~$\rightarrow$~Stav 2~$\rightarrow$~Stav 2~$\rightarrow$~Stav 3 \\
 			\hline
 		\end{tabular}
 		\captionof{table}{Mo¾né pøechody mezi skrytými stavy modelu}
 		\label{tab:HMMPrechody}
 	\end{center}
 \end{figure}
-Nejpravdìpodobnìj¹í z nich bychom byli schopni urèit pomocí ohodnocení jednotlivých pøechodù. 
 
-V na¹em pøípadì bychom pak pøi trénování, kdy známe jak vstupní, tak výstupní posloupnost, museli urèitým zpùsobem vypoèítat hodnoty na jednotlivých pøechodech. K tomu mù¾eme pou¾ít jeden k tomu urèených algoritmù -- Viterbiho algoritmus, Forward-Backward algoritmus, nebo Baum-Welch algoritmus. S jejich pomocí jsme poté po nìkolika iteracích schopni získat hodnoty pro ideální prùchod pøi neznámé posloupnosti.
+\paragraph*{Pøíklad}
+Zatímco u klasického Markovského modelu známe posloupnost vstupních hodnot, v na¹em pøípadì známe pouze posloupnost hodnot výstupních (slovních tvarù). V ka¾dém kroku je poté ulo¾ena hodnota pravdìpodobnosti pøechodu do mo¾ných následujících stavù a hodnota pravdìpodobnosti vygenerování urèitého výstupu (znaèky). Celý proces bude vysvìtlen na obrázku obrázku~\ref{fig:GrafHMM}. 
+
+Horní øada popisuje mno¾inu skrytých stavù($Q$) a èerné èáry mo¾né pøechody mezi nimi s vyznaèenou pravdìpodobností($A$). Modré spojnice oznaèují pravdìpodobnosti vygenerování obrazcù z jednotlivých stavu($B$) a obrazce pod èarou (ètverec, kosoètverec, trojúhelník) jsou posloupností výstupních (pozorovaných) stavù($O$).
+
+\paragraph{Prùbìh algoritmu} 
+Abychom získali v prvním kroku kruh, musíme aktuální stav, ve kterém se nacházíme, mít mo¾nost vyprodukovat kruh -- v na¹em pøípadì \emph{Stav 1} a \emph{Stav 2}. Zapí¹eme je tedy jako úvodní stavy. Abychom jako druhý prvek posloupnosti získali kosoètverec, musíme být ve \emph{Stavu 2}, nebo» ten jako jediný poskytuje tento obrazec. Pøi prvním kroku jsme si vypsali \emph{Stav 1} a \emph{Stav 2}, ze \emph{Stavu 2} se v¹ak zpìt do \emph{Stavu 2} nemù¾eme dostat a tudí¾ vypadává z mo¾ných posloupností a zùstává nám posloupnost (\emph{Stav 1}~$\rightarrow$~\emph{Stav 2}). Kdybychom takto pokraèovali a¾ do konce, získáme ètyøi mo¾nosti, zachycené v tabulce~\ref{tab:HMMPrechody}. Nejpravdìpodobnìj¹í z nich bychom byli schopni urèit pomocí ohodnocení jednotlivých pøechodù a výbìrem toho s nejvy¹¹í pravdìpodobností. 
+
+\paragraph{Vyu¾ití}
+V pøípadì vyu¾ití k na¹emu úèelu v¹ak neznáme $B$, které bychom museli natrénovat pomocí algoritmù popsaných v dal¹ích kapitolách. S jejich pomocí jsme po nìkolika iteracích schopni získat hodnoty pro co nejpravdìpodobnìj¹í prùchod.
 
 I kdy¾ není HMM implementováno v ¾ádném z vyu¾itých programù, poskytuje základ pro pochopení algoritmu CRF.
 
+\pagebreak
+
 \section{Conditional Random Fields (CRF)}
 \label{sec:crf}
-CRF mù¾eme popsat jako bezsmìrový grafický pravdìpodobnostní model (undirected probabilistic graphical model), ve kterém ka¾dý uzel (v na¹em pøípadì slovo) popisuje náhodnou promìnnou. CRF mù¾e také být vyjádøen jako model s koneèným poètem stavù a nenormalizovanými pravdìpodobnostmi pøechodù. V porovnání k HMM nemá jasnì dané hodnoty pøechodù mezi stavy a disponuje mo¾ností mnohonásobných funkcí, generujících rysy. Pøiná¹í také lep¹í výsledky ve zpracování dat se závislostmi vy¹¹ího øádu, které vìt¹inou lépe odpovídají reálnému modelu. Na rozdíl od generativních modelù také, jako¾to pravdìpodobnostní (conditional) model nemusí zkoumat v¹echny mo¾né sekvence pozorovaných prvkù (observations). Pro urèení parametrù tohoto modelu je v souèasné dobì nejvíce doporuèován algoritmus L-BFGS (Low-Memory BFGS), který poskytuje nejkvalitnìj¹í výsledky.
+\paragraph{základní informace} CRF mù¾eme popsat jako bezsmìrový grafický pravdìpodobnostní model (undirected probabilistic graphical model), ve kterém ka¾dý uzel (v na¹em pøípadì slovo) popisuje náhodnou promìnnou. CRF mù¾e také být vyjádøen jako model s koneèným poètem stavù a nenormalizovanými pravdìpodobnostmi pøechodù. V porovnání k HMM nemá jasnì dané hodnoty pøechodù mezi stavy a disponuje mo¾ností mnohonásobných funkcí, generujících rysy. Pøiná¹í také lep¹í výsledky ve zpracování dat se závislostmi vy¹¹ího øádu, které vìt¹inou lépe odpovídají reálnému modelu. Na rozdíl od generativních modelù také, jako¾to pravdìpodobnostní (conditional) model nemusí zkoumat v¹echny mo¾né sekvence pozorovaných prvkù (observations). Pro urèení parametrù tohoto modelu je v souèasné dobì nejvíce doporuèován algoritmus L-BFGS (Low-Memory BFGS), který poskytuje nejkvalitnìj¹í výsledky.
+
+\paragraph{Definice}
+Pro následující text definujme $X$ jako náhodnou promìnnou dat(v na¹em pøípadì vìt) urèených k oznaèkování a $Y$ jako náhodnou promìnnou korespondujících znaèek. V¹echny $Y_i$ z $Y$ poté nále¾í abecedì $\xi$, která tedy obsahuje mno¾inu v¹ech pou¾itých znaèek. Vytvoøíme pak model $P(X|Y)$ z párù pozorovaných hodnot a sekvencí znaèek.
+
 
 \subsection{Label Bias problém}
 Problém ¹patného vyva¾ování znaèek (viz.~\cite{Lafferty}) spoèívá v pøesunu pravdìpodobnostní hodnoty na dal¹í pozici v pøípadì pouze jediného pøechodu za ignorování pozorovaného prvku. Jak je ilustrováno na obrázku ~\ref{fig:GrafLabelBias}, v pøípadì vstupní posloupnosti písmen t,i,k se v prvním kroku neumíme rozhodnout a vstupujeme do stavù 1 a 4 se stejnou pravdìpodobností. Nyní, i kdy¾ na vstupu je písmeno i, nemáme jinou mo¾nost, ne¾ pokraèovat do stavù 2, pøípadnì 5 za ignorování pozorovaného písmena. V pøípadì, ¾e by v trénovacích datech tedy pøevládal øetìzec \uv{tik} nad øetìzcem \uv{tak}, byly by oba tyto øetìzce v¾dy urèeny jako \uv{tik}. Toto je vy¾e¹eno algoritmem CRF pomocí ohodnocení pøechodù mezi stavy, kdy mù¾eme podle aktuálního pozorovaného prvku buï sní¾it, nebo zvý¹it koneènou pravdìpodobnost dané posloupnosti.
@@ -163,7 +202,14 @@ Z dùvodu velkého mno¾ství jednotlivých testù, rùzných nastavení a strojù, na kte
 \end{itemize}
 
 \section{Návrh databáze}
-Pro systém byla navr¾ena jednoduchá databáze, sestávající ze 4 tabulek a poskytující dostatek prostoru pro pøípadná roz¹íøení, o dal¹í rysy, nebo sledované výsledky.
+Pro systém byla navr¾ena jednoduchá databáze, sestávající ze 4 tabulek a poskytující dostatek prostoru pro pøípadná roz¹íøení, o dal¹í rysy, nebo sledované výsledky. Její diagram tøíd je zachycen na obrázku~\ref{fig:db}.
+
+\begin{figure}[ht!]
+	\centering
+		\includegraphics[width=\textwidth]{fig/db}
+		\caption{Diagram prùbìhu testování}
+		\label{fig:db}
+\end{figure}
 
 \section{Spu¹tìní testu}
 Pøi spu¹tìní se do systému zadávají následující data:
@@ -393,31 +439,12 @@ Z dùvodu kvalitních výsledkù a rychlosti této implementace byla hlavní èást celé
 \subsubsection{Skripty}
 Pro testování jsem vytvoøil skript v jazyce BASH, starající se o celý prùbìh testu (viz. tabulka ~\ref{tab:PrubehTestovani}) a ulehèující nastavení celé procedury a èitelnost pou¾itých parametrù. V hlavièce jsou definovány základní údaje a nastavení, které jsou poté pou¾ity v tìle pro postupné spou¹tìní jednotlivých pøíkazù. V prùbìhu této operace jsou poté logovány v¹echny dùle¾ité údaje, které jsou potom lehce pøístupné k následujícímu zpracování. Tento skript je poté naklonován pro ka¾dý vyu¾ívaný poèítaè a tím je poskytnuta zpìtná mo¾nost kontroly nastavených údajù a vyhnutí se chyb spojených s prací na více strojích najednou. Stejný pøístup byl aplikován i na skript, generující data z \emph{CSTS} souboru. Ten je tedy také nakopírován pro ka¾dý poèítaè a jeho parametry jsou v¾dy lehce dohledatelné. Pro dvojí kontrolu je v¹ak pøípadný seznam vynechaných rysù pøepsán i do hlavního skriptu.
 
-\begin{table}[bp]
-	\begin{center}
-		\begin{tabular}{|c|l|l|}
-			\hline
-			\multicolumn{1}{|c|}{Èíslo kroku} &
-			\multicolumn{1}{|c|}{Program} &
-			\multicolumn{1}{|c|}{Popis kroku} \\
-			\hline
-			1 & Øídící skript & Spu¹tìní konverzního skriptu pro trénovací data \\
-			2 & Konverzní skript & Vygenerování trénovacích dat \\
-			3 & Øídící skript & Spu¹tìní programu CRFSuite s trénovacími daty \\
-			4 & CRFSuite learn & Naètení vstupních dat \\
-			5 & CRFSuite learn & Natrénování \\
-			6 & CRFSuite learn & Vytvoøení modelu \\
-			7 & Øídící skript & Spu¹tìní konverzního skriptu pro testovací data \\
-			8 & Konverzní skript & Vygenerování testovacích dat \\
-			9 & CRFSuite tag & Naètení vstupních dat \\ 
-			10 & CRFSuite tag & Provedení jedné iterace a vypsání výsledku a statistik \\
-			11 & Øídící skript & Odeslání emalu se zprávou \\
-			\hline
-		\end{tabular}
-		\captionof{table}{Prùbìh testování a popis jednotlivých akcí}
-		\label{tab:PrubehTestovani}
-	\end{center}
-\end{table}
+\begin{figure}[ht!]
+	\centering
+		\includegraphics[width=\textwidth]{fig/workflow}
+		\caption{Diagram prùbìhu testování}
+		\label{fig:workflow}
+\end{figure}
 
 \subsubsection{Spu¹tìní}
 S pou¾itím vytvoøených nástrojù je poté spu¹tìní testování velmi lehkou a rychlou zále¾itostí. Nejdøíve je v konverzním skriptu (napsaném v jazyce \emph{Python}) souboru (pojmenovaném jako \texttt{[jméno stroje].py}) nastaveno, které rysy mají být pou¾ity. Poté se v bash scriptu ([jméno stroje].sh) nastaví poèet vìt pro trénování a testování, maximální poèet iterací, epsilon, regularizace a dal¹í pøípadné parametry. Dále je nutno upravit pomocí programu ulimit limity zdrojù, dostupných pro ná¹ program -- jedná se konkrétnì o maximální velikost zásobníku, maximální pøidìlený èas CPU a maximální velikost virtuální pamìti. Ke spou¹tìní skriptu je poté pou¾it program \emph{nohup}, zaji¹»ující pøetrvávající bìh programu i po odpojení se od vzdáleného poèítaèe. 
@@ -486,18 +513,18 @@ Z rozdílu mezi poètem úvodních a koneèných rysù lze dobøe pozorovat pøínost vyu¾
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			5000 & 671 & 5h 30m & 4 751KB & 558871 & 113149 & 91.04\% & 34.70\% \\ 
-			10000 & 743 & 20h 47m & 8 326KB & 905326 & 200613 & 92.65\% & 43.02\% \\ 
-			15000 & 769 & 23h 46m & 10 990KB & 1202680 & 266245 & 87.90\% & 7.73\% \\ 
-			20000 & 792 & 33h 41m & 13 706KB & 1464587 & 334939 & 88.37\% & 8.07\% \\ 
-			25000 & 811 & 45h 25m & 17 140KB & 1724528 & 423649 & 88.68\% & 8.20\% \\ 
-			30000 & 822 & 37h 56m & 18 953KB & 1968646 & 461337 & 88.71\% & 7.99\% \\ 
-			35000 & 833 & 56h 44m & 22 744KB & 2260670 & 564590 & 89.38\% & 10.26\% \\ 
-			40000 & 843 & 66h 54m & 23 583KB & 2488724 & 586499 & 90.12\% & 15.69\% \\ 
-			45000 & 849 & 128h 26m & 27 177KB & 2716001 & 680082 & 90.62\% & 18.99\% \\
-			50000 & 854 & 199h 44m & 28 602KB & 2924981 & 717070 & 89.45\% & 6.85\% \\ 
-			55000 & 867 & 90h 22m & 30 087KB & 3140944 & 758370 & 94.74\% & 53.77\% \\ 
-			60000 & 870 & 111h 35m & 34 118KB & 3329504 & 863220 & 89.63\% & 8.05\% \\
+			5000 & 671 & 5h 30m & 4 751 KB & 558871 & 113149 & 91.04\% & 34.70\% \\ 
+			10000 & 743 & 20h 47m & 8 326 KB & 905326 & 200613 & 92.65\% & 43.02\% \\ 
+			15000 & 769 & 23h 46m & 10 990 KB & 1202680 & 266245 & 87.90\% & 7.73\% \\ 
+			20000 & 792 & 33h 41m & 13 706 KB & 1464587 & 334939 & 88.37\% & 8.07\% \\ 
+			25000 & 811 & 45h 25m & 17 140 KB & 1724528 & 423649 & 88.68\% & 8.20\% \\ 
+			30000 & 822 & 37h 56m & 18 953 KB & 1968646 & 461337 & 88.71\% & 7.99\% \\ 
+			35000 & 833 & 56h 44m & 22 744 KB & 2260670 & 564590 & 89.38\% & 10.26\% \\ 
+			40000 & 843 & 66h 54m & 23 583 KB & 2488724 & 586499 & 90.12\% & 15.69\% \\ 
+			45000 & 849 & 128h 26m & 27 177 KB & 2716001 & 680082 & 90.62\% & 18.99\% \\
+			50000 & 854 & 199h 44m & 28 602 KB & 2924981 & 717070 & 89.45\% & 6.85\% \\ 
+			55000 & 867 & 90h 22m & 30 087 KB & 3140944 & 758370 & 94.74\% & 53.77\% \\ 
+			60000 & 870 & 111h 35m & 34 118 KB & 3329504 & 863220 & 89.63\% & 8.05\% \\
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù pøi regularizaci L1 a konstantním poètu iterací}
@@ -541,13 +568,13 @@ Jak je popsáno v podkapitole~\ref{sec:l2}, pøi regularizaci L2 je zachováván kon
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			10000 & 743 & 15h 56m & 36 244KB & 905326 & 91.97\% & 40.64\% \\ 
-			20000 & 792 & 44h 30m & 57 072KB & 1464587 & 92.78\% & 45.28\% \\ 
-			30000 & 822 & 42h 26m & 76 697KB & 2002356 & 93.51\% & 48.41\% \\ 
-			40000 & 843 & 84h 50m & 94 190KB & 2488724 & 93.61\% & 49.06\% \\ 
-			50000 & 854 & 128h 19m & 109 663KB & 2924981 & 93.83\% & 50.26\% \\ 
-			60000 & 870 & 181h 14m & 123 654KB & 3329504 & 94.04\% & 51.09\% \\ 
-			70000 & 881 & 191h 8m & 136 263KB & 3697048 & 94.05\% & 51.52\% \\ 
+			10000 & 743 & 15h 56m & 36 244 KB & 905326 & 91.97\% & 40.64\% \\ 
+			20000 & 792 & 44h 30m & 57 072 KB & 1464587 & 92.78\% & 45.28\% \\ 
+			30000 & 822 & 42h 26m & 76 697 KB & 2002356 & 93.51\% & 48.41\% \\ 
+			40000 & 843 & 84h 50m & 94 190 KB & 2488724 & 93.61\% & 49.06\% \\ 
+			50000 & 854 & 128h 19m & 109 663 KB & 2924981 & 93.83\% & 50.26\% \\ 
+			60000 & 870 & 181h 14m & 123 654 KB & 3329504 & 94.04\% & 51.09\% \\ 
+			70000 & 881 & 191h 8m & 136 263 KB & 3697048 & 94.05\% & 51.52\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù pøi regularizaci L2 a konstantním poètu iterací}
@@ -615,12 +642,12 @@ Ze srovnání lze mimochodem vypozorovat, ¾e nekonsistentní výsledky z testu s reg
 			\multicolumn{1}{|c|}{vìt} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			10000 & 8 326 164B & 36 244KB & 92.65\% & 91.97\% & 43.02\% & 40.64\% \\ 
-			20000 & 1 3706 360B & 57 072KB & 88.37\% & 92.78\% & 8.07\% & 45.28\% \\ 
-			30000 & 18 953 540B & 76 697KB & 88.71\% & 93.51\% & 7.99\% & 48.41\% \\ 
-			40000 & 23 583 752B & 94 190KB & 90.12\% & 93.61\% & 15.69\% & 49.06\% \\ 
-			50000 & 28 602 144B & 109 663KB & 89.45\% & 93.83\% & 6.85\% & 50.26\% \\ 
-			60000 & 34 118 604B & 123 654KB & 89.63\% & 94.04\% & 8.05\% & 51.09\% \\ 
+			10000 & 8 326 164B & 36 244 KB & 92.65\% & 91.97\% & 43.02\% & 40.64\% \\ 
+			20000 & 1 3706 360B & 57 072 KB & 88.37\% & 92.78\% & 8.07\% & 45.28\% \\ 
+			30000 & 18 953 540B & 76 697 KB & 88.71\% & 93.51\% & 7.99\% & 48.41\% \\ 
+			40000 & 23 583 752B & 94 190 KB & 90.12\% & 93.61\% & 15.69\% & 49.06\% \\ 
+			50000 & 28 602 144B & 109 663 KB & 89.45\% & 93.83\% & 6.85\% & 50.26\% \\ 
+			60000 & 34 118 604B & 123 654 KB & 89.63\% & 94.04\% & 8.05\% & 51.09\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Srovnání mezi L1 a L2 pøi konstantním poètu iterací (data)}
@@ -668,11 +695,11 @@ V tomto testu se opìt ve velkém projevila chyba pøi regularizaci L1, kdy 2 z pìt
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			10000 & 47 & 19h 20m & 8 722KB & 905326 & 209912 & 92.61\% & 43.12\% \\ 
-			20000 & 50 & 58h 54m & 13 706KB & 1464587 & 334939 & 88.37\% & 8.07\% \\ 
-			30000 & 51 & 107h 55m & 19 722KB & 2002356 & 488244 & 93.50\% & 46.25\% \\ 
-			40000 & 55 & 155h 57m & 22 254KB & 2488724 & 551872 & 89.67\% & 11.26\% \\ 
-			50000 & 53 & 110h 58m & 27 773KB & 2924981 & 696340 & 89.42\% & 6.79\% \\ 
+			10000 & 47 & 19h 20m & 8 722 KB & 905326 & 209912 & 92.61\% & 43.12\% \\ 
+			20000 & 50 & 58h 54m & 13 706 KB & 1464587 & 334939 & 88.37\% & 8.07\% \\ 
+			30000 & 51 & 107h 55m & 19 722 KB & 2002356 & 488244 & 93.50\% & 46.25\% \\ 
+			40000 & 55 & 155h 57m & 22 254 KB & 2488724 & 551872 & 89.67\% & 11.26\% \\ 
+			50000 & 53 & 110h 58m & 27 773 KB & 2924981 & 696340 & 89.42\% & 6.79\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù pøi regularizaci L1 a konstantním poètu iterací}
@@ -688,7 +715,7 @@ V tomto testu se opìt ve velkém projevila chyba pøi regularizaci L1, kdy 2 z pìt
 
 \subsection{S vyu¾itím algoritmu SGD}
 \subsubsection*{Pøíprava}
-Algoritmus Stochastic Gradient Descent (více informací v podkapitole~\ref{sec:sgd}) bohu¾el vìt¹inu èasu projektu stál mimo mùj zájem. Pøi jeho vyzkou¹ení jsem v¹ak byl pøekvapen jeho velmi kvalitními výsledky a rychlým zpracováním. Pouze jsem tedy zpracoval nìkolik rychlých testù, abych zjistil mo¾nosti jeho vyu¾ití. Nejdøíve jsem spustil tøi testy pro zji¹tìní vhodné hodnoty delta a poté 5 testù s poètem vstupních vìt pohybujícím se mezi 10 a 50 tisíci vzorkù, abych mohl jeho výsledky porovnat se zpracováním za pomoci algoritmu L-BFGS. Pou¾itý program \emph{CRFSuite} podporuje v pøípadì pou¾ití tohoto algoritmu pouze regularizaci L2 a není tedy nutno zrcadlit testy na jakékoliv jiné varianty.
+Algoritmus Stochastic Gradient Descent, popsaný v podkapitole~\ref{sec:sgd}) bohu¾el vìt¹inu èasu projektu stál mimo mùj zájem. Pøi jeho vyzkou¹ení jsem v¹ak byl pøekvapen jeho velmi kvalitními výsledky a rychlým zpracováním. Pouze jsem tedy zpracoval nìkolik rychlých testù, abych zjistil mo¾nosti jeho vyu¾ití. Nejdøíve jsem spustil tøi testy pro zji¹tìní vhodné hodnoty delta a poté 5 testù s poètem vstupních vìt pohybujícím se mezi 10 a 50 tisíci vzorkù, abych mohl jeho výsledky porovnat se zpracováním za pomoci algoritmu L-BFGS. Pou¾itý program \emph{CRFSuite} podporuje v pøípadì pou¾ití tohoto algoritmu pouze regularizaci L2 a není tedy nutno zrcadlit testy na jakékoliv jiné varianty.
 
 \subsubsection*{Konstantní podmínky:}
 \emph{Algoritmus:} SGD\\
@@ -720,10 +747,10 @@ Jako pøi v¹ech ostatních testech, i v tomto pøípadì se zvy¹ováním pøesnosti a po
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			10000 & 27 & 8h 37m & 36 244KB & 905326 & 92.34\% & 42.85\% \\
-			20000 & 29 & 21h 40m & 57 072KB & 1464587 & 93.33\% & 48.67\% \\ 
-			30000 & 35 & 30h 13m & 76 696KB & 2002349 & 93.96\% & 51.60\% \\ 
-			40000 & 36 & 41h 25m & 94 190KB & 2488724 & 94.31\% & 53.45\% \\ 
+			10000 & 27 & 8h 37m & 36 244 KB & 905326 & 92.34\% & 42.85\% \\
+			20000 & 29 & 21h 40m & 57 072 KB & 1464587 & 93.33\% & 48.67\% \\ 
+			30000 & 35 & 30h 13m & 76 696 KB & 2002349 & 93.96\% & 51.60\% \\ 
+			40000 & 36 & 41h 25m & 94 190 KB & 2488724 & 94.31\% & 53.45\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Závislost úspì¹nosti na poètu vstupních vìt pøi algoritmu SGD, regularizaci L2 a konstantním delta}
@@ -750,9 +777,9 @@ Jako pøi v¹ech ostatních testech, i v tomto pøípadì se zvy¹ováním pøesnosti a po
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			35 & 30h 13m & 76 696KB & 2002349 & 93.96\% & 51.60\% \\ 
-			57 & 48h 38m & 76 696KB & 2002356 & 94.01\% & 52.16\% \\ 
-			57 & 52h 10m & 76 696KB & 2002350 & 94.01\% & 52.16\% \\ 
+			35 & 30h 13m & 76 696 KB & 2002349 & 93.96\% & 51.60\% \\ 
+			57 & 48h 38m & 76 696 KB & 2002356 & 94.01\% & 52.16\% \\ 
+			57 & 52h 10m & 76 696 KB & 2002350 & 94.01\% & 52.16\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Závislost úspì¹nosti na hodnotì delta pøi algoritmu SGD, regularizaci L2 a konstantním poètu vìt (30 000)}
@@ -767,11 +794,11 @@ Po zhodnocení pøedchozích testù jsem pøipravil pravidla pro nejdùle¾itìj¹í èást,
 
 \subsection{Pøi regularizaci L1}
 \subsubsection*{Pøíprava}
-Rozhodoval jsem se, zda, s ohledem na anomálie, produkované trénováním s vyu¾ítím regularizace L1, vytvoøit testy i s tímto nastavením, nebo zda radìji pøejít rovnou na bezproblémovou regularizaci L2. Z dùvodu kompletnosti jsem se v¹ak rozhodl tyto testy nevynechávat a zahrnout je do práce, pøinejmen¹ím pro porovnání výsledkù.
+Pøed zapoèetím testování s regularizací L1 bylo nutno zvá¾it pøínos, který této práci, s ohledem na problémy s anomáliemi, pøinese. Pro úplnost v¹ak byly tyto testy provedeny a tím byla poskytnuta mo¾nost komplexního srovnání mezi obìmi regularizacemi.
 
 \subsubsection*{Konstantní podmínky}
 \emph{Algoritmus:} L-BFGS\\
-\emph{Delta:} 0.1\\
+\emph{Delta:} 0,1\\
 \emph{Èásti znaèky:} 1 -- 5 a 8 -- 9\\
 \emph{Poèet vìt pøi testování úspì¹nosti: }7000\\
 \emph{Regularizace:} L1
@@ -781,11 +808,11 @@ Pøi pohledu do tabulky~\ref{tab:FeaturesL1} lze spatøit, ¾e referenèní test bohu
 
 Pro lep¹í srovnání byla vytvoøena tabulka~\ref{tab:SrovnaniL1}, která zachycuje rozdíl mezi úspì¹ností pøi vynechání daného rysu a referenèní hodnotou. Ta je zapsána pod hlavièkou tabulky a ve vìt¹inì pøípadù je pou¾ita výsledná hodnota referenèního výsledku bez vynechaných pravidel. Vyjímku tvoøí poslední sloupec, kde je pou¾ito èíslo 89, které nejlépe oddìluje u¾iteèné pøíznaky od tìch neu¾iteèných. Jedná se v¹ak pouze o odhad a proto je mo¾né, ¾e neu¾iteèných rysù je ve skuteènosti mnohem více, èi ménì. Pro vìt¹í názornost byl do tabulky pøidán sloupec s popisem jednotlivých pravidel generování rysù.
 
-Z tabulky lze vyèíst nìkolik údajù. Jednak Poèet rysù se zvy¹uje se vzdáleností od aktuálního prvku, co¾ je logické, kdy¾ se zamyslíme nad zpùsobem zpracování programem. Ka¾dá unikátní vlastnost je vstahována k souèasnému prvku. Pøi urèení aktuálního prvku tedy generujeme pouze 1 unikátní vlastnost, v kombinaci s prvky le¾ícími v sousedství v¹ak musíme v¾dy ulo¾it kombinaci daného prvku s prvkem aktuálním.
+Z tabulky lze vyèíst nìkolik údajù. Jednak poèet rysù se zvy¹uje se vzdáleností od aktuálního prvku, co¾ je logické, kdy¾ se zamyslíme nad zpùsobem zpracování programem. Ka¾dá unikátní vlastnost je vstahována k souèasnému prvku. Pøi urèení aktuálního prvku tedy generujeme pouze 1 unikátní vlastnost, v kombinaci s prvky le¾ícími v sousedství v¹ak musíme v¾dy ulo¾it kombinaci daného prvku s prvkem aktuálním.
 
 Dále se na rysy mù¾eme podívat z pohledu pamì»ové nároènosti, kde nìkolika sty tisíci unikátními vlastnostmi jasnì dominují mo¾ná lemmata a slovní tvary, které se tak stávají kandidátem na pøípadné vypu¹tìní z modelu v pøípadì potøeby sní¾ení pamì»ové nároènosti trénování (za pøedpokladu, ¾e by tím nebyla výraznì naru¹ena úspì¹nost trénování). To také dokazuje výsledná velikost modelu, kde k nejvìt¹ímu sní¾ení do¹lo u mo¾ných lemmat a slovního tvaru na aktuální pozici a to pøes 3MB. Naproti tomu pøi vynechání spoleèné znaèky na aktuální pozici se model je¹tì o 3MB zvìt¹il.
 
-Tuènì vyznaèené záznamy v tabulce jsou poté ty, u kterých se projevila anomálie regularizace L1 - nemají tedy ¾ádnou váhu pøi analýze a nebudou zaøazeny do vybírání nejménì u¾iteèných prvkù. Pro detailnìj¹í a správnìj¹í zpracování by bylo nutno provést celý test je¹tì jednou na jiném vzorku dat a poté pracovat pouze se správnou hodnotou, resp. s prùmìrem v pøípadì nevyskytující se chyby v obou pøípadech pro dané pravidlo. Na toto zpracování se v¹ak nedostávalo èasu a bylo nutno jej vynechat a pøesunout se k dal¹ím testùm, které mohou pøinést kvalitnìj¹í a cennìj¹í výsledky.
+Tuènì vyznaèené záznamy v tabulce jsou ty, u kterých se projevila anomálie regularizace L1 - nemají tedy ¾ádnou váhu pøi analýze a nebudou zaøazeny do vybírání nejménì u¾iteèných prvkù. Pro detailnìj¹í a správnìj¹í zpracování by bylo nutno provést celý test je¹tì jednou na jiném vzorku dat a poté pracovat pouze se správnou hodnotou, resp. s prùmìrem v pøípadì nevyskytující se chyby v obou pøípadech pro dané pravidlo. Na toto zpracování se v¹ak nedostávalo èasu a bylo nutno jej vynechat a pøesunout se k dal¹ím testùm, které mohou pøinést kvalitnìj¹í a cennìj¹í výsledky.
 
 \begin{table}
 	\begin{center}
@@ -810,36 +837,36 @@ Tuènì vyznaèené záznamy v tabulce jsou poté ty, u kterých se projevila anomálie 
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			- & 51 & 56h 53m & 19 722KB & 2002356 & 488244 & 93.50\% & 46.25\% \\ 
+			- & 51 & 56h 53m & 19 722 KB & 2002356 & 488244 & 93.50\% & 46.25\% \\ 
 			\hline
-			U00 & 52 & 66h 26m & 20 448KB & 1795523 & 517260 & 88.94\% & 8.54\% \\ 
-			U01 & 53 & 54h 50m & 17 981KB & 1820650 & 448183 & 94.15\% & 51.47\% \\ 
-			U02 & 51 & 87h 46m & 16 350KB & 1908841 & 415861 & 92.30\% & 35.52\% \\ 
-			U03 & 54 & 70h 7m & 16 607KB & 1827303 & 414097 & 88.98\% & 8.16\% \\ 
-			U04 & 52 & 83h 49m & 16 794KB & 1797529 & 417891 & 89.26\% & 10.58\% \\ 
-			U10 & 52 & 75h 0m & 17 564KB & 1973324 & 427379 & 94.02\% & 50.21\% \\ 
-			U11 & 52 & 82h 55m & 19 037KB & 1982074 & 549159 & 88.95\% & 8.37\% \\ 
-			U12 & 55 & 77h 2m & 23 358KB & 2000160 & 549160 & 91.75\% & 38.07\% \\ 
-			U13 & 52 & 113h 12m & 17 389KB & 1982580 & 426650 & 88.91\% & 7.67\% \\ 
-			U14 & 52 & 58h 7m & 17 847KB & 1973946 & 434700 & 88.93\% & 8.03\% \\ 
-			U20 & 50 & 83h 45m & 18 678KB & 1836466 & 464943 & 88.89\% & 8.59\% \\ 
-			U21 & 52 & 77h 52m & 17 532KB & 1859057 & 434576 & 93.36\% & 44.68\% \\ 
-			U22 & 53 & 87h 11m & 16 573KB & 1919326 & 419928 & 88.95\% & 7.81\% \\ 
-			U23 & 55 & 52h 54m & 16 751KB & 1851001 & 413535 & 89.10\% & 8.59\% \\ 
-			U24 & 52 & 83h 25m & 17 933KB & 1828280 & 446111 & 88.99\% & 8.31\% \\ 
-			U30 & 50 & 50h 15m & 19 175KB & 1958718 & 466492 & 89.08\% & 8.83\% \\ 
-			U31 & 51 & 121h 18m & 19 211KB & 1969486 & 469025 & 88.90\% & 8.26\% \\ 
-			U32 & 53 & 82h 12m & 19 290KB & 1995508 & 474503 & 88.82\% & 8.00\% \\ 
-			U33 & 51 & 78h 14m & 17 678KB & 1969100 & 431720 & 89.37\% & 11.19\% \\ 
-			U34 & 51 & 103h 53m & 19 382KB & 1959411 & 475058 & 89.01\% & 8.29\% \\ 
-			U40 & 52 & 86h 0m & 19 246KB & 1998814 & 449381 & 88.97\% & 7.78\% \\ 
-			U41 & 53 & 104h 4m & 19 012KB & 1969647 & 463998 & 89.06\% & 8.41\% \\ 
-			U42 & 53 & 77h 5m & 18 186KB & 1938959 & 444168 & 88.99\% & 8.23\% \\ 
-			U43 & 54 & 120h 38m & 18 580KB & 1999796 & 455661 & 88.88\% & 8.37\% \\ 
-			U50 & 51 & 80h 57m & 17 576KB & 2000853 & 431772 & 88.96\% & 8.04\% \\ 
-			U51 & 53 & 52h 39m & 17 419KB & 1983793 & 424259 & 92.61\% & 37.42\% \\ 
-			U52 & 52 & 95h 39m & 18 321KB & 1998814 & 449381 & 88.97\% & 7.78\% \\ 
-			U53 & 53 & 71h 45m & 18 361KB & 1992254 & 450316 & 88.72\% & 8.16\% \\ 
+			U00 & 52 & 66h 26m & 20 448 KB & 1795523 & 517260 & 88.94\% & 8.54\% \\ 
+			U01 & 53 & 54h 50m & 17 981 KB & 1820650 & 448183 & 94.15\% & 51.47\% \\ 
+			U02 & 51 & 87h 46m & 16 350 KB & 1908841 & 415861 & 92.30\% & 35.52\% \\ 
+			U03 & 54 & 70h 7m & 16 607 KB & 1827303 & 414097 & 88.98\% & 8.16\% \\ 
+			U04 & 52 & 83h 49m & 16 794 KB & 1797529 & 417891 & 89.26\% & 10.58\% \\ 
+			U10 & 52 & 75h 0m & 17 564 KB & 1973324 & 427379 & 94.02\% & 50.21\% \\ 
+			U11 & 52 & 82h 55m & 19 037 KB & 1982074 & 549159 & 88.95\% & 8.37\% \\ 
+			U12 & 55 & 77h 2m & 23 358 KB & 2000160 & 549160 & 91.75\% & 38.07\% \\ 
+			U13 & 52 & 113h 12m & 17 389 KB & 1982580 & 426650 & 88.91\% & 7.67\% \\ 
+			U14 & 52 & 58h 7m & 17 847 KB & 1973946 & 434700 & 88.93\% & 8.03\% \\ 
+			U20 & 50 & 83h 45m & 18 678 KB & 1836466 & 464943 & 88.89\% & 8.59\% \\ 
+			U21 & 52 & 77h 52m & 17 532 KB & 1859057 & 434576 & 93.36\% & 44.68\% \\ 
+			U22 & 53 & 87h 11m & 16 573 KB & 1919326 & 419928 & 88.95\% & 7.81\% \\ 
+			U23 & 55 & 52h 54m & 16 751 KB & 1851001 & 413535 & 89.10\% & 8.59\% \\ 
+			U24 & 52 & 83h 25m & 17 933 KB & 1828280 & 446111 & 88.99\% & 8.31\% \\ 
+			U30 & 50 & 50h 15m & 19 175 KB & 1958718 & 466492 & 89.08\% & 8.83\% \\ 
+			U31 & 51 & 121h 18m & 19 211 KB & 1969486 & 469025 & 88.90\% & 8.26\% \\ 
+			U32 & 53 & 82h 12m & 19 290 KB & 1995508 & 474503 & 88.82\% & 8.00\% \\ 
+			U33 & 51 & 78h 14m & 17 678 KB & 1969100 & 431720 & 89.37\% & 11.19\% \\ 
+			U34 & 51 & 103h 53m & 19 382 KB & 1959411 & 475058 & 89.01\% & 8.29\% \\ 
+			U40 & 52 & 86h 0m & 19 246 KB & 1998814 & 449381 & 88.97\% & 7.78\% \\ 
+			U41 & 53 & 104h 4m & 19 012 KB & 1969647 & 463998 & 89.06\% & 8.41\% \\ 
+			U42 & 53 & 77h 5m & 18 186 KB & 1938959 & 444168 & 88.99\% & 8.23\% \\ 
+			U43 & 54 & 120h 38m & 18 580 KB & 1999796 & 455661 & 88.88\% & 8.37\% \\ 
+			U50 & 51 & 80h 57m & 17 576 KB & 2000853 & 431772 & 88.96\% & 8.04\% \\ 
+			U51 & 53 & 52h 39m & 17 419 KB & 1983793 & 424259 & 92.61\% & 37.42\% \\ 
+			U52 & 52 & 95h 39m & 18 321 KB & 1998814 & 449381 & 88.97\% & 7.78\% \\ 
+			U53 & 53 & 71h 45m & 18 361 KB & 1992254 & 450316 & 88.72\% & 8.16\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù vynechání pøíznakù pøi regularizaci L1 a konstantním delta}
@@ -954,9 +981,9 @@ Naopak nejvíce pøínosné se zdá být pravidlo popisující znaèku nejbli¾¹ího sloves
 			U34 & Pøípona slova [+2] & 42945 & -13186 & - 339 708B & 0.01\% \\ 
 			U41 & První dvì písmena & 32709 & -24246 & - 710 276B & 0.06\% \\ 
 			\hline
-			    & Celkem & 508730 & -260770 & -9 539 736B & 0.88\% \\
+			    & Celkem & 508730 & -260770 & -9 539 736B & \\
 			\hline
-			    & Teoretický výsledek & 1493626 & 227474 & 10 182 796B & 89.88\% \\
+			    & Teoretický výsledek & 1493626 & 227474 & 10 182 796B & \\
 			\hline
 		\end{tabular}
 		\captionof{table}{Nejménì vhodná pravidla generování rysù pøi regularizaci L1 (s nezápornou hodnotou)}
@@ -988,7 +1015,7 @@ Co se týèe pamì»ové nároènosti, je v tomto pøípadì model povìt¹inou témìø stejný
 \subsubsection*{Výbìr nejménì hodnotných pravidel}
 Nejsilnìj¹í vliv na kvalitu modelu má podle tabulky~\ref{tab:VhodneL2} pravidlo urèující spoleèné sloupce znaèky na aktuální pozici, následované znaèkou nejbli¾¹ího slovesa a slovním tvarem pøedcházejícího prvku, kde po vynechání kteréhokoliv ze zmínìných pravidel klesá úspì¹nost o více ne¾ 2 procenta. Poté následuje výrazný propad a¾ k hranici 0.5\% a zbylým pravidlùm.
 
-Naproti tomu, jak je vyobrazeno v tabulce~\ref{tab:NevhodneL2}, nejhùøe dopadlo pravidlo se spoleènoou znaèkou následujícího prvku, oba nadcházející slovní tvary (na pozici +1 a +2) a v¹echna mo¾ná lemmata na pozici +1, kdy po vynechání tìchto prvkù stoupla koneèná úspì¹nost o více ne¾ jedno procento. Tato pravidla jsou následována dal¹ími 8mi pravidly se zmìnou vìt¹í ne¾ pùl procenta a zbylými pravidly klesajícími a¾ k nule. Z tabulky lze také vyèíst, ¾e teoretický zisk, pøi vynechání v¹ech nevhodných znaèek, je témìø 12 procent, co¾ je samozøejmì hloupost, nebo» bychom poté dosáhli více ne¾ stoprocentní úspì¹nosti, bude v¹ak zajímavé pozorovat, jaký rozdíl pøinese vynechání jednotlivých skupin pravidel.
+Naproti tomu, jak je vyobrazeno v tabulce~\ref{tab:NevhodneL2}, nejhùøe dopadlo pravidlo se spoleènoou znaèkou následujícího prvku, oba nadcházející slovní tvary (na pozici +1 a +2) a v¹echna mo¾ná lemmata na pozici +1, kdy po vynechání tìchto prvkù stoupla koneèná úspì¹nost o více ne¾ jedno procento. Tato pravidla jsou následována dal¹ími osmi pravidly se zmìnou vìt¹í ne¾ pùl procenta a zbylými pravidly klesajícími a¾ k nule. Po vynechání v¹ech prvkù se záporným pøínosem bychom se mohli dostat a¾ na koneènou velikost modelu okolo 19MB a na ètvrtinový poèet rysù, co¾ by mohlo pøínést markantní zvý¹ení rychlosti a úsporu místa.
 
 Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou dal¹ích, nejménì vhodných rysù do testování. Budeme tedy pracovat s tøemi/pìti/sedmi a devíti nejhor¹ími rysy a porovnáme jejich výsledky. %TODO pøepsat
 
@@ -1011,36 +1038,36 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			- & 85 & 68h 18m & 76 697 368B & 92.17\% & 37.81\% \\ 
+			- & 85 & 68h 18m & 76 697 KB & 92.17\% & 37.81\% \\ 
 			\hline
-			U00 & 92 & 97h 42m & 68 334KB & 92.06\% & 37.18\% \\ 
-			U01 & 89 & 94h 11m & 68 711KB & 90.06\% & 23.14\% \\ 
-			U02 & 89 & 111h 48m & 70 778KB & 92.81\% & 43.13\% \\ 
-			U03 & 93 & 110h 56m & 69 117KB & 93.21\% & 45.61\% \\ 
-			U04 & 89 & 74h 25m & 69 117KB & 93.34\% & 46.75\% \\ 
-			U10 & 87 & 74h 2m & 75 978KB & 92.25\% & 38.21\% \\ 
-			U11 & 87 & 78h 34m & 76 188KB & 91.88\% & 36.02\% \\ 
-			U12 & 106 & 109h 0m & 76 622KB & 88.41\% & 21.38\% \\ 
-			U13 & 85 & 117h 7m & 76 200KB & 93.54\% & 48.15\% \\ 
-			U14 & 84 & 132h 24m & 75 993KB & 92.83\% & 42.47\% \\ 
-			U20 & 90 & 88h 28m & 70 713KB & 92.65\% & 41.10\% \\ 
-			U21 & 86 & 103h 12m & 71 135KB & 92.64\% & 41.96\% \\ 
-			U22 & 87 & 145h 2m & 72 557KB & 92.52\% & 40.71\% \\ 
-			U23 & 86 & 0h 0m & 70 987KB & 93.19\% & 45.22\% \\ 
-			U24 & 85 & 0h 0m & 70 507KB & 92.67\% & 40.78\% \\ 
-			U30 & 82 & 137h 37m & 75 593KB & 92.74\% & 41.84\% \\ 
-			U31 & 84 & 84h 49m & 75 850KB & 92.80\% & 42.09\% \\ 
-			U32 & 87 & 71h 9m & 76 473KB & 91.65\% & 32.23\% \\ 
-			U33 & 85 & 110h 53m & 75 841KB & 93.03\% & 44.06\% \\ 
-			U34 & 82 & 85h 21m & 75 610KB & 91.60\% & 32.17\% \\ 
-			U40 & 85 & 81h 29m & 76 496KB & 92.07\% & 36.79\% \\ 
-			U41 & 86 & 94h 15m & 75 831KB & 92.40\% & 39.32\% \\ 
-			U42 & 87 & 69h 2m & 74 748KB & 92.88\% & 43.22\% \\ 
-			U43 & 85 & 154h 52m & 75 527KB & 92.38\% & 39.52\% \\ 
-			U50 & 84 & 183h 48m & 76 661KB & 90.43\% & 25.11\% \\
-			U51 & 89 & 97h 36m & 76 243KB & 92.26\% & 38.77\% \\ 
-			U52 & 81 & 82h 28m & 76 611KB & 93.06\% & 44.39\% \\ 
-			U53 & 85 & 71h 54m & 76 452KB & 90.04\% & 24.93\% \\ 
+			U00 & 92 & 97h 42m & 68 334 KB & 92.06\% & 37.18\% \\ 
+			U01 & 89 & 94h 11m & 68 711 KB & 90.06\% & 23.14\% \\ 
+			U02 & 89 & 111h 48m & 70 778 KB & 92.81\% & 43.13\% \\ 
+			U03 & 93 & 110h 56m & 69 117 KB & 93.21\% & 45.61\% \\ 
+			U04 & 89 & 74h 25m & 69 117 KB & 93.34\% & 46.75\% \\ 
+			U10 & 87 & 74h 2m & 75 978 KB & 92.25\% & 38.21\% \\ 
+			U11 & 87 & 78h 34m & 76 188 KB & 91.88\% & 36.02\% \\ 
+			U12 & 106 & 109h 0m & 76 622 KB & 88.41\% & 21.38\% \\ 
+			U13 & 85 & 117h 7m & 76 200 KB & 93.54\% & 48.15\% \\ 
+			U14 & 84 & 132h 24m & 75 993 KB & 92.83\% & 42.47\% \\ 
+			U20 & 90 & 88h 28m & 70 713 KB & 92.65\% & 41.10\% \\ 
+			U21 & 86 & 103h 12m & 71 135 KB & 92.64\% & 41.96\% \\ 
+			U22 & 87 & 145h 2m & 72 557 KB & 92.52\% & 40.71\% \\ 
+			U23 & 86 & 0h 0m & 70 987 KB & 93.19\% & 45.22\% \\ 
+			U24 & 85 & 0h 0m & 70 507 KB & 92.67\% & 40.78\% \\ 
+			U30 & 82 & 137h 37m & 75 593 KB & 92.74\% & 41.84\% \\ 
+			U31 & 84 & 84h 49m & 75 850 KB & 92.80\% & 42.09\% \\ 
+			U32 & 87 & 71h 9m & 76 473 KB & 91.65\% & 32.23\% \\ 
+			U33 & 85 & 110h 53m & 75 841 KB & 93.03\% & 44.06\% \\ 
+			U34 & 82 & 85h 21m & 75 610 KB & 91.60\% & 32.17\% \\ 
+			U40 & 85 & 81h 29m & 76 496 KB & 92.07\% & 36.79\% \\ 
+			U41 & 86 & 94h 15m & 75 831 KB & 92.40\% & 39.32\% \\ 
+			U42 & 87 & 69h 2m & 74 748 KB & 92.88\% & 43.22\% \\ 
+			U43 & 85 & 154h 52m & 75 527 KB & 92.38\% & 39.52\% \\ 
+			U50 & 84 & 183h 48m & 76 661 KB & 90.43\% & 25.11\% \\
+			U51 & 89 & 97h 36m & 76 243 KB & 92.26\% & 38.77\% \\ 
+			U52 & 81 & 82h 28m & 76 611 KB & 93.06\% & 44.39\% \\ 
+			U53 & 85 & 71h 54m & 76 452 KB & 90.04\% & 24.93\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testù vynechání pøíznakù pøi regularizaci L2 a konstantním delta}
@@ -1064,37 +1091,37 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 
 			\multicolumn{1}{|c|}{} &
 			\multicolumn{1}{|c|}{} &
-			\multicolumn{1}{|c|}{(76 697 368B)} &
+			\multicolumn{1}{|c|}{(76 697 KB)} &
 			\multicolumn{1}{|c|}{(92.17\%)} \\
 			\hline
-			U00 & Slovní tvar [-2] & -8 363 256B & -0.11\% \\ 
-			U01 & Slovní tvar [-1] & -7 986 148B & -2.11\% \\ 
-			U02 & Slovní tvar [0] & -5 918 732B & 0.64\% \\ 
-			U03 & Slovní tvar [+1] & -7 579 904B & 1.04\% \\ 
-			U04 & Slovní tvar [+2] & -7 579 904B & 1.17\% \\ 
-			U10 & Spoleèná znaèka [-2] & - 718 600B & 0.08\% \\ 
-			U11 & Spoleèná znaèka [-1] & - 508 744B & -0.29\% \\ 
-			U12 & Spoleèná znaèka [0] & - 74 640B & -3.76\% \\ 
-			U13 & Spoleèná znaèka [+1] & - 496 552B & 1.37\% \\ 
-			U14 & Spoleèná znaèka [+2] & - 703 720B & 0.66\% \\ 
-			U20 & Mo¾ná lemmata [-2] & -5 983 720B & 0.48\% \\ 
-			U21 & Mo¾ná lemmata [-1] & -5 561 716B & 0.47\% \\ 
-			U22 & Mo¾ná lemmata [0] & -4 140 296B & 0.35\% \\ 
-			U23 & Mo¾ná lemmata [+1] & -5 709 856B & 1.02\% \\ 
-			U24 & Mo¾ná lemmata [+2] & -6 190 056B & 0.50\% \\ 
-			U30 & Pøípona slova [-2] & -1 103 896B & 0.57\% \\ 
-			U31 & Pøípona slova [-1] & - 847 312B & 0.63\% \\ 
-			U32 & Pøípona slova [0] & - 223 644B & -0.52\% \\ 
-			U33 & Pøípona slova [+1] & - 855 848B & 0.86\% \\ 
-			U34 & Pøípona slova [+2] & -1 086 620B & -0.57\% \\ 
-			U40 & První písmeno & - 200 380B & -0.10\% \\ 
-			U41 & První dvì písmena & - 866 244B & 0.23\% \\ 
-			U42 & První tøi písmena & -1 948 452B & 0.71\% \\ 
-			U43 & Poslední písmeno & -1 170 080B & 0.21\% \\ 
-			U50 & Velikost písmen & -76 697 368B & -92.17\% \\ 
-			U51 & Pozice ve vìtì & - 453 628B & 0.09\% \\ 
-			U52 & Délka slova & - 86 072B & 0.89\% \\ 
-			U53 & Znaèka nejbl. slovesa & - 244 600B & -2.13\% \\ 
+			U00 & Slovní tvar [-2] & -8 363 KB & -0.11\% \\ 
+			U01 & Slovní tvar [-1] & -7 986 KB & -2.11\% \\ 
+			U02 & Slovní tvar [0] & -5 918 KB & 0.64\% \\ 
+			U03 & Slovní tvar [+1] & -7 579 KB & 1.04\% \\ 
+			U04 & Slovní tvar [+2] & -7 579 KB & 1.17\% \\ 
+			U10 & Spoleèná znaèka [-2] & - 718 KB & 0.08\% \\ 
+			U11 & Spoleèná znaèka [-1] & - 508 KB & -0.29\% \\ 
+			U12 & Spoleèná znaèka [0] & - 74 KB & -3.76\% \\ 
+			U13 & Spoleèná znaèka [+1] & - 496 KB & 1.37\% \\ 
+			U14 & Spoleèná znaèka [+2] & - 703 KB & 0.66\% \\ 
+			U20 & Mo¾ná lemmata [-2] & -5 983 KB & 0.48\% \\ 
+			U21 & Mo¾ná lemmata [-1] & -5 561 KB & 0.47\% \\ 
+			U22 & Mo¾ná lemmata [0] & -4 140 KB & 0.35\% \\ 
+			U23 & Mo¾ná lemmata [+1] & -5 709 KB & 1.02\% \\ 
+			U24 & Mo¾ná lemmata [+2] & -6 190 KB & 0.50\% \\ 
+			U30 & Pøípona slova [-2] & -1 103 KB & 0.57\% \\ 
+			U31 & Pøípona slova [-1] & - 847 KB & 0.63\% \\ 
+			U32 & Pøípona slova [0] & - 223 KB & -0.52\% \\ 
+			U33 & Pøípona slova [+1] & - 855 KB & 0.86\% \\ 
+			U34 & Pøípona slova [+2] & -1 086 KB & -0.57\% \\ 
+			U40 & První písmeno & - 200 KB & -0.10\% \\ 
+			U41 & První dvì písmena & - 866 KB & 0.23\% \\ 
+			U42 & První tøi písmena & -1 948 KB & 0.71\% \\ 
+			U43 & Poslední písmeno & -1 170 KB & 0.21\% \\ 
+			U50 & Velikost písmen & -76 697 KB & -92.17\% \\ 
+			U51 & Pozice ve vìtì & - 453 KB & 0.09\% \\ 
+			U52 & Délka slova & - 86 KB & 0.89\% \\ 
+			U53 & Znaèka nejbl. slovesa & - 244 KB & -2.13\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Srovnání výsledkù jednotlivých pravidel s referenèními daty pøi regularizaci L2}
@@ -1128,14 +1155,14 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 			\multicolumn{1}{|c|}{slov} \\
 
 			\hline 
-			U12 & Spoleèná znaèka [0] &  2 196 & - 74 640B & -3.76\% \\ 
-			U53 & Znaèka nejbl. slovesa &  10 102 & - 244 600B & -2.13\% \\ 
-			U01 & Slovní tvar [-1] &  181 706 & -7 986 148B & -2.11\% \\ 
-			U34 & Pøípona slova [+2] &  42 945 & -1 086 620B & -0.57\% \\ 
-			U32 & Pøípona slova [0] &  6 848 & - 223 644B & -0.52\% \\ 
-			U11 & Spoleèná znaèka [-1] &  20 282 & - 508 744B & -0.29\% \\ 
-			U00 & Slovní tvar [-2] &  206 833 & -8 363 256B & -0.11\% \\ 
-			U40 & První písmeno &  8 169 & - 200 380B & -0.10\% \\ 
+			U12 & Spoleèná znaèka [0] &  2 196 & - 74 KB & -3.76\% \\ 
+			U53 & Znaèka nejbl. slovesa &  10 102 & - 244 KB & -2.13\% \\ 
+			U01 & Slovní tvar [-1] &  181 706 & -7 986 KB & -2.11\% \\ 
+			U34 & Pøípona slova [+2] &  42 945 & -1 086 KB & -0.57\% \\ 
+			U32 & Pøípona slova [0] &  6 848 & - 223 KB & -0.52\% \\ 
+			U11 & Spoleèná znaèka [-1] &  20 282 & - 508 KB & -0.29\% \\ 
+			U00 & Slovní tvar [-2] &  206 833 & -8 363 KB & -0.11\% \\ 
+			U40 & První písmeno &  8 169 & - 200 KB & -0.10\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Pravidla s kladným efektem, seøazená podle zmìny ú¹pì¹nosti}
@@ -1160,29 +1187,29 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 			\multicolumn{1}{|c|}{slov} \\
 
 			\hline 
-			U13 & Spoleèná znaèka [+1] &  19 776 & - 496 552B & 1.37\% \\ 
-			U04 & Slovní tvar [+2] &  175 053 & -7 579 904B & 1.17\% \\ 
-			U03 & Slovní tvar [+1] &   204 827 & -7 579 904B & 1.04\% \\ 
-			U23 & Mo¾ná lemmata [+1] &  151 355 & -5 709 856B & 1.02\% \\ 
-			U52 & Délka slova &  3 542 & - 86 072B & 0.89\% \\ 
-			U33 & Pøípona slova [+1] &  33 256 & - 855 848B & 0.86\% \\ 
-			U42 & První tøi písmena &  63 397 & -1 948 452B & 0.71\% \\ 
-			U14 & Spoleèná znaèka [+2] &  28 410 & - 703 720B & 0.66\% \\ 
-			U02 & Slovní tvar [0] &  93 515 & -5 918 732B & 0.64\% \\ 
-			U31 & Pøípona slova [-1] &  32 870 & - 847 312B & 0.63\% \\ 
-			U30 & Pøípona slova [-2] &  43 638 & -1 103 896B & 0.57\% \\ 
-			U24 & Mo¾ná lemmata [+2] &  174 076 & -6 190 056B & 0.50\% \\ 
-			U20 & Mo¾ná lemmata [-2] &  165 890 & -5 983 720B & 0.48\% \\ 
-			U21 & Mo¾ná lemmata [-1] &  143 299 & -5 561 716B & 0.47\% \\ 
-			U22 & Mo¾ná lemmata [0] &  83 030 & -4 140 296B & 0.35\% \\ 
-			U41 & První dvì písmena &  32 709 & - 866 244B & 0.23\% \\ 
-			U43 & Poslední písmeno &  46 198 & -1 170 080B & 0.21\% \\ 
-			U51 & Pozice ve vìtì &  18 563 & - 453 628B & 0.09\% \\ 
-			U10 & Spoleèná znaèka [-2] &  29 032 & - 718 600B & 0.08\% \\ 
+			U13 & Spoleèná znaèka [+1] &  19 776 & - 496 KB & 1.37\% \\ 
+			U04 & Slovní tvar [+2] &  175 053 & -7 579 KB & 1.17\% \\ 
+			U03 & Slovní tvar [+1] &   204 827 & -7 579 KB & 1.04\% \\ 
+			U23 & Mo¾ná lemmata [+1] &  151 355 & -5 709 KB & 1.02\% \\ 
+			U52 & Délka slova &  3 542 & - 86 KB & 0.89\% \\ 
+			U33 & Pøípona slova [+1] &  33 256 & - 855 KB & 0.86\% \\ 
+			U42 & První tøi písmena &  63 397 & -1 948 KB & 0.71\% \\ 
+			U14 & Spoleèná znaèka [+2] &  28 410 & - 703 KB & 0.66\% \\ 
+			U02 & Slovní tvar [0] &  93 515 & -5 918 KB & 0.64\% \\ 
+			U31 & Pøípona slova [-1] &  32 870 & - 847 KB & 0.63\% \\ 
+			U30 & Pøípona slova [-2] &  43 638 & -1 103 KB & 0.57\% \\ 
+			U24 & Mo¾ná lemmata [+2] &  174 076 & -6 190 KB & 0.50\% \\ 
+			U20 & Mo¾ná lemmata [-2] &  165 890 & -5 983 KB & 0.48\% \\ 
+			U21 & Mo¾ná lemmata [-1] &  143 299 & -5 561 KB & 0.47\% \\ 
+			U22 & Mo¾ná lemmata [0] &  83 030 & -4 140 KB & 0.35\% \\ 
+			U41 & První dvì písmena &  32 709 & - 866 KB & 0.23\% \\ 
+			U43 & Poslední písmeno &  46 198 & -1 170 KB & 0.21\% \\ 
+			U51 & Pozice ve vìtì &  18 563 & - 453 KB & 0.09\% \\ 
+			U10 & Spoleèná znaèka [-2] &  29 032 & - 718 KB & 0.08\% \\ 
 			\hline
-			 & Celkem & 1 512 662 & -57 914 588B & 11.97\% \\ 
+			 & Celkem & 1 512 662 & -57 914 KB & \\ 
 			\hline
-			 & Teoretický výsledek &  479 081 & 18 688 032B & 104.14\% \\ 
+			 & Teoretický výsledek &  479 081 & 18 688 KB & \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Pravidla se záporným efektem, seøazená podle zmìny ú¹pì¹nosti}
@@ -1195,10 +1222,10 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 \subsection{Srovnání mezi L1 a L2}
 
 \section{Vyu¾ití zji¹tìných poznatkù pro zlep¹ení úspì¹nosti testování}
-Tato skupina testù se zaobírá vyu¾itím zji¹tìných údajù k vlastnímu zlep¹ení výsledkù algoritmù. Za pomocí vynechávání pravidel pro generování rysù, která podávala nejhor¹í výsledky, bude v nìkolika specifikovaných krocích (v¾dy nìkolik dal¹ích pravidel bude pøidáno do vynechané mno¾iny) provádìno testování a získané výsledky budou porovnávány s nejkvalitnìj¹ím výsledkem z pùvodního testu.
+Tato skupina testù se zaobírá vyu¾itím zji¹tìných údajù k vlastnímu zlep¹ení výsledkù algoritmù. Za pomoci vynechávání pravidel pro generování rysù, která podávala nejhor¹í výsledky, bude v nìkolika specifikovaných krocích provádìno testování (v¾dy nìkolik dal¹ích pravidel bude pøidáno do vynechané mno¾iny) a získané výsledky budou porovnávány s nejkvalitnìj¹ím výsledkem z pùvodního testu.
 
 \subsection{Pøi regularizaci L1}
-Pro tyto testy byly nakonec pou¾ity pouze dva kroky: bez tøí a ¹esti nejménì vhodných pravidel. Takto malý poèet testù byl zpùsoben anomáliemi pøi regularizaci L1 a nepøesvìdèívými výsledky po jejich provedení. Pøi vynechání prvních tøech pravidel se úspì¹nost zvý¹ila o 28 setin procenta, pøi dal¹ích tøech se ale ji¾ sní¾ila pod úroveò úspì¹nosti s vynecháním pouze jediného prvku. Zøejmì byl bylo mo¾né je¹tì provézt nìkolik dal¹ích testù za pøidání dal¹ích prvkù k prvnímu kroku, z èasových dùvodù v¹ak byla vypoèetní síla pøesunuta na testy s vy¹¹í hodnotou. Jediná pøínosná èást pøi tomto nastavení by tedy mohla být velikost modelu, která se nakonec pohybuje okolo 16MB a je tedy mnohem ni¾¹í, ne¾ konkurenèní regularizaci. Více podrobností v tabulkách~\ref{tab:KrokyL1}~a~{tab:NevhodneTestL1}.
+Pro tyto testy byly nakonec pou¾ity pouze dva kroky: bez tøí a ¹esti nejménì vhodných pravidel. Takto malý poèet testù byl zpùsoben anomáliemi pøi regularizaci L1 a nepøesvìdèívými výsledky po jejich provedení. Pøi vynechání prvních tøech pravidel se úspì¹nost zvý¹ila o 28 setin procenta, pøi dal¹ích tøech se ale ji¾ sní¾ila pod úroveò úspì¹nosti s vynecháním pouze jediného prvku. Zøejmì byl bylo mo¾né je¹tì provézt nìkolik dal¹ích testù za pøidání dal¹ích prvkù k prvnímu kroku, z èasových dùvodù v¹ak byla vypoèetní síla pøesunuta na testy s vy¹¹í hodnotou. Jediná pøínosná èást pøi tomto nastavení by tedy mohla být velikost modelu, která se nakonec pohybuje okolo 16MB a je tedy mnohem ni¾¹í, ne¾ konkurenèní regularizace. Více podrobností v tabulkách~\ref{tab:KrokyL1}~a~\ref{tab:NevhodneTestL1}.
 
 \begin{table}
 	\begin{center}
@@ -1207,7 +1234,6 @@ Pro tyto testy byly nakonec pou¾ity pouze dva kroky: bez tøí a ¹esti nejménì vho
 			\multicolumn{1}{|c|}{ID} &
 			\multicolumn{1}{|c|}{Vynechaná pravidla}\\
 			\hline 
-			ID & Vynechaná pravidla \\ 
 			Krok 1 & U04 U23 U33 \\ 
 			Krok 2 & U04 U23 U30 U33 U34 U41 \\ 
 			\hline
@@ -1237,9 +1263,9 @@ Pro tyto testy byly nakonec pou¾ity pouze dva kroky: bez tøí a ¹esti nejménì vho
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline 
-			U33 & 78h 14m & 17 678 220B & 1 969 100 &  431 720 & 89.37\% & 11.19\% \\ 
-			Krok 1 & 46h 17m & 16 552 380B & 1 612 918 &  413 408 & 89.65\% & 13.92\% \\ 
-			Krok 2 & 46h 15m & 14 796 028B & 1 493 626 &  354 589 & 88.99\% & 8.00\% \\ 
+			U33 & 78h 14m & 17 678 KB & 1 969 100 &  431 720 & 89.37\% & 11.19\% \\ 
+			Krok 1 & 46h 17m & 16 552 KB & 1 612 918 &  413 408 & 89.65\% & 13.92\% \\ 
+			Krok 2 & 46h 15m & 14 796 KB & 1 493 626 &  354 589 & 88.99\% & 8.00\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky pøi vynechání nejménì vhodných pravidel porovnané s referenèní hodnotou}
