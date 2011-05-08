@@ -8,6 +8,9 @@
 \providecommand{\selectlanguage}[1]{\relax}
 \providecommand{\eprint}[2][]{\url{#2}}
 
+\bibitem{Forney}
+Forney, D.~G.: The Viterbi Algorithm. 1973.
+
 \bibitem{Kovar}
 Kováø, J.: Skryté Markovské modely a neuronové sítì. {\tt
   https://dip.felk.cvut.cz/browse/pdfcache/kovarj4\_2008dipl.pdf}, 2008.
@@ -22,5 +25,18 @@ Nash, S.~G.; Nocedal, J.: A Numerical Study of the Limited Memory BFGS Method
   and the Truncated-Newton Method for Large Scale Optimization. {\tt
   http://math.asu.edu/~jtaylor/teaching/Fall2010/APM530/papers/Nash91.pdf},
   1991.
+
+\bibitem{Ng}
+Ng, A.~Y.: Feature selection, L1 vs. L2 regularization, and rotational
+  invariance. {\tt http://ai.stanford.edu/~ang/papers/icml04-l1l2.pdf}, 2004.
+
+\bibitem{Lawrence}
+Rabiner, L.~R.: A Tutorial on Hidden Markov Models and Selected Applications in
+  Speech Recognition. {\tt
+  http://www.ece.ucsb.edu/Faculty/Rabiner/ece259/Reprints/tutorial\%20on\%20hm%
+m\%20and\%20applications.pdf}, 1989.
+
+\bibitem{Shokhirev}
+Shokhirev, N.: ABC Tutorials - Hidden Markov Models. 2010.
 
 \end{thebibliography}
