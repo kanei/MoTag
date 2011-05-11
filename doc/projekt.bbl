@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -7,6 +7,14 @@
   \urlstyle{rm}\Url}\fi
 \providecommand{\selectlanguage}[1]{\relax}
 \providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem{Bottou}
+Bottou, L.: Stochastic Gradient Learning in Neural Networks. {\tt
+  http://leon.bottou.org/publications/pdf/nimes-1991.pdf}, 1991.
+
+\bibitem{Fink}
+Fink, G.~A.: \emph{Markov models for pattern recognition: from theory to
+  applications}. Springer, 2008, iSBN~978-3-540-71766-9.
 
 \bibitem{Forney}
 Forney, D.~G.: The Viterbi Algorithm. 1973.
@@ -19,6 +27,10 @@ Kováø, J.: Skryté Markovské modely a neuronové sítì. {\tt
 Lafferty, J.; McCallum, A.; Pereira, F.: Conditional Random Fields:
   Probabilistic Models for Segmenting and Labeling Sequence Data. {\tt
   http://www.cis.upenn.edu/~pereira/papers/crf.pdf}, 2001.
+
+\bibitem{Moss}
+Moss, L.: Example of the Baum-Welch Algorithm. {\tt
+  http://www.indiana.edu/~iulg/moss/hmmcalculations.pdf}, 2008.
 
 \bibitem{Nash}
 Nash, S.~G.; Nocedal, J.: A Numerical Study of the Limited Memory BFGS Method
@@ -33,10 +45,20 @@ Ng, A.~Y.: Feature selection, L1 vs. L2 regularization, and rotational
 \bibitem{Lawrence}
 Rabiner, L.~R.: A Tutorial on Hidden Markov Models and Selected Applications in
   Speech Recognition. {\tt
-  http://www.ece.ucsb.edu/Faculty/Rabiner/ece259/Reprints/tutorial\%20on\%20hm%
-m\%20and\%20applications.pdf}, 1989.
+  http://www.ece.ucsb.edu/Faculty/Rabiner/ece259/Reprints/}\\{\tt
+  tutorial\%20on\%20hmm\%20and\%20applications.pdf}, 1989.
 
 \bibitem{Shokhirev}
-Shokhirev, N.: ABC Tutorials - Hidden Markov Models. 2010.
+Shokhirev, N.: ABC Tutorials - Hidden Markov Models.
+  http://www.shokhirev.com/nikolai/abc/alg/hmm/hmm.html, 2010.
+
+\bibitem{Spoustova}
+Spoustová, D.; Hajiè, J.; Raab, J.; aj.: Semi-supervised Training for the
+  Averaged Perceptron POS Tagger. {\tt
+  http://www.aclweb.org/anthology/E/E09/E09-1087.pdf}, 2009.
+
+\bibitem{Votrubec}
+Votrubec, J.: Volba vhodné sady rysù pro morfologické znaèkování èe¹tiny. {\tt
+  http://ufal.mff.cuni.cz/czech-tagging/VotrubecMSC2005.pdf}, 2005.
 
 \end{thebibliography}

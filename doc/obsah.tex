@@ -2,8 +2,8 @@
 % (c) Michal Bidlo, Bohuslav Køena, 2008
 
 \chapter{Úvod}
-\label{chap:uvod}p
-Tato práce pojednává o vyu¾ití programù urèených k øe¹ení úloh strojového uèení (Conditional Random Fields s vyu¾ítím algoritmù Limited-memory BFGS a Stochastic Gradient Descent) a porovnání výsledkù s existujícími øe¹eními pro znaèkování èeského jazyka, kterými v na¹em pøípadì je program \emph{Morèe}~\footnote[1]{Stránky programu: http://ufal.mff.cuni.cz/morce/} vyvíjený na pra¾ské Univerzitì Karlovì (pou¾ívající Hidden Markov Model). Pro tento úkol byly vybrány programy \emph{CRF++} a \emph{CrfSuite}.
+\label{chap:uvod}
+Tato práce pojednává o vyu¾ití programù urèených k øe¹ení úloh strojového uèení (Conditional Random Fields s vyu¾itím algoritmù Limited-memory BFGS a Stochastic Gradient Descent) a porovnání výsledkù s existujícími øe¹eními pro znaèkování èeského jazyka, kterými v na¹em pøípadì je program \emph{Morèe}~\footnote[1]{Stránky programu: http://ufal.mff.cuni.cz/morce/} vyvíjený na pra¾ské Univerzitì Karlovì (pou¾ívající Hidden Markov Model). Pro tento úkol byly vybrány programy \emph{CRF++} a \emph{CrfSuite}.
 
 V dokumentu bude nejdøíve popsáno znaèkování èe¹tiny a pravidla s ním spojená. Budou zmínìny potí¾e, které jsou s ním spojeny v porovnání s jinými, morfologicky jednodu¹¹ími jazyky. Dále budou rozebrány matematické modely a algoritmy, které jsou pou¾ity pøi procesu uèení. K celému procesu bylo potøeba vytvoøit nìkolik nástrojù, buï konvertujících vstupní data pro jednotlivé programy, nebo ulehèujících vlastní proces testování. Mezi tyto patøí skritpy napsané v jazyce \emph{Python} a \emph{BASH} a informaèní systém, starající se o správu bì¾ících a dokonèených testù a informací o nich, implementovaný za pomocí \emph{PHP}, \emph{SQL} a \emph{HTML}, postavený na open-source CMS\footnote[2]{Z angl. content management system - software pro správu obsahu} systému \emph{Drupal}\footnote[3]{Stránky programu: http://www.drupal.org}. Ve¹kerý kód byl spravován pomocí verzovacího systému \emph{GIT}\footnote[4]{Stránky programu: http://git-scm.com/} a je veøejnì dostupný na internetu\footnote[5]{Adresa repozitáøe: http://github.com/kanei/MoTag}.
 
@@ -23,12 +23,13 @@ Pro dal¹í text definujeme následující termíny:
 		jednotlivých rysù 
 	\item \textbf{Lemma} -- základní podoba slova (slovníkový tvar)
 \end{itemize}
+
 \chapter{Znaèkování èeského jazyka}
 \label{chap:znackovani}
 \section{Proè znaèkovat jazyk}
 Pøi mnoha úkonech v dne¹ní dobì chceme po poèítaèi, aby co nejlépe rozumnìl na¹im po¾adavkùm a byl schopen nám poskytnout co nejpøesnìj¹í výsledky. K tomuto je èasto potøeba, aby stroj pochopil význam textu a tím pádem morfologické stavbì vìt. V èeském jazyce má mnoho slov tzv. homonymní tvar -- jedno slovo mù¾e být v rùzných pøípadech naprosto odli¹ným slovním druhem, nebo mít odli¹né urèení slovních kategorií (napø. pila, kolem, ...). Pøi strojové analýze textu, pøekladech apod. je proto dùle¾ité, abychom byli schopni tyto kategorie rozli¹ovat a pøiøazovat jednotlivým slovùm jejich správnou znaèku.
 
-Pøi procesu znaèkování je pro ka¾dé slovo vstupního textu pøiøazena znaèka, urèující jeho mluvnické kategorie. Tento proces je èasto rozdìlen na nìkolik krokù, kdy slovu nejdøíve pøiøadíme v¹echny mo¾né znaèky a poté teprve vybereme tu správnou. V této práci se budeme zabývat pouze druhým krokem a v¹echna vstupní data proto ji¾ budou mít nastavena mno¾inu v¹ech znaèek, pøipadajících v úvahu, a také tu správnou (ruènì zadaou) poskytující nám vlastní mo¾nost trénování. 
+Pøi procesu znaèkování je pro ka¾dé slovo vstupního textu pøiøazena znaèka, urèující jeho mluvnické kategorie. Tento proces je èasto rozdìlen na nìkolik krokù, kdy slovu nejdøíve pøiøadíme v¹echny mo¾né znaèky a poté teprve vybereme tu správnou. V této práci se budeme zabývat pouze druhým krokem a v¹echna vstupní data proto ji¾ budou mít nastavena mno¾inu v¹ech znaèek, pøipadajících v úvahu, a také tu správnou (ruènì zadanou) poskytující nám vlastní mo¾nost trénování. 
 
 \section{Kategorie popisované znaèkou v èeském jazyce}
 Ka¾dé slovo èeského jazyka má mnoho kategorií, do kterých mù¾e být zaøazeno -- od slovního druhu po slovesný vid. Ve strojovém zpracování jazyka lze pou¾ít nìkolika rùzných pøístupù k ulo¾ení tìchto informací. V na¹em pøípadì bude struktura znaèek odpovídat systému\footnote[1]{Popis morfologických znaèek: http://ucnk.ff.cuni.cz/bonito/znacky.php} pou¾ívanému na pra¾ské Univerzitì Karlovì. Tento systém se skládá ze 16 pozic (viz. tabulka~\ref{tab:PopisZnacek}).
@@ -48,7 +49,7 @@ Ka¾dé slovo èeského jazyka má mnoho kategorií, do kterých mù¾e být zaøazeno -- o
 		9 & Èas \\
 		10 & Stupeò \\
 		11 & Negace \\
-		12 & Aktívum/pasívum \\	
+		12 & Aktivum/pasivum \\	
 		13 & Nepou¾ito \\
 		14 & Nepou¾ito \\
 		15 & Varianta, stylový pøíznak a pod. \\
@@ -62,24 +63,26 @@ Ka¾dé slovo èeského jazyka má mnoho kategorií, do kterých mù¾e být zaøazeno -- o
 \section{Problémy pøi znaèkování}
 Zatímco v angliètinì pøi pouhém oznaèkování slov s jednoznaènou znaèkou dosáhneme úspì¹nosti kolem 90\%, v èeském jazyce je situace mnohem slo¾itìj¹í. Kvùli vý¹e zmínìné homonymii a mno¾ství kategorii, do kterých v èeském jazyce slova mù¾eme zaøadit, bychom se v na¹em pøípadì k 90\% urèitì ani nepøiblí¾ili. V angliètinì se proto také pou¾ívá pouze tøí-pozicová znaèka, která velmi ulehèuje práci ve¹kerým automatickým programùm. Pøi takto nízkém poètu je také velmi nízká pamì»ová nároènost a poèet mo¾ných pøechodù není tak vysoký. Naproti tomu v èe¹tinì je kvùli 16 pozicím mo¾no získat celkový poèet znaèek v øádu tisícù unikátních stavù a tím se neúmìrnì zvy¹uje èasová i pamì»ová nároènost celého procesu znaèkování. Z tohoto dùvodu jsem se pokou¹el z této nároènosti ubrat vypu¹tìním ménì dùle¾itých kategorií a tím sní¾it celkový poèet variant k èíslu nepøevy¹ujícímu jeden tisíc. Nároènost na procesorový èas se tím razantnì sní¾ila a dala mi tak ¹anci otestovat mnohem vìt¹í mno¾ství kombinací rysù a nastavení programù.
 \section{Data}
-K trénování a následné evaluaci výsledkù máme k dispozici okolo 77 000 vìt. Data jsou získána z korpusu \emph{PDT 2.0}\footnote[1]{Stránky PDT 2.0: http://ufal.mff.cuni.cz/pdt2.0/} a ulo¾ena ve formátu dat \emph{CSTS}\footnote[1]{Definice: http://ufal.mff.cuni.cz/pdt2.0/doc/data-formats/csts/html/DTD-HOME.html}. Pomocí skriptù napsaných pøevá¾nì v jazyce \emph{Python} jsou poté tato data pøevedena do formátu kompatibilního s pou¾itými programy.
+K trénování a následné evaluaci výsledkù máme k dispozici okolo 77 000 vìt. Data jsou získána z korpusu \emph{PDT 2.0}\footnote[1]{Stránky PDT 2.0: http://ufal.mff.cuni.cz/pdt2.0/} a ulo¾ena ve formátu dat \emph{CSTS}\footnote[1]{Definice: http://ufal.mff.cuni.cz/pdt2.0/doc/data-formats/csts/html/DTD-HOME.html}. Pomocí skriptù v jazyce \emph{Python} jsou tato data následnì pøevedena do formátu kompatibilního s pou¾itými programy.
+
 \section{Existující øe¹ení pro znaèkování èeského jazyka}
-Pro porovnání výsledkù tohoto projektu byl pou¾it program \emph{Morèe} vytvoøený na Ústavu formální a aplikované lingvistiky na Univerzitì Karlovì v Praze. K trénování je vyu¾íván skrytý markovský model s pou¾itím prùmìrovaného perceptronu. Vstupními daty je korpus \emph{PDT 2.0} s údaji ve formátu \emph{CSTS}. Podle dostupných údajù program dosahuje úspì¹nosti od 95 do 96 procent je tudí¾ nejpøesnìj¹ím znaèkovacím programem pro zpracování èeského jazyka. Z dùvodu pou¾ití stejných dat tedy nebude problém porovnat koneènou úspì¹nost námi pou¾ité implementace s úspì¹ností programu \emph{Morèe}.
+Pro porovnání výsledkù tohoto projektu byl pou¾it program \emph{Morèe} vytvoøený na Ústavu formální a aplikované lingvistiky na Univerzitì Karlovì v Praze. K trénování je vyu¾íván skrytý markovský model s pou¾itím prùmìrovaného perceptronu. Vstupními daty je korpus \emph{PDT 2.0} s údaji ve formátu \emph{CSTS}. Podle dostupných údajù program dosahuje úspì¹nosti od 95 do 96 procent je tudí¾ nejpøesnìj¹ím znaèkovacím programem pro zpracování èeského jazyka. Z dùvodu pou¾ití stejných dat tedy nebude problém porovnat koneènou úspì¹nost námi pou¾ité implementace s úspì¹ností programu \emph{Morèe}. Dal¹í informace o konkurenèním øe¹ení a jeho funkcionalitì, které z velké èásti poslou¾ily i jako inspirace pøi tomto projektu lze nalézt v~\cite{Votrubec}~a~\cite{Spoustova}.
 
 \chapter{Popis algoritmù a modelù}
 \label{chap:algoritmy}
 
-Pro odli¹ení od existujících øe¹ení byl vybrán algoritmus Conditional Random Fields (CRF), roz¹iøující Hidden Markov Model a tím nabízející vý¹¹í úèinnost na vstupních datech. Pro lep¹í pochopení CRF je potøeba nejdøíve porozumìt zpùsobu, jakým pracuje algoritmus HMM. V mnoha existujících øe¹eních se poté pro urèení parametrù pou¾ívají rùzné algoritmy od Viterbiho algoritmu, pou¾ívaného ji¾ od 60. let minulého století, pøes Forward-Backward algoritmus, jeho modifikaci Baum-Welchùv algoritmus, a¾ po \uv{nejmodernìj¹í} zástupce, kterými jsou Low Memory BFGS a Stochastic Gradient Descent, poskytující nejlep¹í výsledky a sní¾ení pamì»ové a èasové nároènosti.
+Pro odli¹ení od existujících øe¹ení byl vybrán algoritmus Conditional Random Fields (CRF), roz¹iøující Hidden Markov Model a tím nabízející vy¹¹í úèinnost na vstupních datech. Pro lep¹í pochopení CRF je potøeba nejdøíve porozumìt zpùsobu, jakým pracuje algoritmus HMM. V mnoha existujících øe¹eních se poté pro urèení parametrù pou¾ívají rùzné algoritmy od Viterbiho algoritmu, pou¾ívaného ji¾ od 60. let minulého století, pøes Forward-Backward algoritmus, jeho modifikaci Baum-Welchùv algoritmus, a¾ po \uv{nejmodernìj¹í} zástupce, kterými jsou Low Memory BFGS a Stochastic Gradient Descent, poskytující nejlep¹í výsledky a sní¾ení pamì»ové a èasové nároènosti.
 
-Celý proces poté probíhá za tzv. Supervised Learning (uèení s uèitelem), kdy programu nejdøíve pøedlo¾íme ji¾ správnì oznaèená data a necháme jej, aby se pomocí jednoho z vý¹e zmínìných algoritmù nauèil správné parametry modelu (CRF nebo HMM). Takto získaný model poté aplikujeme na men¹í skupinu dat, pomocí které poté urèíme koneènou úspì¹nost celého procesu.
+Celý proces probíhá za tzv. Supervised Learning (uèení s uèitelem), kdy programu nejdøíve pøedlo¾íme ji¾ správnì oznaèená data a necháme jej, aby se pomocí jednoho z vý¹e zmínìných algoritmù nauèil správné parametry modelu (CRF nebo HMM). Takto získaný model pak aplikujeme na men¹í skupinu dat, pomocí které urèíme koneènou úspì¹nost celého procesu.
 
 \section{Hiden Markov Model (HMM)}
 \label{sec:hmm}
 \subsubsection*{Základní informace}
-Skrytý markovský model, popsaný v~\cite{Kovar}~a~\cite{Lawrence}, pojmenovaný po ruském matematikovi Andreyi Markovi, oznaèuje statistický model urèený pro popis posloupnosti obsahující Markovské stavy. Tìmi máme na mysli takový stav, pro nì¾ je dùle¾itá pouze blízká minulost (v na¹em pøípadì pouze nìkolik pøedchozích stavù -- znaèek) a vzdálená minulost je zanedbána. Ve zpracování jazyka se èasto omezuje zpracování pouze na dvì pøedchozí znaèky.
+Skrytý markovský model, popsaný v~\cite{Fink},~\cite{Kovar}~a~\cite{Lawrence}, pojmenovaný po ruském matematikovi Andreyi Markovi, oznaèuje statistický model urèený pro popis posloupnosti obsahující Markovské stavy. Tìmi máme na mysli takový stav, pro nì¾ je dùle¾itá pouze blízká minulost (v na¹em pøípadì pouze nìkolik pøedchozích stavù -- znaèek) a vzdálená minulost je zanedbána. Ve zpracování jazyka se èasto omezuje zpracování pouze na dvì pøedchozí znaèky. 
 
 \subsubsection*{Popis a definice}
-HMM je koneèným automatem, vyjádøeným jako $(A, B, \Pi)$, kde $A$ popisuje hodnoty pravdìpodobnosti pøechodu, $B$ hodnoty pravdìpodobnosti generování (výstupu) a $\Pi$ hodnoty pravdìpodobnosti úvodního stavu. Mno¾ina skrytých stavù $Q$ a seznam výstupních hodnot (pozorování) $O$ jsou pokládány za známé a nejsou tedy zahrnuty do definice. Aktuální stav není pozorovatelný a místo toho ka¾dý stav s urèitou pravdìpodobností($B$) generuje výstup.
+HMM je koneèným automatem, vyjádøeným jako $(A, B, \Pi)$, kde $A$ popisuje hodnoty pravdìpodobnosti pøechodu, $B$ hodnoty pravdìpodobnosti generování (výstupu) a $\Pi$ hodnoty pravdìpodobnosti úvodního stavu. Mno¾ina skrytých stavù $Q$ a seznam výstupních hodnot (pozorování) $O$ jsou pokládány za známé a nejsou tedy zahrnuty do definice. Aktuální stav není pozorovatelný a místo toho ka¾dý stav s urèitou pravdìpodobností($B$) generuje výstup. Následující definice byly pøevzaty z èlánku~\cite{Shokhirev}.
+
 \begin{gather}
 	\Lambda = (A, B, \Pi)\\
 	\Pi = {p_i = P(q_i[t = 1])}\\
@@ -136,7 +139,7 @@ Zatímco u klasického Markovského modelu známe posloupnost vstupních hodnot, v na
 Horní øada popisuje mno¾inu skrytých stavù($Q$) a èerné èáry mo¾né pøechody mezi nimi s vyznaèenou pravdìpodobností($A$). Modré spojnice oznaèují pravdìpodobnosti vygenerování obrazcù z jednotlivých stavu($B$) a obrazce pod èarou (ètverec, kosoètverec, trojúhelník) jsou posloupností výstupních (pozorovaných) stavù($O$).
 
 \paragraph{Vysvìtlení} 
-Abychom získali v prvním kroku kruh, musíme aktuální stav, ve kterém se nacházíme, mít mo¾nost kruh vygenerovat -- v na¹em pøípadì jsou to stavy \emph{Stav 1} a \emph{Stav 2}. Zapí¹eme je tedy do prvního sloupeèku tabulky. Abychom jako druhý prvek posloupnosti získali kosoètverec, musíme být ve \emph{Stavu 2}, nebo» ten jako jediný poskytuje tento obrazec. Pøi prvním kroku jsme si vypsali \emph{Stav 1} a \emph{Stav 2}, ze \emph{Stavu 2} se v¹ak zpìt do \emph{Stavu 2} nemù¾eme dostat a tudí¾ vypadává z mo¾ných posloupností a zùstává nám posloupnost (\emph{Stav 1}~$\rightarrow$~\emph{Stav 2}). Kdybychom takto pokraèovali a¾ do konce, získáme ètyøi mo¾nosti, zachycené v tabulce~\ref{tab:HMMPrechody}. Nejpravdìpodobnìj¹í z nich bychom byli schopni urèit pomocí ohodnocení jednotlivých pøechodù a výbìrem toho s nejvy¹¹í pravdìpodobností, k èemu¾ jsou vyu¾ity ní¾e popsané algoritmy, vyu¾ívající rùzných metod k optimalizaci tohoto procesu. 
+Abychom získali v prvním kroku kruh, musíme aktuální stav, ve kterém se nacházíme, mít mo¾nost kruh vygenerovat -- v na¹em pøípadì jsou to stavy \emph{Stav 1} a \emph{Stav 2}. Zapí¹eme je tedy do prvního sloupeèku tabulky. Abychom jako druhý prvek posloupnosti získali kosoètverec, musíme být ve \emph{Stavu 2}, nebo» ten jako jediný poskytuje tento obrazec. Pøi prvním kroku jsme si vypsali \emph{Stav 1} a \emph{Stav 2}, ve \emph{Stav 2} v¹ak nemù¾eme setrvat a ten tudí¾ vypadává z mo¾ných posloupností a zùstává nám posloupnost (\emph{Stav 1}~$\rightarrow$~\emph{Stav 2}). Kdybychom takto pokraèovali a¾ do konce, získáme ètyøi mo¾nosti, zachycené v tabulce~\ref{tab:HMMPrechody}. Nejpravdìpodobnìj¹í z nich bychom byli schopni urèit pomocí ohodnocení jednotlivých pøechodù a výbìrem toho s nejvy¹¹í pravdìpodobností, k èemu¾ jsou vyu¾ity ní¾e popsané algoritmy, vyu¾ívající rùzných metod k optimalizaci tohoto procesu. 
 
 \pagebreak
 
@@ -145,14 +148,14 @@ Abychom získali v prvním kroku kruh, musíme aktuální stav, ve kterém se nacházím
 \subsubsection*{Základní informace} CRF mù¾eme popsat jako bezsmìrový grafický pravdìpodobnostní model (undirected probabilistic graphical model), ve kterém ka¾dý uzel (v na¹em pøípadì slovo) popisuje náhodnou promìnnou. CRF mù¾e také být vyjádøen jako model s koneèným poètem stavù a nenormalizovanými pravdìpodobnostmi pøechodù. V porovnání k HMM nemá jasnì dané hodnoty pøechodù mezi stavy a disponuje mo¾ností mnohonásobných funkcí, generujících rysy. Pøiná¹í také lep¹í výsledky ve zpracování dat se závislostmi vy¹¹ího øádu, které vìt¹inou lépe odpovídají reálnému modelu. Na rozdíl od generativních modelù také, jako¾to pravdìpodobnostní (conditional) model nemusí zkoumat v¹echny mo¾né sekvence pozorovaných prvkù. Pro urèení parametrù tohoto modelu je v souèasné dobì nejvíce doporuèován algoritmus L-BFGS (Low-Memory BFGS), který by mìl poskytovat nejkvalitnìj¹í výsledky (v pøípadì této práce se to v¹ak nepotvrdilo a vhodnìj¹í se nakonec ukázal algoritmus SGD).
 
 \subsubsection*{Popis a definice}
-Jak je popsáno v ~\cite{Lafferty}, nejprve si definujeme $X$ jako náhodnou promìnnou dat(v na¹em pøípadì vìt) urèených k oznaèkování a $Y$ jako náhodnou promìnnou korespondujících znaèek. V¹echny $Y_i$ z $Y$ poté nále¾í abecedì $\xi$, která tedy obsahuje mno¾inu v¹ech pou¾itých znaèek. Vytvoøíme pak model $P(X|Y)$ z párù pozorovaných hodnot a sekvencí znaèek. CRF pak mù¾eme vyjádøit následujícím odstavcem:
+Jak je popsáno v ~\cite{Lafferty}, nejprve si definujeme $X$ jako náhodnou promìnnou dat(v na¹em pøípadì vìt) urèených k oznaèkování a $Y$ jako náhodnou promìnnou korespondujících znaèek. V¹echny $Y_i$ z $Y$ nále¾í abecedì $\xi$, která tedy obsahuje mno¾inu v¹ech pou¾itých znaèek. Vytvoøíme pak model $P(X|Y)$ z párù pozorovaných hodnot a sekvencí znaèek. CRF pak mù¾eme vyjádøit následujícím odstavcem:
 \paragraph*{Definice} \textit{Nech» $G = (V,E)$ je grafem, u kterého platí $Y = (Y_v)_{v \in V}$ tak, ¾e $Y$ je indexováno body vektoru $G$. Poté $(X,Y)$ vyjadøuje CRF v pøípadì, kdy náhodné promìnné $Y_v$ jsou podmínìné $X$ a vyhovují Markovské vlastnosti s ohledem na graf vyjádøený vzorcem~\ref{eq:crfgraf}, kde $w \sim v$ znaèí, ¾e prvky $w$ a $v$ spolu ve vektoru $G$ sousedí.}
 
 \begin{equation} \label{eq:crfgraf}
 	p(Y_v | X, Y_w , w \not= v) = p(Y_v | X, Y_w , w \sim v)
 \end{equation}
 
-Aèkoliv by $G$, $X$ i $Y$ mohly nabývat rùzných forem stromù, pro potøeby této práce je budeme pova¾ovat za jednoduché øetìzce - $G = (V = \{1, 2, \cdots m\}, E = \{(i, i + 1)\})$, $X = (X_1 , X_2 , \cdots , X_n )$ a $Y = (Y_1 , Y_2 , \cdots , Y_n )$. Mù¾eme tedy základní teorém CRF definovat vzorcem~\ref{eq:crf}, ve kterém $x$ je sekvencí dat, $y$ sekvencí znaèek a $y|_s$ je mno¾inou souèásti $y$ spojenous vrcholy podgrafu $s$. $f_k$ a $g_k$ oznaèují rysy modelu.
+Aèkoliv by $G$, $X$ i $Y$ mohly nabývat rùzných forem stromù, pro potøeby této práce je budeme pova¾ovat za jednoduché øetìzce - $G = (V = \{1, 2, \dotsc m\}, E = \{(i, i + 1)\})$, $X = (X_1 , X_2 , \dotsc , X_n )$ a $Y = (Y_1 , Y_2 , \dotsc , Y_n )$. Mù¾eme tedy základní teorém CRF definovat vzorcem~\ref{eq:crf}, ve kterém $x$ je sekvencí dat, $y$ sekvencí znaèek a $y|_s$ je mno¾inou souèástí $y$ spojených s vrcholy podgrafu $s$. Rysy modelu jsou oznaèeny jako $f_k$ a $g_k$.
 
 \begin{equation} \label{eq:crf}
 	p \theta (y | x) \propto \\
@@ -175,19 +178,19 @@ Problém ¹patného vyva¾ování znaèek (viz.~\cite{Lafferty}) spoèívá v pøesunu prav
 Viterbiho algoritmus\cite{Forney} byl navrhnut v roce 1967 Andrewem Viterbim jako dekódovací algoritmus pro konvoluèní kódy v telekomunikaèních sítích. Kvùli svému zamìøení na vyhledání nejpravdìpodobnìj¹í cesty sekvencí skrytých stavù (nejèastìji HMM) se v¹ak pou¾ívá v mnoha odvìtvích jako napø. zpracování signálù, nebo znaèkování jazyka. 
 
 \subsubsection*{Popis a definice}
-Za pøedpokladu, ¾e vstupní data mají stejný poèet pozorovaných a skrytých stavù, obì posloupnosti jsou zarovnané a výpoèet v daném místì je závislý pouze na aktuálním a pøedchozím prvku, mù¾eme s jeho pomocí získat tzv. Viterbiho cestu -- nejpravdìpodobnìj¹í cestu posloupností. V ka¾dém kroku algoritmus vyhodnotí v¹echny cesty vedoucí k aktuálnímu stavu a ponechá pouze tu nejlep¹í, díky èemu¾ není nucen uchovávat v¹echny existující cesty, ale pouze jednu pro ka¾dý stav. Za pomocí uchovávaní ceny stavu se poka¾dé algoritmus rozhodne ze v¹ech následujícíh mo¾ností a ulo¾í kompletní cestu od zaèátku prùchodu posloupností.
+Za pøedpokladu, ¾e vstupní data mají stejný poèet pozorovaných a skrytých stavù, obì posloupnosti jsou zarovnané a výpoèet v daném místì je závislý pouze na aktuálním a pøedchozím prvku, mù¾eme s jeho pomocí získat tzv. Viterbiho cestu -- nejpravdìpodobnìj¹í cestu posloupností. V ka¾dém kroku algoritmus vyhodnotí v¹echny cesty vedoucí k aktuálnímu stavu a ponechá pouze tu nejlep¹í, díky èemu¾ není nucen uchovávat v¹echny existující cesty, ale pouze jednu pro ka¾dý stav. Za pomoci uchovávaní ceny stavu se poka¾dé algoritmus rozhodne ze v¹ech následujících mo¾ností a ulo¾í kompletní cestu od zaèátku prùchodu posloupností. Následující definice byly pøevzaty z èlánku~\cite{Shokhirev}.
  
 \paragraph*{Definice} Nech» $\delta_t(i)$ je maximální pravdìpodobností posloupností s délkou $t$ konèících ve stavu $i$ a pro daný model produkuje prvních $t$ pozorovaných objektù.
 
 \begin{equation}
-	\delta_t(i) = max\{P\big(q(1), q(2), \cdots, q(t-1) ; o(1), o(2), ... , o(t) | q(t) = q_i \big).\}
+	\delta_t(i) = max\{P\big(q(1), q(2), \dotsc, q(t-1) ; o(1), o(2), ... , o(t) | q(t) = q_i \big).\}
 \end{equation}
 
 \subparagraph*{Inicializace:}
 \begin{equation}
 \begin{split}
   	\delta_1(i) = p_i b_i\big(o(1)\big) \\
-	\psi_1(i) = 0 , i = 1, \cdots , N
+	\psi_1(i) = 0 , i = 1, \dotsc , N
 \end{split}
 \end{equation}
 
@@ -209,77 +212,102 @@ Za pøedpokladu, ¾e vstupní data mají stejný poèet pozorovaných a skrytých stavù,
 
 \subparagraph*{Zpìtné dohledání cesty}
 \begin{equation}
-	 q\ast_t = \psi_t+1( q\ast_{t+1}) , t = T - 1,  T - 2 , \cdots , 1
+	 q\ast_t = \psi_t+1( q\ast_{t+1}) , t = T - 1,  T - 2 , \dotsc , 1
 \end{equation}
 
 \section{Forward-backward algorithm}
 \label{sec:forw-back}
-\subsubsection*{Základní informace} Pou¾ívá dva prùchody posloupností stavù -- dopøedu a zpìt (podle toho také vznikl jeho název). Nejdøíve projde celou sekvenci a urèí cenu cesty pøi daném prùchodu. Poté projde sekvencí zpìt a pøi ka¾dém kroku spoèítá pravdìpodobnost pozorování zbylých vstupních hodnot. Oba tyto prùchody jsou poté \uv{vyhlazeny} do spoleèného výsledku. Speciálním pøípadem je poté Baum-Welchùv algoritmus.
+\subsubsection*{Základní informace} Pou¾ívá dva prùchody posloupností stavù -- dopøedu a zpìt (podle toho také vznikl jeho název). Nejdøíve projde celou sekvenci a urèí cenu cesty pøi daném prùchodu. Poté projde sekvencí zpìt a pøi ka¾dém kroku spoèítá pravdìpodobnost pozorování zbylých vstupních hodnot. Oba tyto prùchody jsou následnì \uv{vyhlazeny} do spoleèného výsledku. Speciálním pøípadem je Baum-Welchùv algoritmus, jeho¾ pøíklad zpracování je dostupný v~\cite{Moss}.
 
 \subsubsection*{Popis a definice}
 V prvním kroku je proveden algoritmus prùchodu smìrem od zaèátku ke konci. Nejprve je vypoètena úvodní pravdìpodobnost posloupnosti o jediném prvku $o(1)$. Pravdìpodobnost $\alpha_t(i+1)$ vypoèteme vynásobením v¹ech $\alpha_t(i)$ odpovídající pravdìpodobností pøechodu do následujícího stavu a výsledek vynásobíme výstupní pravdìpodobností prvku $o(t+1)$. Po vypoètení v¹ech krokù a jejich seètení získáme po¾adovanou celkovou pravdìpodobnost.
 
 \paragraph*{Definice (forward)}
-Nech» $a_t(i)$ je pravdìpodobností èásti sekvence pozorovaných prvkù \\$O_t=\{o(1),o(2),\cdots,o(t)\}$ produkovaných v¹emi mo¾nými posloupnostmi konèícími $i$-tým stavem (viz.~\cite{Shokhirev}).
+Nech» $a_t(i)$ je pravdìpodobností èásti sekvence pozorovaných prvkù \\$O_t=\{o(1),o(2),\dotsc,o(t)\}$ produkovaných v¹emi mo¾nými posloupnostmi konèícími $i$-tým stavem. Následující definice byly pøevzaty z èlánku~\cite{Shokhirev}.
 
 \begin{equation}
-	a_t(i) = P\big(o(1), o(2), \cdots , o(t) | q(t) = q_i \big)
+	a_t(i) = P\big(o(1), o(2), \dotsc , o(t) | q(t) = q_i \big)
 \end{equation}
 
 \subparagraph*{Inicializace (forward):}
 \begin{equation}
-  	\alpha_1(i) = p_i b_i\big(o(1)\big), i = 1, \cdots , N
+  	\alpha_1(i) = p_i b_i\big(o(1)\big), i = 1, \dotsc , N
 \end{equation}
 
 \subparagraph*{Rekurze (forward):}
 \begin{equation}
 \begin{split}
 	\alpha_{t+1}(i)= \left[\sum_{j=1}^N \alpha_t(j) a_{ji} \right] b_i \big(o(t + 1)\big) \\
-	i = 1, \cdots, N , t =1, \cdots , T - 1
+	i = 1, \dotsc, N , t =1, \dotsc , T - 1
 \end{split}
 \end{equation}
 
 \subparagraph*{Ukonèení (forward):}
 \begin{equation}
-	P\big(o(1)o(2) \cdots o(T)\big) = \sum_{j=1}^N \alpha_T(j)
+	P\big(o(1)o(2) \dotsc o(T)\big) = \sum_{j=1}^N \alpha_T(j)
 \end{equation}
 
 \paragraph*{Definice (backward)}
 V podobném smyslu definujeme zpìtnou promìnnou $\beta_t(i)$ jako podmínìnou pravdìpodonost èásti sekvence pozorovaných prvkù od $o(t+1)$ a¾ do konce pro v¹echny posloupnosti zaèínající v $i$-tém stavu.
 
 \begin{equation}
-	\beta_t(i) = P\big(o(t+1), o(t+2), \cdots , o(T) | q(t) = q_i \big).
+	\beta_t(i) = P\big(o(t+1), o(t+2), \dotsc , o(T) | q(t) = q_i \big).
 \end{equation}
-Backward algoritmus poèítá pomocí rekuzního prùchodu smìrem zpìt a narozdíl od Forward algoritmu není vyu¾íván ke generování výstupních prvkù, oba jsou v¹ak vyu¾ívány k vyhledání ideálního parametru HMM.
+Backward algoritmus poèítá pomocí rekuzního prùchodu smìrem zpìt a na rozdíl od Forward algoritmu není vyu¾íván ke generování výstupních prvkù, oba jsou v¹ak vyu¾ívány k aproximaci parametru HMM.
 
 \subparagraph*{Inicializace (backward):}
 \begin{equation}
-	\beta_T(i) = 1 , i = 1, \cdots , N
+	\beta_T(i) = 1 , i = 1, \dotsc , N
 \end{equation}
 
 \subparagraph*{Rekurze (backward):}
 \begin{equation}
 \begin{split}
 	\beta_t(i) = \sum_{j=1}^N a_{ij}b_j\big(o(t+1)\big)\beta_{t+1}(j)\\
-	i = 1, \cdots , N , t = T - 1,  T - 2 , \cdots  , 1
+	i = 1, \dotsc , N , t = T - 1,  T - 2 , \dotsc  , 1
 \end{split}
 \end{equation}
 \subparagraph*{Ukonèení (backward):}
 \begin{equation}
-	P\big(o(1)o(2) \cdots o(T)\big) = \sum_{j=1}^N p_j b_j\big(o(1)\big)\beta_1(j)
+	P\big(o(1)o(2) \dotsc o(T)\big) = \sum_{j=1}^N p_j b_j\big(o(1)\big)\beta_1(j)
 \end{equation}
 
 %http://www.shokhirev.com/nikolai/abc/alg/hmm/hmm.html
 
-\section{L-BFGS}
+\section{Low memory BFGS}
 \label{sec:lbfgs}
 
 \subsubsection*{Základní informace}
 
-L-BFGS (viz.~\cite{Nash}) oznaèuje nízko pamì»ovou (Low memory) úpravu optimalizaèní metody BFGS (Broyden-Fletcher-Goldfarb-Shanno) z rodiny Quasi-Newtonových metod, urèenou k aproximaci inverzní Hessovy matice\footnote[1]{ètvercová matice druhých parciálních derivací funkce -- popisuje místní zakøivení funkce o nìkolika promìnných}. Optimalizací pro sní¾ení pamì»ové nároènosti je neukládání matice samotné, ale pouze ukládá historii zmìn.
+L-BFGS (viz.~\cite{Nash}) oznaèuje nízko pamì»ovou (Low memory) úpravu optimalizaèní metody BFGS (Broyden-Fletcher-Goldfarb-Shanno) z rodiny Quasi-Newtonových metod, urèenou k aproximaci inverzní Hessovy matice\footnote[1]{ètvercová matice druhých parciálních derivací funkce -- popisuje místní zakøivení funkce o nìkolika promìnných}. Pro sní¾ení pamì»ové nároènosti je ukládán pouze rozdíl v matici, jeho¾ historie je ukládána pouze po omezený poèet krokù.
 
 \section{Stochastic Gradient Descent}
 \label{sec:sgd}
+\subsubsection*{Základní informace}
+Aèkoliv je algoritmus ji¾ velmi dlouhou dobu, jeho pøínos je se nejvíce projevil a¾ v nedávné dobì, kdy je díky své vysoké rychlosti pou¾íván v pøípadì trénování na velkém vzorku dat. Za pøedpokladu, ¾e $X$ je maticí o velikosti $(n, p)$, mù¾eme cenu trénování vyjádøit jako $O(kn\bar{p})$, kde k oznaèuje poèet iterací a $\bar{p}$ je prùmìrný poèet nenulových atributù ka¾dého prvku, z èeho¾ vyplývá, ¾e èasová nároènost roste témìø lineárnì s poètem vstupních vzorkù. Jeho velkou výhodou je tedy vysoká úèinnost a zároveò jednoduchost jeho implementace\footnote[1]{Podrobnìj¹í informace o tomto algoritmu vèetnì jeho implementace v jazyce \emph{Python} jsou dostupné na http://scikit-learn.sourceforge.net/modules/sgd.html}. Dal¹í informace lze nalézt v èlánku~\cite{Bottou}.
+
+\subsubsection*{Popis a definice}
+Pøi výpoètu SGD se sna¾íme minimalizovat sumu diferenciovatelných funcí, mající následující podobu:
+
+\begin{equation}
+	Q(w) = \sum_{i=1}^n Q_i(w)
+\end{equation}
+
+$w$ je parametrem, který se sna¾íme zjistit a $Q_i$ oznaèuje funkci pøiøazenou k jednotlivým prvkùm vstupních dat a $\nabla$ je notací pro gradient. 
+
+Pøi standartním \uv{dávkovém} Gradient Descent algoritmu jsou provedeny následující iterace:
+\begin{equation}
+	w \leftarrow w - \alpha \sum_{i=1}^n \nabla Q_i(w)
+\end{equation}
+
+Pøi Stochastic \uv{on-line} Gradient Descent je gradient $Q(w)$ aproximován gradientem v jediném stavu:
+\begin{equation}
+	w \leftarrow w - \alpha \nabla Q_i(w)
+\end{equation}
+
+V obou pøípadech $\alpha$ oznaèuje velikost kroku. 
+
+\pagebreak
 
 \section{Regularizace}
 \label{sec:reg}
@@ -306,7 +334,7 @@ $R(\theta)$ je regularizaèní podmínkou a $\theta$ oznaèuje parametr.
 Z dùvodu velkého mno¾ství jednotlivých testù, rùzných nastavení a strojù, na kterých testování bì¾í, jsem se rozhodl vytvoøit za pomoci open-source CMS \emph{Drupal} informaèní systém, který pomù¾e udr¾ovat pøehled o v¹ech spu¹tìných testech a o jejich výsledcích. Systém byl vytvoøen jako modul pro zmínìný CMS a vyu¾ívá mo¾ností v té dobì dokonèované verze 7.0. Pro vytvoøení formuláøù a jejich validaci implementuje Drupal Forms API a data ukládá do tabulek databáze dané stránky s vyu¾itím Drupal Database API. 
 
 \section{Návrh systému}
-Pro systém byla navr¾ena jednoduchá databáze, sestávající ze 4 tabulek a poskytující dostatek prostoru pro pøípadná roz¹íøení, o dal¹í rysy, nebo sledované výsledky. Její diagram tøíd je zachycen na obrázku~\ref{fig:db}.
+Pro systém byla navr¾ena jednoduchá databáze, sestávající ze 4 tabulek a poskytující dostatek prostoru pro pøípadná roz¹íøení o dal¹í rysy, nebo sledované výsledky. Její diagram tøíd je zachycen na obrázku~\ref{fig:db}.
 
 Aby systém co nejvíce ulehèoval práci, bylo nutné rozdìlit proces vkládání dat na dvì èásti: 
 \begin{itemize}
@@ -344,7 +372,7 @@ Stránka je navr¾ena jako jednoduchý formuláø se vstupními poli a za¹krtávacími t
 	\item \textbf{Poèet testovacích vìt} -- celé èíslo, specifikující poèet vìt obsa¾ených v souboru, vyu¾itém pøi procesu testování (znaèkování)
 	\item \textbf{Maximální poèet iterací} -- celé èíslo, urèující maximální poèet iterací provedených pøi trénování
 	\item \textbf{Delta} -- desetinné èíslo, specifikující hodnotu $\Delta$, která je pou¾ita jako velikost práhu urèeného k ukonèení testování
-	\item \textbf{Pou¾ité rysy} -- rysy, vyu¾ité pøi trénování modelu - pro vstup je pou¾ita skupina za¹krtávacích políèek, vèetnì mo¾nosti za¹krtnout v¹echna, nebo ¾ádn
+	\item \textbf{Pou¾ité rysy} -- rysy, vyu¾ité pøi trénování modelu - pro vstup je pou¾ita skupina za¹krtávacích políèek, vèetnì mo¾nosti za¹krtnout v¹echna, nebo ¾ádné
 	\item \textbf{Pou¾ité èásti znaèky} -- jednotlivé èásti znaèky, které jsou pou¾ity ve vstupních souborech, stejnì jako u pøedchozího vstupního parametru jsou definovány skupinou za¹krtávacích políèek, vèetnì mo¾nosti za¹krtnout v¹echna, nebo ¾ádné
 \end{itemize}
 
@@ -362,14 +390,14 @@ Pøi ukonèení testu se poté dodají informace získané z logù a výstupních dat. Ty 
 \end{itemize}
 
 \section{Zobrazení bì¾ících a skonèených testù, zobrazení náhledu}
-Na tìchto stránkách si poté mù¾eme prohlédnout výsledky, které mù¾eme pozdìji pou¾ít k dal¹ím úèelùm. Výsledky jsou filtrovatelné podle vìt¹iny sloupcù. V prùbìhu testování je velmi u¾iteèná stránka zobrazení náhledu, která nám zobrazuje, které testy ji¾ byly provedeny, nebo právì bì¾í, a dává nám tak jednoduchou mo¾nost zanalyzovat dal¹í postup projektu.
+Na tìchto stránkách si mù¾eme prohlédnout výsledky, které mù¾eme pozdìji pou¾ít k dal¹ím úèelùm. Výsledky jsou filtrovatelné podle vìt¹iny sloupcù. V prùbìhu testování je velmi u¾iteèná stránka zobrazení náhledu, která nám zobrazuje, které testy ji¾ byly provedeny, nebo právì bì¾í, a dává nám tak jednoduchou mo¾nost zanalyzovat dal¹í postup projektu.
 
 \chapter{Prostøedí testù a pou¾itý software}
 \label{chap:prostredi}
 \section{Operaèní systém}
 Aèkoliv v¹echny vyu¾ívané programy a skripty jsou multiplatformní, v¹echny testy byly spou¹tìny na operaèním systému \emph{Linux} nainstalovaném na univerzitních strojích, ke kterým jsem se vzdálenì pøipojoval pøes ssh. 
 \section{Hardware}
-Testování probíhalo prùbì¾nì a¾ na 10 poèítaèích, kde tøi znich jsou dostupné pro v¹eobecné vyu¾ítí (\emph{athena1} -- \emph{athena3}) a zbylé jsou pøístupné pouze pro výzkum zpracování jazyka (\emph{pcnlp1} -- \emph{pcnlp8}, kromì \emph{pcnlp2}, na kterém bì¾í OS \emph{Windows}). Z dùvodu rozdílného hardware na jednotlivých strojích se poté pøi testování projevují velké skoky ve výsledných èasech. V tabulce ~\ref{tab:PouziteStroje} je zobrazena struèná charakteristika jednotlivých strojù.
+Testování probíhalo prùbì¾nì a¾ na 10 poèítaèích, kde tøi znich jsou dostupné pro v¹eobecné vyu¾ítí (\emph{athena1} -- \emph{athena3}) a zbylé jsou pøístupné pouze pro výzkum zpracování jazyka (\emph{pcnlp1} -- \emph{pcnlp8}, kromì \emph{pcnlp2}, na kterém bì¾í OS \emph{Windows}). Z dùvodu rozdílného hardware na jednotlivých strojích se pøi testování projevují velké skoky ve výsledných èasech. V tabulce ~\ref{tab:PouziteStroje} je zobrazena struèná charakteristika jednotlivých strojù.
 %TODO Dopsat sem jejich vykon??
 \begin{figure}
 	\begin{center}
@@ -401,7 +429,7 @@ Testování probíhalo prùbì¾nì a¾ na 10 poèítaèích, kde tøi znich jsou dostupné pr
 			2GB \\
 			\hline
 		\end{tabular}
-		\captionof{table}{Charakteristika stroujù pou¾itých pøi zpracování projektu}
+		\captionof{table}{Charakteristika strojù pou¾itých pøi zpracování projektu}
 		\label{tab:PouziteStroje}
 	\end{center}
 \end{figure}
@@ -415,14 +443,14 @@ Program \emph{CRF++}\footnote[1]{Stránky programu: http://crfpp.sourceforge.net/
 Nevýhodou programu je nekomentovaný zdrojový kód a program je proto nevhodný k jakýmkoliv úpravám. Pøi zpracování se také èasto vyskytl problém se zprávou \emph{SIGSEGV}. Kód programu se zøejmì nebyl schopen vypoøádat s nároènými vstupními daty a pøi pou¾ití v¹ech kategorii a vy¹¹ího poètu vstupù zaslal systému vý¹e zmínìnou zprávu a ukonèil se.
 
 \subsection{Vlastnosti a nastavení}
-V tomto øe¹ení jsou, narozdíl od CRFSuite, pøítomny tzv. bigramy, co¾ je zpùsob dynamického generování rysù v prùbìhu testování, kdy aktuální prvek získá závislost na urèené znaèce pøedchozího prvku. Pro vyu¾ití této vlastnosti je v¹ak nutno vygenerovat rysy pro v¹echny kombinace znaèek a tím se do modelu pøidá nìkolik milionù rysù (èím¾ se razantnì sní¾í rychlost). Pro èeskou znaèku tato vlastnost také nepøiná¹í pøíli¹né výhody, nebo» znaèka je brána jako celek a nemù¾eme se nijak odkazovat pouze na urèité pozice (napøíklad na slovní druh). Toto je zpùsobeno optimalizacemi, kdy se vstupní øetìzce pøevedou na èíselnou hodnotu. 
+V tomto øe¹ení jsou, na rozdíl od CRFSuite, pøítomny tzv. bigramy, co¾ je zpùsob dynamického generování rysù v prùbìhu testování, kdy aktuální prvek získá závislost na urèené znaèce pøedchozího prvku. Pro vyu¾ití této vlastnosti je v¹ak nutno vygenerovat rysy pro v¹echny kombinace znaèek a tím se do modelu pøidá nìkolik milionù rysù (èím¾ se razantnì sní¾í rychlost). Pro èeskou znaèku tato vlastnost také nepøiná¹í pøíli¹né výhody, nebo» znaèka je brána jako celek a nemù¾eme se nijak odkazovat pouze na urèité pozice (napøíklad na slovní druh). Toto je zpùsobeno optimalizacemi, kdy se vstupní øetìzce pøevedou na èíselnou hodnotu. 
 
 Program disponuje typickými nastaveními jako je omezení poètu iterací a urèení ukonèujících podmínek. Generování rysù je øe¹eno pomocí deklarací pravidel umístìných v konfiguraèním souboru a ve¹keré úpravy vstupních dat je potøeba vykonávat externími prostøedky. Do programu jsou pak vlo¾ena dvourozmìrné pole s prvky oddìlenými mezerou v první dimenzi a odøádkováním v druhé. Pøi testování je pak v posledním sloupci ulo¾en správný výsledek, urèený pro natrénování. Pøed pøedáním dat do programu byly také øetìzce lemmat pøevedeny na èísla pomocí programu napsaného v jazyce \emph{C}. 
 
 \subsubsection{Generování vstupních dat}
-Nastavení v konfiguraèním souboru jsou tvoøena písmenem, urèujícím, zda jde o unigram (vztahující se pouze k souèasnému prvku posloupnosti), èi o bigram (vý¹e zmínìný pøechod mezi pøedchozím a aktuálním prvkem). Poté následuje dvouciferný identifikátor rysu, zajis»ující unikátnost vùèi ostatním definicím, dvojteèkou a øetìzcem definujícím pou¾itá vstupní data. K tomu je vyu¾íván zápis \%[x,y], kde x oznaèuje relativní pozici mezi slovy (0 oznaèuje aktuální, záporné èíslo pøedchozí a kladné následující prvek) a y oznaèuje sloupec vstupních dat, který má být pou¾it (èíslovaný od 0). 
+Nastavení v konfiguraèním souboru jsou tvoøena písmenem, urèujícím, zda jde o unigram (vztahující se pouze k souèasnému prvku posloupnosti), èi o bigram (vý¹e zmínìný pøechod mezi pøedchozím a aktuálním prvkem). Následuje dvouciferný identifikátor rysu, zajis»ující unikátnost vùèi ostatním definicím, dvojteèkou a øetìzcem definujícím pou¾itá vstupní data. K tomu je vyu¾íván zápis \%[x,y], kde x oznaèuje relativní pozici mezi slovy (0 oznaèuje aktuální, záporné èíslo pøedchozí a kladné následující prvek) a y oznaèuje sloupec vstupních dat, který má být pou¾it (èíslovaný od 0). 
 
-\paragraph*{Pøíklad}Celé pravidlo poté mù¾e vypadat napø. takto: \emph{U01:\%[-1,1]} a znaèí unigram s identifikaèním èíslem 01 a ze vstupního textu si vybere data na aktuální pozici z druhého sloupce. Pro ilustraci je v tabulce ~\ref{tab:CRFppPriklad} zobrazen krátký, zjednodu¹ený pøíklad vstupních dat. Pokud si urèíme jako aktuální pozici slovo tenkrát, tedy $x = 2$ a pou¾ijeme vý¹e zmínìné pravidlo, vyjde nám hodnota $x = 2 - 1 = 1$ a $y = 1$. Celý rys by pak vypadal takto: \texttt{U01:jsem}.
+\paragraph*{Pøíklad}Celé pravidlo mù¾e vypadat napø. takto: \emph{U01:\%[-1,1]} a znaèí unigram s identifikaèním èíslem 01 a ze vstupního textu si vybere data na aktuální pozici z druhého sloupce. Pro ilustraci je v tabulce ~\ref{tab:CRFppPriklad} zobrazen krátký, zjednodu¹ený pøíklad vstupních dat. Pokud si urèíme jako aktuální pozici slovo tenkrát, tedy $x = 2$ a pou¾ijeme vý¹e zmínìné pravidlo, vyjde nám hodnota $x = 2 - 1 = 1$ a $y = 1$. Celý rys by pak vypadal takto: \texttt{U01:jsem}.
 
 \begin{table}
 	\begin{center}
@@ -448,10 +476,10 @@ Nastavení v konfiguraèním souboru jsou tvoøena písmenem, urèujícím, zda jde o un
 
 \subsection{Popis procesu testování a výsledky} 
 \label{sec:CRFPopisTest}
-Jak bylo zmínìno v úvodu této kapitoly, program není schopen zji¹»ovat souvislosti mezi pøedchozím a aktuáním slovem na bázi jednotlivých èástí znaèky. Proto byl celý proces testování rozdìlen na nìkolik krokù, ve kterých se postupnì urèí pouze nìkteré èásti znaèky a ty se budou buï postupnì vyu¾ívat v dal¹ích krocích, nebo se v¹echny najednou vyu¾ijí v jednom koneèném kroku, urèujícím kompletní znaèku. V prvním kroku proto bylo èasto pou¾ito slovního druhu a jeho detailu, v druhém rodu, osoby, pádu a ve tøetím nìkolika ze zbylých vlastností. Výsledky tohoto postupu v¹ak nebyly pøíli¹ uspokojující a proto od nìj bylo upu¹tìno.
+Jak bylo zmínìno v úvodu této kapitoly, program není schopen zji¹»ovat souvislosti mezi pøedchozím a aktuálním slovem na bázi jednotlivých èástí znaèky. Proto byl celý proces testování rozdìlen na nìkolik krokù, ve kterých se postupnì urèí pouze nìkteré èásti znaèky a ty budou buï vyu¾ity v dal¹ích krocích, nebo se v¹echny najednou vyu¾ijí v jednom koneèném kroku, urèujícím kompletní znaèku. V prvním kroku proto bylo èasto pou¾ito slovního druhu a jeho detailu, v druhém rodu, osoby, pádu a ve tøetím nìkolika ze zbylých vlastností. Výsledky tohoto postupu v¹ak nebyly pøíli¹ uspokojující a proto od nìj bylo upu¹tìno.
 
 \subsubsection{Pravidla pro generování rysù}
-Z dùvodu nìkolika-krokového charakteru testování se rysy velmi li¹í, veskrze jde v¹ak pouze o kombinace pøedchozích a aktuálních prvkù vstupních souborù. Pøi generování vstupních souborù také byla provedena základní analýza a v pøípadì, ¾e slovní druh byl u v¹ech mo¾ných znaèek konstantní, byl pou¾it jako jeden z rysù. V opaèném pøípadì byla zapsán znak \uv{-}. Dále byly pou¾ity nìkolikanásobné rysy, skládající se zároveò ze dvou prvkù (minulá a souèasná znaèka apod.).
+Z dùvodu nìkolika-krokového charakteru testování se rysy velmi li¹í, veskrze jde v¹ak pouze o kombinace pøedchozích a aktuálních prvkù vstupních souborù. Pøi generování vstupních souborù také byla provedena základní analýza a v pøípadì, ¾e slovní druh byl u v¹ech mo¾ných znaèek konstantní, byl pou¾it jako jeden z rysù. V opaèném pøípadì byl zapsán znak \uv{-}. Dále byly pou¾ity nìkolikanásobné rysy, skládající se zároveò ze dvou prvkù (minulá a souèasná znaèka apod.).
 
 Pro tyto pravidla mi povìt¹inou byly inspirací existující konfiguraèní soubory pou¾ívané pro trénování anglického jazyka, které byly souèástí pøíkladù pou¾itých v programu \emph{CRF++}. Pro tvoøení rysù byl pou¾it tvar slova, lemmata (slo¾enina identifikátorù v¹ech mo¾ných lemmat) a èást znaèky urèující slovní druh.
 
@@ -473,17 +501,17 @@ Testù bylo nakonec spu¹tìno nìkolik desítek, vìt¹ina z nich v¹ak nepøiná¹ela ký¾
 			\multicolumn{1}{|c|}{Poèet pøíznakù} &
 			\multicolumn{1}{|c|}{Úspì¹nost} \\
 			\hline
-			1 & 3000 & 0.05  & 1 & 1100000000000000 & 1318350 & 94.099\% \\
-			  &      &       & 2 & 0010100100000000 & 2354463 & 59.105\% \\
-			  &      &       & 3 & 0001000010000000 & 299812  & 80.526\% \\
+			1 & 3000 & 0.05  & 1 & 1100000000000000 & 1 318 350 & 94.099\% \\
+			  &      &       & 2 & 0010100100000000 & 2 354 463 & 59.105\% \\
+			  &      &       & 3 & 0001000010000000 & 299 812  & 80.526\% \\
 			\hline
-			2 & 3000 & 0.005 & 1 & 1100000000000000 & 2065745 & 92.487\% \\
-		 	  &      &       & 2 & 0010100100000000 & 1716750 & 75.100\% \\
-			  &      &       & 3 & 0001000110000000 & 897138  & 87.055\% \\ 
+			2 & 3000 & 0.005 & 1 & 1100000000000000 & 2 065 745 & 92.487\% \\
+		 	  &      &       & 2 & 0010100100000000 & 1 716 750 & 75.100\% \\
+			  &      &       & 3 & 0001000110000000 & 897 138  & 87.055\% \\ 
 			\hline
-			3 & 5000 & 0.005 & 1 & 1100000000000000 & 1318350 & 94.312\% \\
-			  &      &       & 2 & 0010100000000000 & 1097024 & 71.303\% \\
-			  &      &       & 3 & 0001000110000000	& 596079  & 84.856\% \\
+			3 & 5000 & 0.005 & 1 & 1100000000000000 & 1 318 350 & 94.312\% \\
+			  &      &       & 2 & 0010100000000000 & 1 097 024 & 71.303\% \\
+			  &      &       & 3 & 0001000110000000	& 596 079  & 84.856\% \\
 			\hline
 		\end{tabular}
 		\captionof{table}{Výsledky testování pøi vyu¾ití programu \emph{CRF++}}
@@ -498,13 +526,13 @@ Testù bylo nakonec spu¹tìno nìkolik desítek, vìt¹ina z nich v¹ak nepøiná¹ela ký¾
 Program \emph{CRFSuite}\footnote[1]{Stránky programu: http://www.chokkan.org/software/crfsuite/} je open-source implementací algoritmu Conditional Random Fields, urèený pro znaèkování sekvenèních dat. Je naprogramován v èistém C a dle jeho autora optimalizován pro co nejvy¹¹í rychlost za obìtování obecnosti. Jeho autorem je Ph.D Naoaki Okazakim pùsobící na univerzitì v Tokyu. Program ke svému chodu vy¾aduje knihovnu libLBFGS\footnote[1]{Stránky knihovny: http://www.chokkan.org/software/liblbfgs/} od stejného autora.
 
 \subsection{Vlastnosti a nastavení}
-Pro aproximaci parametru program implementuje dva algoritmy - L-BFGS (obsa¾ený ve vý¹e zmínìné knihovnì) a SGD, který je dle poznámek inspirován implementací pou¾itou v dal¹ím programu pro strojové uèení -- \emph{CRFSGD}\footnote[2]{Algoritmus SGD, jeho implementace a pøíklady jejího pou¾ití: http://leon.bottou.org/projects/sgd}. Pro vyhlazení výsledkù poté nabízí regularizace L1 a L2 v pøípadì L-BFGS a pro SGD pouze L2. Program disponuje øadou upøesòujících nastavení, kde kromì standartních (podmínka ukonèení testování, maximální poèet iterací) lze nastavit i parametry jednotlivých algoritmù. 
+Pro aproximaci parametru program implementuje dva algoritmy - L-BFGS (obsa¾ený ve vý¹e zmínìné knihovnì) a SGD, který je dle poznámek inspirován implementací pou¾itou v dal¹ím programu pro strojové uèení -- \emph{CRFSGD}\footnote[2]{Algoritmus SGD, jeho implementace a pøíklady jejího pou¾ití: http://leon.bottou.org/projects/sgd}. Pro vyhlazení výsledkù nabízí regularizace L1 a L2 v pøípadì L-BFGS a pro SGD pouze L2. Program disponuje øadou upøesòujících nastavení, kde kromì standartních (podmínka ukonèení testování, maximální poèet iterací) lze nastavit i parametry jednotlivých algoritmù. 
 Z pohledu zdojového kódu a jeho èitelnosti je v tomto pøípadì situace o mnoho lep¹í, ne¾ u \emph{CRF++}, stále v¹ak platí omezení zpùsobená pøevodem do èíselných konstant a tím pádem není mo¾nì prùbì¾nì kontrolovat pøedchozí oznaèený prvek - jakékoliv úpravy by proto mìly dùrazný dopad na rychlost zpracování. Jak bude zmínìno v následující kapitole, urèitými zpùsoby lze tento problém zmírnit.
 
 \subsubsection*{Generování vstupních dat}
 \emph{CRFSuite} neimplementuje ¾ádný automatický pøístup ke generování rysù, ale k programu je pøikládán skript v jazyce \emph{python}, který je schopen upravit vstupní data anglického korpusu do správného formátu. Pro potøeby tohoto projektu jsem jej pøepsal tak, aby pøijímal vstup ve formátu \emph{CSTS}.
  
-Skript postupnì naèítá data ze standartního vstupu a vytváøí multidimenzionální pole pro pozdìj¹í zpracování. Pøi tomto kroku také provádí zpracování vstupu pro vylep¹ení kontextu trénování. Jeliko¾ pro ka¾dé slovo máme ve vstupních datech urèeny v¹echny dostupné znaèky, mù¾eme analyzovat jejich spoleènou èást a tu poté vyu¾ít jako jeden z rysù. Skript také kombinuje v¹echna pou¾itá lemmata a analyzuje velikost, pozici ve vìtì, koncovky a pøedpony slov. Vnitønì jsou data na ka¾dém øádku ulo¾ena v následujícím tvaru: \emph{tvar slova}, \emph{spoleèná èást znaèky}, \emph{v¹echna lemmata}, \emph{pøípona slova}, \emph{správná znaèka}. 
+Skript postupnì naèítá data ze standartního vstupu a vytváøí multidimenzionální pole pro pozdìj¹í zpracování. Pøi tomto kroku také provádí zpracování vstupu pro vylep¹ení kontextu trénování. Jeliko¾ pro ka¾dé slovo máme ve vstupních datech urèeny v¹echny dostupné znaèky, mù¾eme analyzovat jejich spoleènou èást a tu vyu¾ít jako jeden z rysù. Skript také kombinuje v¹echna pou¾itá lemmata a analyzuje velikost, pozici ve vìtì, koncovky a pøedpony slov. Vnitønì jsou data na ka¾dém øádku ulo¾ena v následujícím tvaru: \emph{tvar slova}, \emph{spoleèná èást znaèky}, \emph{v¹echna lemmata}, \emph{pøípona slova}, \emph{správná znaèka}. 
 
 V dal¹ím kroku program z ulo¾ených dat generuje podle zadaných pravidel (viz. tabulka~\ref{tab:SeznamRysu}) rysy a pøedává je na standartní výstup. 
 
@@ -531,7 +559,7 @@ V pøípadì tohoto programu nebyly vyu¾ity ¾ádné metody rozdìlování prùbìhu do jed
 Z dùvodu u¹etøení èasu a teoretické jednodu¹¹í mo¾nosti natrénování (odvozování pravidel od men¹ího poètu celkových znaèek a tím pádem vy¹¹ího poètu podobných znaèek, poskytujícím vy¹¹í pravdìpodobnost ovlivnìní modelu) byly pøi testování pøevá¾nì spou¹tìny testy nekompletní znaèkou - pro zjednodu¹ení byly vyu¾ity pouze nejdùle¾itìj¹í mluvnické kategorie. Toto zjednodu¹ení nám dovoluje provést testy v ni¾¹ím èase a se v¹emi pravidly, které by byly pou¾ity i v pøípadì kompletní znaèky. Pro reálé nasazení by pak bylo nutno zjistit, zda jsou v¹echny kategorie potøebné, nebo zda staèí tento omezený poèet prvkù. Vliv pravidel na výkon by v¹ak nemìl být ovlivnìn, nebo» nevyu¾ívají ¾ádnou z vynechaných znaèek.
 
 \subsubsection*{Pravidla pro generování rysù}
-V této práci jsou vyu¾ívány klasické rysy, které se pou¾ívají prakticky ve v¹ech typických pøíkladech vyu¾ití strojového uèení ( pøedchozí prvek, následující prvek,... ), ale i rysy speciální, které mají smysl pouze pro znaèkování textu, èi dokonce pouze pro èeský jazyk (výèet v¹ech rysù viz. tabulka ~\ref{tab:SeznamRysu}). V¹echny rysy dodr¾ují oznaèení, pou¾ívané ve vìt¹inì podobných programù, popsané v kapitole~\ref{sec:CRFPopisTest}, pouze v pøípadì tohoto programu nejsou implementovány bigramy a rysy jsou generovány pøed spu¹tìním programu.
+V této práci jsou vyu¾ívány klasické rysy, které se pou¾ívají prakticky ve v¹ech typických pøíkladech vyu¾ití strojového uèení ( pøedchozí prvek, následující prvek,... ), ale i rysy speciální, které mají smysl pouze pro znaèkování textu, èi dokonce pouze pro èeský jazyk (výèet v¹ech rysù viz. tabulka ~\ref{tab:SeznamRysu}). V¹echny rysy dodr¾ují oznaèení, pou¾ívané ve vìt¹inì podobných programù, popsané v kapitole~\ref{sec:CRFPopisTest}, pouze v pøípadì tohoto programu nejsou implementovány bigramy a rysy jsou generovány pøed spu¹tìním programu. 
 
 \begin{table}[htbp]
 	\begin{center}
@@ -589,7 +617,7 @@ Pro testování byl vytvoøen øídící skript v jazyce BASH, starající se o celý prùb
 		\label{fig:workflow}
 \end{figure}
 
-S pou¾itím vytvoøených nástrojù je spu¹tìní testování jednoduchou a rychlou zále¾itostí. Nejdøíve je v konverzním skriptu (napsaném v jazyce \emph{Python}) souboru (pojmenovaném jako \texttt{[jméno stroje].py}) nastaveno, které rysy mají být pou¾ity. Poté se v bash scriptu ([jméno stroje].sh) nastaví poèet vìt pro trénování a testování, algoritmus, maximální poèet iterací, epsilon, regularizace a dal¹í pøípadné parametry. Dále je nutno upravit pomocí programu ulimit limity zdrojù, dostupných pro ná¹ program -- jedná se konkrétnì o maximální velikost zásobníku, maximální pøidìlený èas CPU a maximální velikost virtuální pamìti. Ke spou¹tìní skriptu je poté pou¾it program \emph{nohup}, zaji¹»ující pøetrvávající bìh programu i po odpojení se od vzdáleného poèítaèe. 
+S pou¾itím vytvoøených nástrojù je spu¹tìní testování jednoduchou a rychlou zále¾itostí. Nejdøíve je v konverzním skriptu (napsaném v jazyce \emph{Python}) souboru (pojmenovaném jako \texttt{[jméno stroje].py}) nastaveno, které rysy mají být pou¾ity. V dal¹ím kroku se v bash scriptu ([jméno stroje].sh) nastaví poèet vìt pro trénování a testování, algoritmus, maximální poèet iterací, epsilon, regularizace a dal¹í pøípadné parametry. Dále je nutno upravit pomocí programu ulimit limity zdrojù, dostupných pro ná¹ program -- jedná se konkrétnì o maximální velikost zásobníku, maximální pøidìlený èas CPU a maximální velikost virtuální pamìti. Ke spou¹tìní skriptu je pou¾it program \emph{nohup}, zaji¹»ující pøetrvávající bìh programu i po odpojení se od vzdáleného poèítaèe. 
 
 \paragraph*{Pøíklad:}
 
@@ -605,14 +633,40 @@ Kvùli rozsáhlosti testù provedených s tímto programem byly v¹echny výsledky pøes
 
 \chapter{Testy}
 \label{chap:testy}
-Pøed zapoèatím øádného testování a analýzy výsledkù bylo potøeba se rozhodnout s jakými parametry bude testování provádìno. V¹echny následující testy jsou provedeny v programu \emph{CRFSuite}, který, jak je zmínìno vý¹e, pro tento projekt pøiná¹í vhodnìj¹í prostøedí. V rámci této práce bude vìt¹ina testù provedena s regularizací L1 i L2 (viz. podkapitola~\ref{sec:reg}) a výsledky budou poté mezi sebou porovnány. Vìt¹ina testù je provedena s vyu¾itím algoritmu L-BFGS (viz. podkapitola~\ref{sec:lbfgs}), v prùbìhu práce v¹ak bylo provedeno nìkolik testù s algoritmem SGD (viz. podkapitola~\ref{sec:sgd}), který poskytl kvalitnìj¹í výsledky pøi ni¾¹í èasové nároènosti a proto nìkolik posledních testù bylo provedeno i s jeho vyu¾itím. Na provedení komplexního srovnání a protestování v¹ech vynechaných rysù v¹ak ji¾ nebýval èas. Do práce je tak pøidáno krátké srovnání mezi výsledky obou zmínìnych algoritmù a závìry, zji¹tìné pro L-BFGS budou pokusnì aplikovány i na SGD.
+Pøed zapoèatím øádného testování a analýzy výsledkù bylo potøeba se rozhodnout s jakými parametry bude testování provádìno. V¹echny následující testy jsou provedeny v programu \emph{CRFSuite}, který, jak je zmínìno vý¹e, pro tento projekt pøiná¹í vhodnìj¹í prostøedí. V rámci této práce bude vìt¹ina testù provedena s regularizací L1 i L2 (viz. podkapitola~\ref{sec:reg}) a výsledky budou mezi sebou porovnány. Testy jsou pøevá¾nì provedádìny s vyu¾itím algoritmu L-BFGS (viz. podkapitola~\ref{sec:lbfgs}), v prùbìhu práce v¹ak byll pro nìkolik testù pou¾it algoritmus SGD (viz. podkapitola~\ref{sec:sgd}), který poskytl kvalitnìj¹í výsledky pøi ni¾¹í èasové nároènosti. Na provedení komplexního srovnání a protestování v¹ech vynechaných rysù v¹ak ji¾ nevy¹el èas. Do práce je tak pøidáno krátké srovnání mezi výsledky obou zmínìnych algoritmù a závìry, zji¹tìné pro L-BFGS budou pokusnì aplikovány i na SGD.
 
 Dal¹í volbou byl zpùsob ukonèení trénování -- nabízely se dvì mo¾nosti: Buï ukonèení po urèitém poètu iterací, nebo pøi dosa¾ení práhu rozdílu celkové pravdìpodobnosti mezi dvìmi po sobì jdoucími iteracemi pod úroveò konstanty $\Delta$. Pro testování váhy jednotlivých pravidel generování rysù v¹ak byla vyu¾ita druhá varianta ($\Delta$), která by mìla poskytnout vy¹¹í variabilitu a tím mo¾nost správnì vyu¾ít aktuálního nastavení (co¾ bylo pozdìji potvrzeno mnohem vy¹¹ím poètem iterací pøi regularizaci L2 namísto L1 a výkyvy mezi poètem iterací v pøípadì vynechání nìkterých pravidel) a je také výchozím nastavením programu.
 
 Problematickým se ukázal být poèet testovacích vzorkù, kde pøi pou¾ití více ne¾ 7000 vzorkù program \emph{CRFSuite} z nezji¹tìných dùvodù odmítl vydat jakékoliv výsledky a zøejmì se zacyklil pøi vnitøní chybì. Proces stále visel v systému, nejevil v¹ak ¾ádné známky aktivity a proto musel být ruènì ukonèen. Pro pøesnìj¹í mìøení by tedy zøejmì bylo výhodnìj¹í výsledky je¹tì validovat oproti dal¹ím vzorkùm dat, pro základní porovnání výkonnostního pøínosu jednotlivých rysù by v¹ak mìl být tento poèet naprosto dostaèujícím.
 
+Jak bylo zmínìno v kapitole~\ref{chap:prostredi}, doba trénování neroste lineárnì, nebo» pokusy byly provádìny na rùzných strojích o rùzném výpoèetním výkonu. Celková doba procesu testování je v¹ak ve v¹ech pøípadech velmi podobná a je závislá témìø èistì na výkonu procesoru a poètu vstupních prvkù (poèet rysù, ani poèet iterací trénování ji neovlivní). Ve v¹ech testech se pohybovala v rozmezí od 300 do 1000 sekund a pro u¹etøení místa v tabulkách nebude zahrnuta. Tato hodnota je v¹ak zobrazena v pøíloze v kompletním seznamu v¹ech testù.
+
+\section{Popis sloupcù v tabulkách}
+V této podkapitole budou popsány jednotlivé nadpisy pou¾ité v hlavièkách tabulek, zobrazujících výsledky a srovnání testù. V pøípadì ¹etøením místem byly obèas nìkterá slova zkrácena, jejich význam by v¹ak mìl zùstat pochopitelný. Ve sloupcích, popisujících jakoukoliv zmìnu jsou referenèní hodnoty zobrazeny v závorce hned pod nadpisem sloupce.
+
+\begin{itemize}
+	\item \textbf{Poèet vìt} - poèet ucelených sekvencí vstupních dat, pou¾itých pøi testování
+	\item \textbf{Poèet iterací} - poèet iterací, provedených pøi testování
+	\item \textbf{Poèet znaèek} - celkový poèet unikátních znaèek ve vstupních datech
+	\item \textbf{Doba trénování} - èas potøebný k natrénování modelu
+	\item \textbf{Velikost modelu} - velikost výsledného modelu
+	\item \textbf{Úvodní poèet rysù} - mno¾ství rysù na zaèátku trénování
+	\item \textbf{Koneèný poèet rysù} - mno¾ství rysù na konci trénování
+	\item \textbf{Poèet rysù} - v pøípadì, kdy je úvodní i koneèný poèet rysù toto¾ný (nebo je rozdíl velmi malý), je zapsána pouze jediná hodnota
+	\item \textbf{Úspì¹nost slov} - pomìr mezi poètem správnì urèených slov a celkovým poètem slov obsa¾eným v testovacích datech
+	\item \textbf{Úspì¹nost vìt} - pomìr mezi poètem celých správných vìt (kde v¹echna slova byla urèena správnì) a celkovým poètem vstupních vìt
+	\item \textbf{Popis pravidla} - slovní popis daného pravidla, pou¾itý pro lep¹í pochopení tabulek bez nutnosti nahlí¾et do definicí jednotlivých pravidel
+	\item \textbf{Zmìna poètu rysù} - rozdíl v poètu rysù oproti referenèní hodnotì (pøi vynechání pouze jednoho pravidla odpovídá poètu rysù, generovaných daným pravidlem)
+	\item \textbf{Zmìna koneèného poètu rysù} - rozdíl v poètu rysù na konci testování, odvíjející se od referenèní hodnoty (kladná hodnota znaèí pøírùstek, záporná úbytek)
+	\item \textbf{Zmìna velikosti modelu} - rozdíl mezi referenèní a aktuální velikostí modelu (kladná hodnota znaèí zvìt¹ení souboru, záporná pak zmen¹ení)
+	\item \textbf{Zmìna úspì¹nosti slov} - rozdíl mezi referenèní a aktuální úspì¹ností jednotlivých slov (kladná hodnota znaèí zlep¹ení, záporná zhor¹ení)
+	\item \textbf{Zmìna úspì¹nosti vìt} - rozdíl mezi referenèní a aktuální úspì¹ností celých vìt (kladná hodnota znaèí zlep¹ení, záporná zhor¹ení)
+\end{itemize}
+
+\pagebreak
+
 \section{Závislost úspì¹nosti na poètu vstupních vìt}
-Následující testy se zabývají analýzou ideálního poètu vìt pro pou¾ití v dal¹ích èástech projektu. Je nutno získat takovou hodnotu, která bude poskytovat jednak kvalitní, jednak èasovì akceptovatelné výsledky, které poskytnou mo¾nost zpracovat v¹echny èasovì nároèné testy na daném poètu strojù.
+Následující testy se zabývají analýzou ideálního poètu vìt pro pou¾ití v dal¹ích èástech projektu. Je nutno získat takovou hodnotu, která bude poskytovat jednak kvalitní, jednak èasovì akceptovatelné výsledky, které poskytnou mo¾nost zpracovat v¹echny èasovì nároèné testy na daném poètu strojù. 
 
 \subsection{Konstantní poèet iterací a regularizace L1}
 
@@ -627,13 +681,11 @@ Nejdøíve bylo tøeba rozhodnout, jaký poèet iterací bude vhodný pro proces testov
 \emph{Regularizace:} L1
 
 \subsubsection*{Vyhodnocení}
-Jak lze vidìt v tabulce~\ref{tab:RegL1KonstIter}, pøi prvních dvou testech (5000 a 10 000 vstupních vìt) a také v pøedposledním testu (55000 vìt) se s nejvìt¹í pravdìpodobností vyskytla chyba v programu \emph{CRFSuite}, projevující se nezvykle vysokými hodnotami úspì¹nosti. Ani po pøetestování\footnote[1]{Pro ovìøení byly zvovu provedeny testy s následujícím poètem vìt: 5 000, 10 000, 55 000, 50 000} na odli¹ných strojích v¹ak výsledky nezmìnily. Tyto abnormální hodnoty se pozdìji vyskytují i v dal¹ích testech. 
+Jak lze vidìt v tabulce~\ref{tab:RegL1KonstIter}, pøi prvních dvou testech (5000 a 10 000 vstupních vìt) a také v pøedposledním testu (55000 vìt) se s nejvìt¹í pravdìpodobností vyskytla \uv{chyba} v programu \emph{CRFSuite}, projevující se nezvykle vysokými hodnotami úspì¹nosti. Ani po pøetestování\footnote[1]{Pro ovìøení byly zvovu provedeny testy s následujícím poètem vìt: 5 000, 10 000, 55 000, 50 000} na odli¹ných strojích se v¹ak výsledky nezmìnily. Tyto abnormální hodnoty se pozdìji vyskytují i v dal¹ích testech. 
 
 Nebýt tøech podivných výsledkù, je jasnì vidìt stoupající tendence testù a¾ k 50 000 vìt. Od této úrovnì u¾ se poté úspì¹nost spí¹e sni¾uje -- co¾ mù¾e být zpùsobeno omezením maximálního poètu iterací na 50. 
 
-Jak bylo zmínìno vý¹e (viz. kapitola ~\ref{chap:prostredi}), doba trénování neroste lineárnì, nebo» pokusy byly provádìny na rùzných strojích o rùzném výpoèetním výkonu. Celková doba procesu testování je ve v¹ech pøípadech velmi podobná a je závislá témìø èistì na výkonu procesoru a poètu vstupních prvkù. V tomto pøípadì se pohybovala od 300 do 700 sekund a proto jsem se z dùvodu u¹etøení místa v tabulce rozhodl tuto informaci nezapisovat do tabulky výsledkù. 
-
-Z rozdílu mezi poètem úvodních a koneèných rysù lze dobøe pozorovat pøínost vyu¾ité regularizace, odmazávající nevýrazné rysy. Koneèný poèet je tak v prùmìru 4 krát ní¾¹í, èím¾ se i sni¾uje velikost výsledného modelu. Toto bude rozebráno v . %TODO doplnit kde je to rozebrano
+Z rozdílu mezi poètem úvodních a koneèných rysù lze dobøe pozorovat pøínos vyu¾ité regularizace, odmazávající nevýrazné rysy. Koneèný poèet je tak v prùmìru 4 krát ní¾¹í, èím¾ se i sni¾uje velikost výsledného modelu. 
 
 \begin{table}
 	\begin{center}
@@ -677,10 +729,12 @@ Z rozdílu mezi poètem úvodních a koneèných rysù lze dobøe pozorovat pøínost vyu¾
 	\end{center}
 \end{table}
 
-\subsection{Konstantní poèet iterací a regularizace L1}
+\pagebreak
+
+\subsection{Konstantní poèet iterací a regularizace L2}
 
 \subsubsection*{Pøíprava}
-V tomto pøípadì jsem vyu¾il stejných pravidel, jako u minulého testu, pouze jsem zmìnil regularizaci pro získání výsledkù k porovnání. Pouze jsem pøehodnotil velikost kroku mezi jednotlivými testy, kterou jsem v tomto pøípadì zvý¹il z 5 na 10 tisíc vìt a tím sní¾il celkový èas testu.
+V tomto pøípadì jsem vyu¾il stejných pravidel, jako u minulého testu, pouze jsem zmìnil regularizaci pro získání výsledkù k porovnání. Jediným rozdílem je velikost kroku mezi jednotlivými testy, která byla pro urychlení zdvojnásobena na 10 000 vìt.
 
 \subsubsection*{Konstantní podmínky}
 \emph{Algoritmus:} L-BFGS\\
@@ -690,7 +744,7 @@ V tomto pøípadì jsem vyu¾il stejných pravidel, jako u minulého testu, pouze jsem
 \emph{Regularizace:} L2
 
 \subsubsection*{Vyhodnocení}
-Jak je popsáno v podkapitole~\ref{sec:l2}, pøi regularizaci L2 je zachováván konstantní poèet rysù (proto je také v tabulce zobrazena pouze jeden sloupec, místo dvou v pøedchozím pøípadì) a tím pádem je zde teoretická vy¹¹í pravdìpodobnost úspìchu. Jak lze vidìt v tabulce~\ref{tab:RegL2KonstIter}, výsledná úspì¹nost roste bez vìt¹ích výkyvù od 10 a¾ po 70 tisíc vstupních vìt, kde se zvy¹ujícím se poètem rysù se rozdíl mezi jednotlivými kroky sni¾uje. Úspì¹nost se ve v¹ech pøípadech pohybuje nad hranicí 90 procent a poskytuje tedy velmi uspokojivé výsledky.
+Jak je popsáno v podkapitole~\ref{sec:reg}, pøi regularizaci L2 nedochází k tak výraznému úbytku koneèných rysù (v tomto pøípadì nulovému, v tabulkách s L2 je proto zobrazován pouze jeden sloupecs poètem rysù) a tím pádem by koneèný výsledek mìl pøínést vy¹¹í úspì¹nost. Jak lze vidìt v tabulce~\ref{tab:RegL2KonstIter}, úspì¹nost roste bez vìt¹ích výkyvù od 10 a¾ po 70 tisíc vstupních vìt, se zvy¹ujícím se poètem rysù se rozdíl mezi jednotlivými kroky v¹ak sni¾uje. Úspì¹nost se ve v¹ech pøípadech pohybuje nad hranicí 90 procent a tento zpùsob zpracování tak poskytuje velmi uspokojivé výsledky.
 
 \begin{table}[htbp]
 	\begin{center}
@@ -727,10 +781,12 @@ Jak je popsáno v podkapitole~\ref{sec:l2}, pøi regularizaci L2 je zachováván kon
 	\end{center}
 \end{table}
 
-\subsection{Konstantní poèet iterací - srovnání mezi L1 a L2}
-U L2 je v porovnání s regularizací L1 (viz. tabulky~\ref{tab:L1L2KonstIterData}~a~\ref{tab:L1L2KonstIterEval}) úspì¹nost v rámci jednotlivých slov vy¹¹í o nìkolik procent a u celých vìt je rozdíl dokonce nìkolik desítek procent (nepoèítáme-li výsledky zpùsobené anomálií vyskytující se pøi nìkterých výsledcích u L1). Toto zlep¹ení je v¹ak vykoupeno skuteèností, ¾e velikost modelu je v prùmìru 4krát vy¹¹í a doba testování ze zvý¹ila pøibli¾nì o polovinu. Je tedy otázkou, zda je pro nás tato skuteènost akceptovatelná a zda nám stojí o zvý¹ení úspì¹nosti o nìkolik procent, nebo zda dáme pøednost malému modelu a rychlej¹ímu zpracování -- to u¾ by v¹ak zále¾elo na konkrétním vyu¾ití programu. Pøekvapivì se v¹ak nijak nezvý¹ila doba trénování, kdy rozdíl není jednoznaènì viditelný z dùvodu rozdílu ve výkonnosti jednotlivých strojù.
+\pagebreak
 
-Ze srovnání lze mimochodem vypozorovat, ¾e nekonsistentní výsledky z testu s regularizací L1 se velmi pøibli¾ují výsledkùm s regularizací L2. 
+\subsection{Konstantní poèet iterací - srovnání mezi L1 a L2}
+U L2 je v porovnání s regularizací L1 úspì¹nost (tabulka~\ref{tab:L1L2KonstIterEval}) úspì¹nost v rámci jednotlivých slov vy¹¹í o nìkolik procent a u celých vìt je rozdíl dokonce nìkolik desítek procent (nepoèítáme-li výsledky zpùsobené anomálií vyskytující se pøi nìkterých výsledcích u L1). Toto zlep¹ení je v¹ak vykoupeno skuteèností, ¾e velikost modelu (~\ref{tab:L1L2KonstIterData})je v prùmìru 4krát vy¹¹í a doba testování ze zvý¹ila pøibli¾nì o polovinu. Je tedy otázkou, zda je pro nás tato skuteènost akceptovatelná a zda nám stojí za zvý¹ení úspì¹nosti o nìkolik procent, nebo zda dáme pøednost malému modelu a rychlej¹ímu zpracování -- to u¾ v¹ak zále¾elí na konkrétním vyu¾ití programu. Pøekvapivì se v¹ak nijak nezvý¹ila doba trénování.
+
+Ze srovnání lze také vypozorovat, ¾e nekonsistentní výsledky z testu s regularizací L1 se velmi pøibli¾ují výsledkùm s regularizací L2. 
 
 \begin{table}[bp]
 	\begin{center}
@@ -738,20 +794,17 @@ Ze srovnání lze mimochodem vypozorovat, ¾e nekonsistentní výsledky z testu s reg
 
 			\hline
 			\multicolumn{1}{|c||}{Poèet} &
-			\multicolumn{1}{|c|}{L1 doba} &
-			\multicolumn{1}{|c||}{L2 doba} &
-			\multicolumn{1}{|c|}{L1 doba} &
-			\multicolumn{1}{|c||}{L2 doba} &
-			\multicolumn{1}{|c|}{L1 koneèný} &
-			\multicolumn{1}{|c|}{L2 koneèný} \\
+			\multicolumn{2}{|c|}{Doba trénování} &
+			\multicolumn{2}{|c|}{Doba testování} &
+			\multicolumn{2}{|c|}{Koneèný poèet rysù} \\
 
 			\multicolumn{1}{|c||}{vìt} &
-			\multicolumn{1}{|c|}{trénování} &
-			\multicolumn{1}{|c||}{trénování} &
-			\multicolumn{1}{|c|}{testování} &
-			\multicolumn{1}{|c||}{testování} &
-			\multicolumn{1}{|c|}{poèet rysù} &
-			\multicolumn{1}{|c|}{poèet rysù} \\
+			\multicolumn{1}{|c|}{L1} &
+			\multicolumn{1}{|c||}{L2} &
+			\multicolumn{1}{|c|}{L1} &
+			\multicolumn{1}{|c||}{L2} &
+			\multicolumn{1}{|c|}{L1} &
+			\multicolumn{1}{|c|}{L2} \\
 			\hline
 			10000 & 20h 47m & 15h 56m & 646s & 595s & 200 613 & 905 326 \\ 
 			20000 & 33h 41m & 44h 30m & 527s & 935s & 334 939 & 1 464 587 \\ 
@@ -802,10 +855,10 @@ Ze srovnání lze mimochodem vypozorovat, ¾e nekonsistentní výsledky z testu s reg
 
 \pagebreak
 
-\subsection{Ukonèení pomocí $\Delta$ a regularizace L1}
+\subsection{Regularizace L1 a ukonèení pomocí dosa¾ení práhu $\Delta$}
 
 \subsubsection*{Pøíprava}
-Nejdøíve jsem se rozhodl uskuteènit skupinu testù se sni¾ující se hodnotou $\delta$ od 0.1 po 0.0001, po spu¹tìní testù a dokonèení pouze dvou z nich, kdy od hodnoty 0.001 ji¾ byla podmínka ukonèení  pøíli¹ nároèná a proces testování by trval øádovì mìsíce, jsem se rozhodl od tohoto testu upustit. Zároveò hodnota 0.1 poskytovala kvalitní výsledky v rozumném èase a poèet iterací okolo 50, co¾ nám nabízí rozumné srovnání s pøedchozím zpùsobem testování.
+Nejdøíve byla uskuteènìna skupina testù se sni¾ující se hodnotou $\Delta$ od 0.1 po 0.0001, po spu¹tìní testù a dokonèení pouze dvou z nich, kdy od hodnoty 0.001 ji¾ byla podmínka ukonèení pøíli¹ nároèná a proces testování by trval øádovì mìsíce, jsem se rozhodl od tohoto testu upustit. Zároveò hodnota 0.1 poskytovala kvalitní výsledky v rozumném èase a poèet iterací okolo 50, co¾ nám nabízí rozumné srovnání s pøedchozím zpùsobem testování.
 
 \subsubsection*{Konstantní podmínky}
 \emph{Algoritmus:} L-BFGS\\
@@ -815,9 +868,9 @@ Nejdøíve jsem se rozhodl uskuteènit skupinu testù se sni¾ující se hodnotou $\del
 \emph{Regularizace:} L1
 
 \subsubsection*{Vyhodnocení}
-V tomto testu se opìt ve velkém projevila chyba pøi regularizaci L1, kdy 2 z pìti výsledkù mají neúmìrnou úspì¹nost.  Ze zbylých tøí testù lze pak vidìt existující stoupající tendenci v úspì¹nosti dle jednotlivých slov, výsledek je ale z dùvodu chyb velmi neprùkazný. 
+Jak jde vidìt v tabulce~\ref{tab:RegL1KonstDel}, opìt se projevila anomálie pøi regularizaci L1, kdy 2 z pìti výsledkù mají neúmìrnou úspì¹nost. Ze zbylých tøí testù lze pak vidìt existující stoupající tendenci v úspì¹nosti dle jednotlivých slov, výsledek je ale z dùvodu chyb velmi neprùkazný. 
 
-\begin{table}[bp]
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|r|r|r|r|r|r|r|r|}
 
@@ -854,9 +907,9 @@ V tomto testu se opìt ve velkém projevila chyba pøi regularizaci L1, kdy 2 z pìt
 
 \pagebreak
 
-\subsection{S vyu¾itím algoritmu SGD}
+\subsection{Algoritmus SGD}
 \subsubsection*{Pøíprava}
-Algoritmus Stochastic Gradient Descent, popsaný v podkapitole~\ref{sec:sgd}) bohu¾el vìt¹inu èasu projektu stál mimo mùj zájem. Pøi jeho vyzkou¹ení jsem v¹ak byl pøekvapen jeho velmi kvalitními výsledky a rychlým zpracováním. Pouze jsem tedy zpracoval nìkolik rychlých testù, abych zjistil mo¾nosti jeho vyu¾ití. Nejdøíve jsem spustil tøi testy pro zji¹tìní vhodné hodnoty $\Delta$ a poté 5 testù s poètem vstupních vìt pohybujícím se mezi 10 a 50 tisíci vzorkù, abych mohl jeho výsledky porovnat se zpracováním za pomoci algoritmu L-BFGS. Pou¾itý program \emph{CRFSuite} podporuje v pøípadì pou¾ití tohoto algoritmu pouze regularizaci L2 a není tedy nutno zrcadlit testy na jakékoliv jiné varianty.
+Algoritmus Stochastic Gradient Descent, popsaný v podkapitole~\ref{sec:sgd}) bohu¾el vìt¹inu èasu projektu stál mimo hlavní zájem. Po jeho vyzkou¹ení v¹ak byly kvùli jeho kvalitám v¹echny koneèné testy spou¹tìny i s tímto algoritmem. Nejdøíve byly provedeny tøi testy pro zji¹tìní vhodné hodnoty $\Delta$ a poté 5 testù s poètem vstupních vìt pohybujícím se mezi 10 a 50 tisíci vzorkù, aby mohly získané výsledky být porovnány se testy provedenými za pomoci algoritmu L-BFGS. Pou¾itý program \emph{CRFSuite} podporuje v pøípadì pou¾ití tohoto algoritmu pouze regularizaci L2 a není tedy nutno zrcadlit testy na jakékoliv jiné varianty.
 
 \subsubsection*{Konstantní podmínky}
 \emph{Algoritmus:} SGD\\
@@ -865,9 +918,11 @@ Algoritmus Stochastic Gradient Descent, popsaný v podkapitole~\ref{sec:sgd}) boh
 \emph{Regularizace:} L2
 
 \subsubsection*{Vyhodnocení}
-Jako pøi v¹ech ostatních testech, i v tomto pøípadì se zvy¹ováním pøesnosti a poètu vstupních vzorkù se plynule zvy¹uje i úspì¹nost. Oproti ostatním testovaným variantám je v¹ak tato mnohem rychlej¹í a poskytuje kvalitnìj¹í výsledky, kdy pøi 50 000 vìtách se dostáváme a¾ na 94,31\% a pøi vìt¹ím poètu vstupních prvkù, nebo v kombinaci s vy¹¹í pøesností by tak nejspí¹e byla pokoøena hranice 95\%. Pøi porovnání s hodnotami získanými testováním s algoritmem L-BFGS je tento a¾ 3krát rychlej¹í a úspì¹nost je pøitom vy¹¹í o 0.5\% (pøi 30 000 vstupních vìtách a deltì 0.1). 
+Jako pøi vìt¹inì ostatních testù, i v tomto pøípadì se zvy¹ováním pøesnosti a poètu vstupních vzorkù se plynule zvy¹uje i úspì¹nost. Jak lze vidìt v tabulce~\ref{tab:SGDRegL2KonstDel}, tento algoritmus pro urèení parametrù je vùèi ostatním testovaným nastavením mnohem rychlej¹í a poskytuje kvalitnìj¹í výsledky kdy se pøi 50 000 vìtách dostáváme a¾ na 94,31\% a pøi vìt¹ím poètu vstupních prvkù, nebo v kombinaci s vy¹¹í pøesností, porovnané v tabulce~\ref{tab:SGDRegL2}, by tak nejspí¹e byla pokoøena hranice 95\%. Pøi porovnání s hodnotami získanými testováním s algoritmem L-BFGS je tento a¾ 3krát rychlej¹í a úspì¹nost je pøitom vy¹¹í o 0.5\% (pøi 30 000 vstupních vìtách a deltì 0.1). 
 
-\begin{table}[bp]
+K testu zkoumajícímu ideální hodnotu $\Delta$ je pak vhodné poznamenat, ¾e stejné ukonèení pro 0.01 i 0.001 je zpùsobeno velmi nízkým rozdílem v 57. iteraci, který splnil podmínku ukonèení pro obì sledované varianty.
+
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|r|r|r|r|r|r|r|r|}
 
@@ -888,18 +943,18 @@ Jako pøi v¹ech ostatních testech, i v tomto pøípadì se zvy¹ováním pøesnosti a po
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			10000 & 27 & 8h 37m & 36 244 KB & 905326 & 92.34\% & 42.85\% \\
-			20000 & 29 & 21h 40m & 57 072 KB & 1464587 & 93.33\% & 48.67\% \\ 
-			30000 & 35 & 30h 13m & 76 696 KB & 2002349 & 93.96\% & 51.60\% \\ 
-			40000 & 36 & 41h 25m & 94 190 KB & 2488724 & 94.31\% & 53.45\% \\ 
+			10000 & 27 & 8h 37m & 36 244 KB & 905 326 & 92.34\% & 42.85\% \\
+			20000 & 29 & 21h 40m & 57 072 KB & 1 464 587 & 93.33\% & 48.67\% \\ 
+			30000 & 35 & 30h 13m & 76 696 KB & 2 002 349 & 93.96\% & 51.60\% \\ 
+			40000 & 36 & 41h 25m & 94 190 KB & 2 488 724 & 94.31\% & 53.45\% \\ 
 			\hline
 		\end{tabular}
-		\captionof{table}{Závislost úspì¹nosti na poètu vstupních vìt pøi algoritmu SGD a regularizaci L2}
+		\captionof{table}{Závislost úspì¹nosti na poètu vstupních vìt pøi algoritmu SGD a regularizaci~L2}
 		\label{tab:SGDRegL2KonstDel}
 	\end{center}
 \end{table}
 
-\begin{table}[bp]
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|r|r|r|r|r|r|r|r|}
 
@@ -918,9 +973,9 @@ Jako pøi v¹ech ostatních testech, i v tomto pøípadì se zvy¹ováním pøesnosti a po
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
 			\hline
-			35 & 30h 13m & 76 696 KB & 2002349 & 93.96\% & 51.60\% \\ 
-			57 & 48h 38m & 76 696 KB & 2002356 & 94.01\% & 52.16\% \\ 
-			57 & 52h 10m & 76 696 KB & 2002350 & 94.01\% & 52.16\% \\ 
+			35 & 30h 13m & 76 696 KB & 2 002 349 & 93.96\% & 51.60\% \\ 
+			57 & 48h 38m & 76 696 KB & 2 002 356 & 94.01\% & 52.16\% \\ 
+			57 & 52h 10m & 76 696 KB & 2 002 350 & 94.01\% & 52.16\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Závislost úspì¹nosti na hodnotì $\Delta$ pøi algoritmu SGD, regularizaci L2 a konstantním poètu vìt (30 000)}
@@ -931,7 +986,7 @@ Jako pøi v¹ech ostatních testech, i v tomto pøípadì se zvy¹ováním pøesnosti a po
 \pagebreak
 
 \section{Porovnávání úspì¹nosti pøi vynechání urèitých pravidel rysù}
-Po zhodnocení pøedchozích testù jsem pøipravil pravidla pro nejdùle¾itìj¹í èást, kterou je testování úspì¹nosti pøi vynechání urèitých rysù (zji¹»ování váhy rysu na koneèný výsledek). Pro tuto èást jsem se nakonec rozhodl vyu¾ít radìji nemìnnou konstantu $\Delta$, která poskytne algoritmu vìt¹í volnost v pøípadì zmìn zpùsobených vynecháním jednotlivých rysù. V tomto kroku bude provedeno testování pøi postupném vynechávání v¹ech jednotlivých rysù a poté bude analyzován jejich pøínos pro úspì¹nost urèení. Do testování je zahrnut i test bez vynechaného rysu, který bude slou¾it jako referenèní a podle jeho hodnot poté budou urèeny kladné a záporné vysledky. Nejménì výhodné pøíznaky poté budou vypu¹tìny a celý model bude otestován bez nich. Získaný výsledek poté bude porovnán s pùvodní hodnotou a dle tohoto výsledku bude urèena úspì¹nost tohoto pøístupu.
+Po zhodnocení pøedchozích testù jsem pøipravil pravidla pro nejdùle¾itìj¹í èást, kterou je testování úspì¹nosti pøi vynechání urèitých pravidel rysù (zji¹»ování váhy pravidla na koneèný výsledek). Jak bylo zmínìno vý¹e, v¹echny následující testy budou pracovat s ukonèovací podmínkou urèenou dosa¾ením práhu $\Delta$. V tomto kroku bude provedeno testování pøi postupném vynechávání v¹ech pravidel a bude zanalyzován jejich pøínos pro úspì¹nost urèení. Do testování je zahrnut i test bez vynechaného rysu, který bude slou¾it jako referenèní a k jeho hodnotám pak budou vztahovány jednotlivé výsledky. Nejménì výhodné pøíznaky budou vypu¹tìny a celý model bude otestován bez nich. Získaný výsledek bude porovnán s pùvodní hodnotou a dle tohoto výsledku bude urèena úspì¹nost tohoto pøístupu.
 
 \subsection{Regularizace L1}
 \subsubsection*{Pøíprava}
@@ -945,17 +1000,17 @@ Pøed zapoèetím testování s regularizací L1 bylo nutno zvá¾it pøínos, který této 
 \emph{Regularizace:} L1
 
 \subsubsection*{Vyhodnocení}
-Pøi pohledu do tabulky~\ref{tab:FeaturesL1} lze spatøit, ¾e referenèní test bohu¾el produkuje abnormální (chybné) výsledky a tudí¾ tím komplikuje celý proces urèení hodnoty jednotlivých rysù. Pøi zanedbání chybných testù lze vidìt, ¾e úspì¹nost urèení jednotlivých slov se pohybuje v rámci jednoho procenta a ¾ádný z rysù tedy nemá na koneèný výsledek rozhodující vliv. Nìkteré z rysù v¹ak mají na výsledek místo pozitivního, vliv negativní a tím pádem bude vhodné je pøi testování vypustit. 
+Pøi pohledu do tabulky~\ref{tab:FeaturesL1} lze spatøit, ¾e referenèní test bohu¾el produkuje abnormální (chybné) výsledky a tím komplikuje celý proces urèení hodnoty jednotlivých rysù. Pøi zanedbání chybných testù lze vidìt, ¾e úspì¹nost urèení jednotlivých slov se pohybuje v rámci jednoho procenta a ¾ádný z rysù tedy nemá na koneèný výsledek rozhodující vliv. 
 
-Pro lep¹í srovnání byla vytvoøena tabulka~\ref{tab:SrovnaniL1}, která zachycuje rozdíl mezi úspì¹ností pøi vynechání daného rysu a referenèní hodnotou. Ta je zapsána pod hlavièkou tabulky a ve vìt¹inì pøípadù je pou¾ita výsledná hodnota referenèního výsledku bez vynechaných pravidel. Vyjímku tvoøí poslední sloupec, kde je pou¾ito èíslo 89, které nejlépe oddìluje u¾iteèné pøíznaky od tìch neu¾iteèných. Jedná se v¹ak pouze o odhad a proto je mo¾né, ¾e neu¾iteèných rysù je ve skuteènosti mnohem více, èi ménì. Pro vìt¹í názornost byl do tabulky pøidán sloupec s popisem jednotlivých pravidel generování rysù.
+Pro lep¹í srovnání byla vytvoøena tabulka~\ref{tab:SrovnaniL1}, která zachycuje rozdíl mezi úspì¹ností pøi vynechání daného rysu a referenèní hodnotou. Ta je zapsána pod hlavièkou tabulky a ve vìt¹inì pøípadù je pou¾ita výsledná hodnota referenèního výsledku bez vynechaných pravidel. Vyjímku tvoøí poslední sloupec, kde je pou¾ito èíslo 89, které nejlépe oddìluje u¾iteèné pøíznaky od tìch neu¾iteèných. Jedná se v¹ak pouze o odhad a proto je mo¾né, ¾e neu¾iteèných pravidel je ve skuteènosti mnohem více, èi jsou dokonce u¾iteèné v¹echny. Pro vìt¹í názornost byl do tabulky pøidán sloupec s popisem jednotlivých pravidel generování rysù.
 
 Z tabulky lze vyèíst nìkolik údajù. Jednak poèet rysù se zvy¹uje se vzdáleností od aktuálního prvku, co¾ je logické, kdy¾ se zamyslíme nad zpùsobem zpracování programem. Ka¾dá unikátní vlastnost je vstahována k souèasnému prvku. Pøi urèení aktuálního prvku tedy generujeme pouze 1 unikátní vlastnost, v kombinaci s prvky le¾ícími v sousedství v¹ak musíme v¾dy ulo¾it kombinaci daného prvku s prvkem aktuálním.
 
-Dále se na rysy mù¾eme podívat z pohledu pamì»ové nároènosti, kde nìkolika sty tisíci unikátními vlastnostmi jasnì dominují mo¾ná lemmata a slovní tvary, které se tak stávají kandidátem na pøípadné vypu¹tìní z modelu v pøípadì potøeby sní¾ení pamì»ové nároènosti trénování (za pøedpokladu, ¾e by tím nebyla výraznì naru¹ena úspì¹nost trénování). To také dokazuje výsledná velikost modelu, kde k nejvìt¹ímu sní¾ení do¹lo u mo¾ných lemmat a slovního tvaru na aktuální pozici a to pøes 3MB. Naproti tomu pøi vynechání spoleèné znaèky na aktuální pozici se model je¹tì o 3MB zvìt¹il.
+Dále se na rysy mù¾eme podívat z pohledu pamì»ové nároènosti, kde nìkolika sty tisíci unikátními vlastnostmi jasnì dominují mo¾ná lemmata a slovní tvary, které se tak stávají kandidátem na vypu¹tìní z modelu v pøípadì potøeby sní¾ení pamì»ové nároènosti trénování (za pøedpokladu, ¾e by tím nebyla výraznì naru¹ena úspì¹nost trénování). To také dokazuje výsledná velikost modelu, kde k nejvìt¹ímu sní¾ení do¹lo u mo¾ných lemmat a slovního tvaru na aktuální pozici a to pøes 3MB. Naproti tomu pøi vynechání spoleèné znaèky na aktuální pozici se model je¹tì o 3MB zvìt¹il.
 
 Tuènì vyznaèené záznamy v tabulce jsou ty, u kterých se projevila anomálie regularizace L1 - nemají tedy ¾ádnou váhu pøi analýze a nebudou zaøazeny do vybírání nejménì u¾iteèných prvkù. Pro detailnìj¹í a správnìj¹í zpracování by bylo nutno provést celý test je¹tì jednou na jiném vzorku dat a poté pracovat pouze se správnou hodnotou, resp. s prùmìrem v pøípadì nevyskytující se chyby v obou pøípadech pro dané pravidlo. Na toto zpracování se v¹ak nedostávalo èasu a bylo nutno jej vynechat a pøesunout se k dal¹ím testùm, které mohou pøinést kvalitnìj¹í a cennìj¹í výsledky.
 
-\begin{table}
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|c|r|r|r|r|r|r|r|}
 
@@ -1015,13 +1070,13 @@ Tuènì vyznaèené záznamy v tabulce jsou ty, u kterých se projevila anomálie regul
 	\end{center}
 \end{table}
 
-\begin{table}
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|l|r|r|r|r|r|}
 			\hline
 			\multicolumn{1}{|c|}{} &
 			\multicolumn{1}{|c|}{Popis} &
-			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Zm. poè.} &
 			\multicolumn{1}{|c|}{Zm. kon.} &
 			\multicolumn{1}{|c|}{Zm. vel.} &
 			\multicolumn{1}{|c|}{Zm. úsp.} &
@@ -1038,71 +1093,62 @@ Tuènì vyznaèené záznamy v tabulce jsou ty, u kterých se projevila anomálie regul
 			\multicolumn{1}{|c|}{} &
 			\multicolumn{1}{|c|}{} &
 			\multicolumn{1}{|c|}{} &
-			\multicolumn{1}{|c|}{(488244)} &
-			\multicolumn{1}{|c|}{(19722532B)} &
+			\multicolumn{1}{|c|}{(488 244)} &
+			\multicolumn{1}{|c|}{(19 722KB)} &
 			\multicolumn{1}{|c|}{(93.50\%)} &
 			\multicolumn{1}{|c|}{(89.00\%)} \\
 			\hline
-			U00 & Slovní tvar [-2] & 206833 & 29016 &  725 936B & -4.56\% & -0.06\% \\ 
-			U01 & Slovní tvar [-1] & \textbf{181706} & \textbf{-40061} & \textbf{-1 740 800B} & \textbf{0.65\%} & \textbf{5.15\%} \\ 
-			U02 & Slovní tvar [0] & \textbf{93515} & \textbf{-72383} & \textbf{-3 372 340B} & \textbf{-1.20\%} & \textbf{3.30\%} \\ 
-			U03 & Slovní tvar [+1] & 175053 & -74147 & -3 115 076B & -4.52\% & -0.02\% \\ 
-			U04 & Slovní tvar [+2] & 204827 & -70353 & -2 927 668B & -4.24\% & 0.26\% \\ 
-			U10 & Spol. znaèka [-2] & \textbf{29032} & \textbf{-60865} & \textbf{-2 158 504B} & \textbf{0.52\%} & \textbf{5.02\%} \\ 
-			U11 & Spol. znaèka [-1] & 20282 & 60915 & - 685 244B & -4.55\% & -0.05\% \\ 
-			U12 & Spol. znaèka [0] & \textbf{2196} & \textbf{60916} & \textbf{3 636 056B} & \textbf{-1.75\%} & \textbf{2.75\%} \\ 
-			U13 & Spol. znaèka [+1] & 19776 & -61594 & -2 333 264B & -4.59\% & -0.09\% \\ 
-			U14 & Spol. znaèka [+2] & 28410 & -53544 & -1 875 456B & -4.57\% & -0.07\% \\ 
-			U20 & Lemma [-2] & 165890 & -23301 & -1 043 604B & -4.61\% & -0.11\% \\ 
-			U21 & Lemma [-1] & \textbf{143299} & \textbf{-53668} & \textbf{-2 190 460B} & \textbf{-0.14\%} & \textbf{4.36\%} \\ 
-			U22 & Lemma [0] & 83030 & -68316 & -3 148 796B & -4.55\% & -0.05\% \\ 
-			U23 & Lemma [+1] & 151355 & -74709 & -2 970 800B & -4.40\% & 0.10\% \\ 
-			U24 & Lemma [+2] & 174076 & -42133 & -1 788 960B & -4.51\% & -0.01\% \\ 
-			U30 & Pøípona slova [-2] & 43638 & -21752 & - 546 972B & -4.42\% & 0.08\% \\ 
-			U31 & Pøípona slova [-1] & 32870 & -19219 & - 511 272B & -4.60\% & -0.10\% \\ 
-			U32 & Pøípona slova [0] & 6848 & -13741 & - 432 208B & -4.68\% & -0.18\% \\ 
-			U33 & Pøípona slova [+1] & 33256 & -56524 & -2 044 312B & -4.13\% & 0.37\% \\ 
-			U34 & Pøípona slova [+2] & 42945 & -13186 & - 339 708B & -4.49\% & 0.01\% \\ 
-			U40 & První písmeno & 3542 & -38863 & - 476 185B & -4.53\% & -0.03\% \\ 
-			U41 & První dvì písmena & 32709 & -24246 & - 710 276B & -4.44\% & 0.06\% \\ 
-			U42 & První tøi písmena & 63397 & -44076 & -1 536 212B & -4.51\% & -0.01\% \\ 
-			U43 & Poslední písmeno & 2560 & -32583 & -1 142 404B & -4.62\% & -0.12\% \\ 
-			U50 & Velikost písmen & 1503 & -56472 & -2 146 388B & -4.54\% & -0.04\% \\ 
-			U51 & Pozice ve vìtì & \textbf{18563} & \textbf{-63985} & \textbf{-2 302 780B} & \textbf{-0.89\%} & \textbf{3.61\%} \\ 
-			U52 & Délka slova & 3542 & -38863 & -1 400 800B & -4.53\% & -0.03\% \\ 
-			U53 & Zn. nejbl. slovesa & 10102 & -37928 & -19 722 532B & -4.78\% & -0.28\% \\ 
+			U00 & Slovní tvar [-2] & 206 833 & 29 016 &  725 KB & -4.56\% & -0.06\% \\ 
+			U01 & Slovní tvar [-1] & \textbf{181 706} & \textbf{-40 061} & \textbf{-1 740 KB} & \textbf{0.65\%} & \textbf{5.15\%} \\ 
+			U02 & Slovní tvar [0] & \textbf{93 515} & \textbf{-72 383} & \textbf{-3 372 KB} & \textbf{-1.20\%} & \textbf{3.30\%} \\ 
+			U03 & Slovní tvar [+1] & 175 053 & -74 147 & -3 115 KB & -4.52\% & -0.02\% \\ 
+			U04 & Slovní tvar [+2] & 204 827 & -70 353 & -2 927 KB & -4.24\% & 0.26\% \\ 
+			U10 & Spol. znaèka [-2] & \textbf{29 032} & \textbf{-60 865} & \textbf{-2 158 KB} & \textbf{0.52\%} & \textbf{5.02\%} \\ 
+			U11 & Spol. znaèka [-1] & 20 282 & 60 915 & - 685 KB & -4.55\% & -0.05\% \\ 
+			U12 & Spol. znaèka [0] & \textbf{2 196} & \textbf{60 916} & \textbf{3 636KB} & \textbf{-1.75\%} & \textbf{2.75\%} \\ 
+			U13 & Spol. znaèka [+1] & 19 776 & -61 594 & -2 333 KB & -4.59\% & -0.09\% \\ 
+			U14 & Spol. znaèka [+2] & 28 410 & -53 544 & -1 875 KB & -4.57\% & -0.07\% \\ 
+			U20 & Lemma [-2] & 165 890 & -23 301 & -1 043 KB & -4.61\% & -0.11\% \\ 
+			U21 & Lemma [-1] & \textbf{143 299} & \textbf{-53 668} & \textbf{-2 190 KB} & \textbf{-0.14\%} & \textbf{4.36\%} \\ 
+			U22 & Lemma [0] & 83 030 & -68 316 & -3 148 KB & -4.55\% & -0.05\% \\ 
+			U23 & Lemma [+1] & 151 355 & -74 709 & -2 970 KB & -4.40\% & 0.10\% \\ 
+			U24 & Lemma [+2] & 174 076 & -42 133 & -1 788 KB & -4.51\% & -0.01\% \\ 
+			U30 & Pøípona slova [-2] & 43 638 & -21 752 & - 546 KB & -4.42\% & 0.08\% \\ 
+			U31 & Pøípona slova [-1] & 32 870 & -19 219 & - 511 KB & -4.60\% & -0.10\% \\ 
+			U32 & Pøípona slova [0] & 6 848 & -13 741 & - 432 KB & -4.68\% & -0.18\% \\ 
+			U33 & Pøípona slova [+1] & 33 256 & -56 524 & -2 044 KB & -4.13\% & 0.37\% \\ 
+			U34 & Pøípona slova [+2] & 42 945 & -13 186 & - 339 KB & -4.49\% & 0.01\% \\ 
+			U40 & První písmeno & 3 542 & -38 863 & - 476 KB & -4.53\% & -0.03\% \\ 
+			U41 & První dvì písmena & 32 709 & -24 246 & - 710 KB & -4.44\% & 0.06\% \\ 
+			U42 & První tøi písmena & 63 397 & -44 076 & -1 536 KB & -4.51\% & -0.01\% \\ 
+			U43 & Poslední písmeno & 2 560 & -32 583 & -1 142 KB & -4.62\% & -0.12\% \\ 
+			U50 & Velikost písmen & 1 503 & -56 472 & -2 146 KB & -4.54\% & -0.04\% \\ 
+			U51 & Pozice ve vìtì & \textbf{18 563} & \textbf{-63 985} & \textbf{-2 302 KB} & \textbf{-0.89\%} & \textbf{3.61\%} \\ 
+			U52 & Délka slova & 3 542 & -38 863 & -1 400 KB & -4.53\% & -0.03\% \\ 
+			U53 & Zn. nejbl. slovesa & 10 102 & -37 928 & -19 722 KB & -4.78\% & -0.28\% \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Srovnání výsledkù jednotlivých pravidel s referenèními daty pøi regularizaci L1}
-		\caption*{Legenda: \\
-			\\
-			\begin{tabularx}{\textwidth}{|l|X|}
-				\hline
-				Poèet rysù & Poèet rysù, vygenerovaných daným pravidlem (rozdíl mezi poètem rysù pøi vyu¾ití v¹ech pravidel a rysy pøi vynechaní pravidla daného øádku) \\			
-				Zm. kon. poè. rysù & Zmìna mno¾ství rysù na konci testování, které byly ulo¾eny do modelu. Kladná hodnota znaèí pøírùstek, záporná úbytek. \\
-				Zm. vel. modelu & Zmìna velikosti modelu -- rozdíl mezi referenèní a aktuální velikostí, kladná hodnota znaèí zvìt¹ení souboru, záporná pak zmen¹ení. \\
-				Zm. úsp. slov & Zmìna úspì¹nosti urèení jednotlivých slov -- rozdíl mezi referenèní a aktuální úspì¹ností, kladná hodnota znaèí zlep¹ení, záporná zhor¹ení.\\
-				\hline
-			\end{tabularx}
-		}
 		\label{tab:SrovnaniL1}
 	\end{center}
 \end{table}
 
-\subsubsection*{Výbìr nejménì hodnotných pravidel}
-Pro výbìr nejménì vhodných pravidel pou¾ijeme tabulku~\ref{tab:SrovnaniL1}, pøesnìji její poslední sloupec, ve kterém jsou pravidla porovnávány oproti hodnotì 89\% a pomineme v¹echny tuènì zvýraznìné øádky. Vy¹¹í hodnota znamená zlep¹ení v pøípadì vynechání daného pravidla a proto budeme vyhledávat ty øádky, které mají kladnou hodnotu. 
+\pagebreak
 
-Po pøefiltrování nám zùstalo 6 pravidel (viz. tabulka~\ref{tab:NevhodneL1}). Dle testù jsou nejménì pøínosná pravidla popisující pøíponu slova na pozici [x+1] a slovní tvar na pozici [x+2]. Pøi vynechání v¹ech tìchto pravidel ubereme ze vstupního modelu pøes pùl milionu rysù a teoreticky bychom mìli získat témìø jedno procento úspì¹nosti urèení jednotlivých slov (vzhledem k náhodnému urèení konstanty 89 je toto v¹ak velmi zavádìjící). 
+\subsubsection*{Zhodnocení jednotlivých pravidel}
+Pro výbìr nejménì vhodných pravidel pou¾ijeme tabulku~\ref{tab:SrovnaniL1}, pøesnìji její poslední sloupec, ve kterém jsou pravidla porovnávány oproti hodnotì 89\% a pomineme v¹echny tuènì zvýraznìné øádky. Kladná hodnota znamená zlep¹ení v pøípadì vynechání daného pravidla a proto budeme vyhledávat ty øádky, které mají co nejvy¹¹í kladnou hodnotu. 
+
+Po výbìru pouze kladných hodnot nám zùstalo 6 pravidel (viz. tabulka~\ref{tab:NevhodneL1}). Dle testù jsou nejménì pøínosná pravidla popisující pøíponu slova na pozici [x+1] a slovní tvar na pozici [x+2]. Pøi vynechání v¹ech tìchto pravidel ubereme ze vstupního modelu pøes pùl milionu rysù.
 
 Naopak nejvíce pøínosné se zdá být pravidlo popisující znaèku nejbli¾¹ího slovesa. Ostatní prvky, které se ukázaly být dùle¾ité v druhém testu, vyu¾ívajícím regularizaci L2, v tomto pøípadì jsou ovlivnìny chybou a proto je tì¾ké rozhodnout, za mají pro testování stejný pøínos.
 
-\begin{table}
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|l|r|r|r|r|}
 			\hline
 			\multicolumn{1}{|c|}{} &
 			\multicolumn{1}{|c|}{Popis} &
-			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Zm. poè.} &
 			\multicolumn{1}{|c|}{Zm. kon.} &
 			\multicolumn{1}{|c|}{Zm. vel.} &
 			\multicolumn{1}{|c|}{Zm. úsp.} \\
@@ -1115,16 +1161,16 @@ Naopak nejvíce pøínosné se zdá být pravidlo popisující znaèku nejbli¾¹ího sloves
 			\multicolumn{1}{|c|}{slov} \\
 
 			\hline 
-			U04 & Slovní tvar [+2] & 204827 & -70353 & -2 927 668B & 0.26\% \\ 
-			U23 & Lemma [+1] & 151355 & -74709 & -2 970 800B & 0.10\% \\ 
-			U30 & Pøípona slova [-2] & 43638 & -21752 & - 546 972B & 0.08\% \\ 
-			U33 & Pøípona slova [+1] & 33256 & -56524 & -2 044 312B & 0.37\% \\ 
-			U34 & Pøípona slova [+2] & 42945 & -13186 & - 339 708B & 0.01\% \\ 
-			U41 & První dvì písmena & 32709 & -24246 & - 710 276B & 0.06\% \\ 
+			U04 & Slovní tvar [+2] & 204 827 & -70353 & -2 927 KB & 0.26\% \\ 
+			U23 & Lemma [+1] & 151 355 & -74 709 & -2 970 KB & 0.10\% \\ 
+			U30 & Pøípona slova [-2] & 43 638 & -21 752 & - 546 KB & 0.08\% \\ 
+			U33 & Pøípona slova [+1] & 33 256 & -56 524 & -2 044 KB & 0.37\% \\ 
+			U34 & Pøípona slova [+2] & 42 945 & -13 186 & - 339 KB & 0.01\% \\ 
+			U41 & První dvì písmena & 32 709 & -24 246 & - 710 KB & 0.06\% \\ 
 			\hline
-			    & Celkem & 508730 & -260770 & -9 539 736B & \\
+			    & Celkem & 508730 & -260 770 & -9 539 736B & \\
 			\hline
-			    & Teoretický výsledek & 1493626 & 227474 & 10 182 796B & \\
+			    & Teoretický výsledek & 1 493 626 & 227 474 & 10 182 KB & \\
 			\hline
 		\end{tabular}
 		\captionof{table}{Nejménì vhodná pravidla generování rysù pøi regularizaci L1 (s nezápornou hodnotou)}
@@ -1137,7 +1183,7 @@ Naopak nejvíce pøínosné se zdá být pravidlo popisující znaèku nejbli¾¹ího sloves
 \subsection{Regularizace L2}
 
 \subsubsection*{Pøíprava}
-Pøi tomto testu byla vyu¾ita stejná pravidla, jako pøi tom pøedchozím - budou tedy postupnì spou¹tìny testy a po jednom budou vypou¹tìna v¹echna pravidla pro generování rysù. Výsledky budou porovnány s referenèními hodnotami, tvoøenými výsledkem se v¹emi pravidly a poté bude spu¹tìno nìkolik testù, vynechávajících nejménì u¾iteèná pravidla.
+Pøi tomto testu byla vyu¾ita stejná pravidla, jako pøi tom pøedchozím - budou tedy postupnì spou¹tìny testy a po jednom budou vypou¹tìna v¹echna pravidla pro generování rysù. Výsledky budou porovnány s referenèními hodnotami, tvoøenými výsledkem testu se v¹emi dostupnými pravidly.
 
 \subsubsection*{Konstantní podmínky}
 \emph{Algoritmus:} L-BFGS\\
@@ -1151,16 +1197,9 @@ Pøi zobrazení výsledkù v tabulce~\ref{tab:FeaturesL2} jsem se rozhodl kompletnì 
 
 Pøi pohledu na výsledky, obzvlá¹tì ty zachycené v tabulce~\ref{tab:SrovnaniL2}, jde vidìt, ¾e jednotlivá pravidla mají na výsledek testu mnohem vìt¹í vliv, ne¾ v pøede¹lém pøípadì. Pøi vynechání nìkterých pravidel úspì¹nost klesá a¾ k hranici 90\% a naopak u jiných stoupá a¾ témìø k 94\%. Co je v¹ak pøekvapivé, ¾e pøi vynechání vìt¹iny pravidel se koneèná úspì¹nost zvý¹ila. Mohlo by se tedy zdát, ¾e celý model by bylo nejlep¹í otestovat s mno¾inou pouze 8 pravidel, jejich¾ vypu¹tìní mìlo na výsledek záporný vliv, bychom mìli získat nejlep¹í výsledky. 
 
-Co se týèe pamì»ové nároènosti, je v tomto pøípadì model povìt¹inou témìø stejný, jako bez vynechání jakéhokoliv pravidla - zmìna se pohybuje do 10\%. To je samozøejmì zpùsobené konstantním poètem výstupních rysù a pokud bychom chtìli sni¾ovat velikost výstupního modelu, byli bychom nuceni odebírat ze zpracování dal¹í pravidla. Nejvíce místa poté opìt zabírají stejná pravidla jako v pøedchozí kapitole tj. Slovní tvary a mo¾ná lemmata.
+Co se týèe pamì»ové nároènosti, je v tomto pøípadì model povìt¹inou témìø stejný, jako bez vynechání jakéhokoliv pravidla - zmìna se pohybuje do 10\%, co¾ se pøímo odvíjí od poètu rysù vygenerovaných vynechaným pravidlem. Nejvíce místa opìt zabírají stejná pravidla jako v pøedchozí kapitole tj. Slovní tvary a mo¾ná lemmata.
 
-\subsubsection*{Výbìr nejménì hodnotných pravidel}
-Nejsilnìj¹í vliv na kvalitu modelu má podle tabulky~\ref{tab:VhodneL2} pravidlo urèující spoleèné sloupce znaèky na aktuální pozici, následované znaèkou nejbli¾¹ího slovesa a slovním tvarem pøedcházejícího prvku, kde po vynechání kteréhokoliv ze zmínìných pravidel klesá úspì¹nost o více ne¾ 2 procenta. Poté následuje výrazný propad a¾ k hranici 0.5\% a zbylým pravidlùm.
-
-Naproti tomu, jak je vyobrazeno v tabulce~\ref{tab:NevhodneL2}, nejhùøe dopadlo pravidlo se spoleènoou znaèkou následujícího prvku, oba nadcházející slovní tvary (na pozici +1 a +2) a v¹echna mo¾ná lemmata na pozici +1, kdy po vynechání tìchto prvkù stoupla koneèná úspì¹nost o více ne¾ jedno procento. Tato pravidla jsou následována dal¹ími osmi pravidly se zmìnou vìt¹í ne¾ pùl procenta a zbylými pravidly klesajícími a¾ k nule. Po vynechání v¹ech prvkù se záporným pøínosem bychom se mohli dostat a¾ na koneènou velikost modelu okolo 19MB a na ètvrtinový poèet rysù, co¾ by mohlo pøínést markantní zvý¹ení rychlosti a úsporu místa.
-
-Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou dal¹ích, nejménì vhodných rysù do testování. Budeme tedy pracovat s tøemi/pìti/sedmi a devíti nejhor¹ími rysy a porovnáme jejich výsledky. %TODO pøepsat
-
-\begin{table}
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|c|r|r|r|r|r|r|r|}
 
@@ -1215,8 +1254,8 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 		\label{tab:FeaturesL2}		
 	\end{center}
 \end{table}
-%TODO DOplnit hodnoty U50
-\begin{table}
+
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|l|r|r|r|r|r|}
 			\hline
@@ -1265,21 +1304,19 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 			U53 & Znaèka nejbl. slovesa & - 244 KB & -2.13\% \\ 
 			\hline
 		\end{tabular}
-		\captionof{table}{Srovnání výsledkù jednotlivých pravidel s referenèními daty pøi regularizaci L2}
-		\caption*{Legenda: \\
-			\\
-			\begin{tabularx}{\textwidth}{|l|X|}
-				\hline
-				Zm. vel. modelu & Zmìna velikosti modelu -- rozdíl mezi referenèní a aktuální velikostí, kladná hodnota znaèí zvìt¹ení souboru, záporná pak zmen¹ení. \\
-				Zm. úsp. slov & Zmìna úspì¹nosti urèení jednotlivých slov -- rozdíl mezi referenèní a aktuální úspì¹ností, kladná hodnota znaèí zlep¹ení, záporná zhor¹ení.\\
-				\hline
-			\end{tabularx}
-		}
+		\captionof{table}{Srovnání výsledkù jednotlivých pravidel s referenèními daty pøi regularizaci~L2}
 		\label{tab:SrovnaniL2}
 	\end{center}
 \end{table}
 
-\begin{table}
+\pagebreak
+
+\subsubsection*{Zhodnocení jednotlivých pravidel}
+Nejsilnìj¹í vliv na kvalitu modelu má podle tabulky~\ref{tab:VhodneL2} pravidlo urèující \emph{spoleèné sloupce znaèky} na aktuální pozici, následované \emph{znaèkou nejbli¾¹ího slovesa} a \emph{slovním tvarem pøedcházejícího prvku}, kde po vynechání kteréhokoliv ze zmínìných pravidel klesá úspì¹nost o více ne¾ 2 procenta. Následuje \emph{velikost písmen} a poté výrazný propad a¾ k hranici 0.5\% a zbylým pravidlùm.
+
+Naproti tomu, jak je vyobrazeno v tabulce~\ref{tab:NevhodneL2}, nejhùøe dopadlo pravidlo se \emph{spoleènoou znaèkou následujícího prvku}, oba \emph{nadcházející slovní tvary} (na pozici +1 a +2) a \emph{mo¾ná lemmata} na pozici +1, kdy po vynechání tìchto prvkù stoupla koneèná úspì¹nost o více ne¾ jedno procento. Tato pravidla jsou následována dal¹ími osmi pravidly se zmìnou vìt¹í ne¾ pùl procenta a zbylými pravidly klesajícími a¾ k nule. Po vynechání v¹ech prvkù se záporným pøínosem bychom se mohli dostat a¾ na koneènou velikost modelu okolo 19MB a na ètvrtinový poèet rysù, co¾ by mohlo pøínést markantní zvý¹ení rychlosti a úsporu místa.
+
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|l|r|r|r|r|}
 			\hline
@@ -1299,6 +1336,7 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 			U12 & Spoleèná znaèka [0] &  2 196 & - 74 KB & -3.76\% \\ 
 			U53 & Znaèka nejbl. slovesa &  10 102 & - 244 KB & -2.13\% \\ 
 			U01 & Slovní tvar [-1] &  181 706 & -7 986 KB & -2.11\% \\ 
+			U50 & Velikost písmen & 1 503 & - 36 KB &-1.74\% \\
 			U34 & Pøípona slova [+2] &  42 945 & -1 086 KB & -0.57\% \\ 
 			U32 & Pøípona slova [0] &  6 848 & - 223 KB & -0.52\% \\ 
 			U11 & Spoleèná znaèka [-1] &  20 282 & - 508 KB & -0.29\% \\ 
@@ -1311,7 +1349,7 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 	\end{center}
 \end{table}
 
-\begin{table}
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|l|r|r|r|r|}
 			\hline
@@ -1364,9 +1402,9 @@ Skupiny pro vynechání v nadcházejících testech jsou utvoøeny v¾dy pøidáním dvou 
 Tato skupina testù se zaobírá vyu¾itím zji¹tìných údajù k vlastnímu zlep¹ení výsledkù algoritmù. Za pomoci vynechávání pravidel pro generování rysù, která podávala nejhor¹í výsledky, bude v nìkolika specifikovaných krocích provádìno testování (v¾dy nìkolik dal¹ích pravidel bude pøidáno do vynechané mno¾iny) a získané výsledky budou porovnávány s nejkvalitnìj¹ím výsledkem z pùvodního testu.
 
 \subsection{Regularizace L1}
-Pro tyto testy byly nakonec pou¾ity pouze dva kroky: bez tøí a ¹esti nejménì vhodných pravidel. Takto malý poèet testù byl zpùsoben anomáliemi pøi regularizaci L1 a nepøesvìdèívými výsledky po jejich provedení. Pøi vynechání prvních tøech pravidel se úspì¹nost zvý¹ila o 28 setin procenta, pøi dal¹ích tøech se ale ji¾ sní¾ila pod úroveò úspì¹nosti s vynecháním pouze jediného prvku. Zøejmì byl bylo mo¾né je¹tì provézt nìkolik dal¹ích testù za pøidání dal¹ích prvkù k prvnímu kroku, z èasových dùvodù v¹ak byla vypoèetní síla pøesunuta na testy s vy¹¹í hodnotou. Jediná pøínosná èást pøi tomto nastavení by tedy mohla být velikost modelu, která se nakonec pohybuje okolo 16MB a je tedy mnohem ni¾¹í, ne¾ konkurenèní regularizace. Více podrobností v tabulkách~\ref{tab:KrokyL1}~a~\ref{tab:NevhodneTestL1}.
+Pro tyto testy byly nakonec pou¾ity pouze dva kroky: bez tøí a ¹esti nejménì vhodných pravidel. Takto malý poèet testù byl zpùsoben anomáliemi pøi regularizaci L1 a nepøesvìdèívými výsledky po jejich provedení. Pøi vynechání prvních tøech pravidel se úspì¹nost zvý¹ila o 28 setin procenta, pøi dal¹ích tøech se ale ji¾ sní¾ila pod úroveò úspì¹nosti s vynecháním pouze jediného prvku. Zøejmì by bylo mo¾né je¹tì provézt nìkolik dal¹ích testù za pøidání dal¹ích prvkù k prvnímu kroku, z èasových dùvodù v¹ak byla vypoèetní síla pøesunuta na testy s vy¹¹í hodnotou. Jediná pøínosná èást pøi tomto nastavení by tedy mohla být velikost modelu, která se nakonec pohybuje okolo 16MB a je tedy mnohem ni¾¹í, ne¾ u konkurenèní regularizace. Více podrobností v tabulkách~\ref{tab:KrokyL1}~a~\ref{tab:NevhodneTestL1}.
 
-\begin{table}
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|l|l|}
 			\hline
@@ -1382,7 +1420,7 @@ Pro tyto testy byly nakonec pou¾ity pouze dva kroky: bez tøí a ¹esti nejménì vho
 	\end{center}
 \end{table}
 
-\begin{table}
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|c|r|r|r|r|r|r|r}
 			\hline
@@ -1401,32 +1439,31 @@ Pro tyto testy byly nakonec pou¾ity pouze dva kroky: bez tøí a ¹esti nejménì vho
 			\multicolumn{1}{|c|}{poèet rysù} &
 			\multicolumn{1}{|c|}{slov} &
 			\multicolumn{1}{|c|}{vìt} \\
-			\hline 
+			\hline
 			U33 & 78h 14m & 17 678 KB & 1 969 100 &  431 720 & 89.37\% & 11.19\% \\ 
+			\hline 
 			Krok 1 & 46h 17m & 16 552 KB & 1 612 918 &  413 408 & 89.65\% & 13.92\% \\ 
 			Krok 2 & 46h 15m & 14 796 KB & 1 493 626 &  354 589 & 88.99\% & 8.00\% \\ 
 			\hline
 		\end{tabular}
-		\captionof{table}{Výsledky pøi vynechání nejménì vhodných pravidel porovnané s referenèní hodnotou}
+		\captionof{table}{Výsledky pøi vynechání nejménì vhodných pravidel pøi regularizaci~L1}
 		\label{tab:NevhodneTestL1}
 	\end{center}
 \end{table}
 
 \subsection{Regularizace L2}
-V tomto zpracování budou popsány výsledky s pou¾itím algoritmu L-BFGS i SGD a budou vzájemnì porovnány.
-\begin{table}
+V tomto zpracování budou popsány výsledky s pou¾itím algoritmu L-BFGS i SGD a budou vzájemnì porovnány. Jako referenèní hodnota v tomto pøípadì nebude slou¾it nejlep¹í výsledek pøi vynechání jednotlivých pravidel, ale hodnota pøi vyu¾ití v¹ech, nebo» pro algoritmus SGD nemáme tato data k dispozici a porovnání by ztrácelo na objektivnosti.
+\begin{table}[htbp]
 	\begin{center}
 		\begin{tabular}{|l|l|}
 			\hline
 			\multicolumn{1}{|c|}{ID} &
 			\multicolumn{1}{|c|}{Vynechaná pravidla}\\
 			\hline 
-			ID & Vynechaná pravidla \\ 
 			Krok 1 & U03 U04 U13 \\ 
 			Krok 2 & U03 U04 U13 U23 U52 \\ 
 			Krok 3 & U03 U04 U13 U23 U33 U42 U52 \\ 
 			Krok 4 & U02 U03 U04 U13 U14 U23 U33 U42 U52 \\ 
-			Krok 5 & U02 U03 U04 U13 U14 U20 U23 U24 U30 U31U33 U42 U52 \\ 
 			\hline
 		\end{tabular}
 		\captionof{table}{Výèet krokù a jednotlivých vynechaných pravidel}
@@ -1434,7 +1471,103 @@ V tomto zpracování budou popsány výsledky s pou¾itím algoritmu L-BFGS i SGD a bu
 	\end{center}
 \end{table}
 
-\subsection{Se zpracováním algoritmem SGD}
+\begin{table}[htbp]
+	\begin{center}
+		\begin{tabular}{|c|r|r|r|r|r|r|r}
+			\hline
+			\multicolumn{1}{|c|}{} &
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Doba} &
+			\multicolumn{1}{|c|}{Velikost} &
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Úsp.} &
+			\multicolumn{1}{|c|}{Úsp.} \\
+
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{iterací} &
+			\multicolumn{1}{|c|}{trénování} &
+			\multicolumn{1}{|c|}{modelu} &
+			\multicolumn{1}{|c|}{rysù} &
+			\multicolumn{1}{|c|}{slov} &
+			\multicolumn{1}{|c|}{vìt} \\
+			\hline 
+			- & 85 & 68h 18m & 76 697 KB & 2 002 356 & 92.17\% & 37.81\% \\ 
+			\hline
+			Krok 1 &  &  &  &  &  & \\ 
+			Krok 2 & 91 & 100h 43m & 54 674 KB & 1 447 803 & 93.03\% & 45.45\% \\ 
+			Krok 3 & 97 & 75h 34m & 51 870 KB & 1 351 150 & 93.31\% & 47.74\% \\ 
+			Krok 4 & 101 & 92h 4m & 45 247 KB & 1 229 225 & 93.00\% & 45.99\% \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Výsledky pøi vynechání nejménì vhodných pravidel pøi regularizaci~L2 a algoritmu L-BFGS}
+		\label{tab:NevhodneTestL2BFGS}
+	\end{center}
+\end{table}
+
+\begin{table}[htbp]
+	\begin{center}
+		\begin{tabular}{|c|r|r|r|r|r|r|r}
+			\hline
+			\multicolumn{1}{|c|}{} &
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Doba} &
+			\multicolumn{1}{|c|}{Velikost} &
+			\multicolumn{1}{|c|}{Poèet} &
+			\multicolumn{1}{|c|}{Úsp.} &
+			\multicolumn{1}{|c|}{Úsp.} \\
+
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{iterací} &
+			\multicolumn{1}{|c|}{trénování} &
+			\multicolumn{1}{|c|}{modelu} &
+			\multicolumn{1}{|c|}{rysù} &
+			\multicolumn{1}{|c|}{slov} &
+			\multicolumn{1}{|c|}{vìt} \\
+			\hline 
+			- & 35 & 30h 13m & 76696816B & 2002349 & 93.96\% & 51.60\% \\ 
+			\hline
+			Krok 1 & 35 & 54h 44m & 60470280B & 1602698 & 93.95\% & 51.86\% \\ 
+			Krok 2 & 35 & 45h 44m & 54608868B & 1446867 & 93.69\% & 50.37\% \\ 
+			Krok 3 & 36 & 46h 28m & 51811720B & 1351150 & 93.72\% & 51.22\% \\ 
+			Krok 4 & 38 & 44h 57m & 45191864B & 1229225 & 93.61\% & 50.52\% \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Výsledky pøi vynechání nejménì vhodných pravidel pøi regularizaci~L2 a algoritmu SGD}
+		\label{tab:NevhodneTestL2SGD}
+	\end{center}
+\end{table}
+
+
+\begin{table}[htbp]
+	\begin{center}
+		\begin{tabular}{|c|r|r|r|r|r|r|r}
+			\hline
+			\multicolumn{1}{|c|}{} &
+			\multicolumn{2}{|c|}{Doba trénování} &
+			\multicolumn{2}{|c|}{Úspì¹nost slov} &
+			\multicolumn{2}{|c|}{Úspì¹nost vìt} \\
+
+			\multicolumn{1}{|c|}{ID} &
+			\multicolumn{1}{|c|}{L-BFGS} &
+			\multicolumn{1}{|c|}{SGD} &
+			\multicolumn{1}{|c|}{L-BFGS} &
+			\multicolumn{1}{|c|}{SGD} &
+			\multicolumn{1}{|c|}{L-BFGS} &
+			\multicolumn{1}{|c|}{SGD} \\
+			\hline 
+			- & 68h 18m & 30h 13m & 92.17\% & 93.96\% & 37.81\% & 51.60\% \\ 
+			\hline
+			Krok 1 &  & 54h 44m &  & 93.95\% &  & 51.86\% \\ 
+			Krok 2 & 100h 43m & 45h 44m & 93.03\% & 93.69\% & 45.45\% & 50.37\% \\ 
+			Krok 3 & 75h 34m & 46h 28m & 93.31\% & 93.72\% & 47.74\% & 51.22\% \\ 
+			Krok 4 & 92h 4m & 44h 57m & 93.00\% & 93.61\% & 45.99\% & 50.52\% \\ 
+			\hline
+		\end{tabular}
+		\captionof{table}{Srovnání mezi algoritmy L-BFGS a SGD pøi vynechání nejménì vhodných pravidel pøi regularizaci~L2}
+		\label{tab:NevhodneTestL2SGD}
+	\end{center}
+\end{table}
+
 \chapter{Závìr}
 
 %=========================================================================
