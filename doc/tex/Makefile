@@ -3,7 +3,7 @@
 # E-mail: bidlom AT fit vutbr cz
 #===========================================
 # asi budete chtit prejmenovat:
-CO=projekt
+CO=MoTag
 PARAMS=--shell-escape --synctex=1
 
 all: $(CO).pdf
