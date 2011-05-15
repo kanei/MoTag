@@ -2,8 +2,10 @@
 
 # run: nohup ./[computername].sh &
 
-id=computer 	#computername
-mail=mail@mail.com #email address to send email after completion
+id=computer 		#computername
+mail=mail@mail.com 	#email address to send email after completion
+dtrain=train_data.cst	#data used for training
+dtest=test_data.cst	#data used for testing
 
 crfsuite="./crfsuite-0.10/bin/crfsuite" #address of the crfsuite program
 
@@ -25,14 +27,14 @@ ulimit -s unlimited
 
 date > $id.log
 #prepare data
-python2.7 $id.py -n $ntrain <train-3-ann.cst > $id.train
+python2.7 $id.py -n $ntrain < $dtrain > $id.train
 #run training
-$crfsuite learn -p regularization=$reg $params -m $id.model $id.train >>$id.log 
-date >>$id.log
+$crfsuite learn -p regularization=$reg $params -m $id.model $id.train >> $id.log 
+date >> $id.log
 #prepare data for testing
-python2.7 $id.py -n $ntest <dtest-3-ann.cst > $id.test 
+python2.7 $id.py -n $ntest < $dtest > $id.test 
 #run testing
-$crfsuite tag -q -t -m $id.model $id.test >$id.result 
+$crfsuite tag -q -t -m $id.model $id.test > $id.result 
 date >> $id.result
 mail -s \'$id\' $mail < $id.log
 
