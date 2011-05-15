@@ -1,0 +1,17 @@
+Skript zpracování dat ve formátu CSTS programem CRFSuite
+===============================================================================
+Vytvořeno jako součást bakalářské práce
+autor: Marek Vantuch (xvantu00@stud.fit.vutbr.cz)
+===============================================================================
+Před spuštěním je potřeba nainstalovat program CRFSuite spolu s knihovnou 
+LibLFGS. Ve skriptu run.sh je nutno nastavit správnou cestu k programu a
+vstupním datům, kontertovaným pomocí csts_to_crfsuite.py. Poté lze 
+opět v run.sh upravit nastavení parametrů, počet vstupních vět a pod.
+V případě spouštění na více strojích najednou je vhodné nastavit konstantu id 
+na identifikát aktuálního pc, stejně jako přejmenovat skript run.sh a 
+csts_to_crfsuite.py na odpovídající název pro lehké dohledání použitých 
+nastavení.
+
+Celý proces pak může být spuštěn pomocí:
+./[id].sh &
+

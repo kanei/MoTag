@@ -13,8 +13,6 @@ def usage():
 	-n [sentence count]	defines how many sentences will be processed\
 	-p 111---		uses parts of tag which are defined as 1"
 
-
-
 def output_features(fo, seq):
    for i in range(2, len(seq)-2):
       fs = []
@@ -25,8 +23,6 @@ def output_features(fo, seq):
       fs.append('U02=%s' % seq[i][0])
       fs.append('U03=%s' % seq[i + 1][0])
       fs.append('U04=%s' % seq[i + 2][0])
-      #fs.append('U05=%s/%s' % (seq[i-1][0], seq[i][0]))
-      #fs.append('U06=%s/%s' % (seq[i][0], seq[i+1][0]))
 
       # tag
       fs.append('U10=%s' % seq[i-2][1])
@@ -34,14 +30,6 @@ def output_features(fo, seq):
       fs.append('U12=%s' % seq[i][1])
       fs.append('U13=%s' % seq[i + 1][1])
       fs.append('U14=%s' % seq[i + 2][1])
-      #fs.append('U15=%s/%s' % (seq[i-2][1], seq[i-1][1]))
-      #fs.append('U16=%s/%s' % (seq[i-1][1], seq[i][1]))
-      #fs.append('U17=%s/%s' % (seq[i][1], seq[i+1][1]))
-      #fs.append('U18=%s/%s' % (seq[i+1][1], seq[i+2][1]))
-
-      #fs.append('U20=%s/%s/%s' % (seq[i-2][1], seq[i-1][1], seq[i][1]))
-      #fs.append('U21=%s/%s/%s' % (seq[i-1][1], seq[i][1], seq[i+1][1]))
-      #fs.append('U22=%s/%s/%s' % (seq[i][1], seq[i+1][1], seq[i+2][1]))
 
    # lemma
       fs.append('U20=%s' % seq[i-2][2])
@@ -80,25 +68,20 @@ def output_features(fo, seq):
       # word length
       fs.append('U52=%d' % len(w))
 
-      #	fo.write('\n\npos:%d len:%d\n' % (i, (len(seq) - 2)))
-
       v = ""
       # closest verbs tag
       for j in range(1, len(seq) - 2):
          #check for verb tag
          #dirrection to beginning of sequence
          if i-j >= 2:
-            #fo.write('%d:%s' % ((i - j), seq[i-j][1]))
             if seq[i-j][1][0] == "V":
                v = seq[i-j][1]
                break
          #dirrection to end of sentence
          if i + j < len(seq) - 2:
-            #fo.write(' - %d:%s' % ((i + j), seq[i+j][1]))
             if seq[i + j][1][0] == "V":
                v = seq[i + j][1]
                break
-               #fo.write('\n')
 
       fs.append('U53=%s' % v)
       fo.write('%s\t%s\n' % (seq[i][4], '\t'.join(fs)))
@@ -207,10 +190,6 @@ def main():
                      uni = uni[:p] + "." + uni[p + 1:]
                   p = p + 1
 
-   #			fo.write('%s\n' % (tag))
-
-   #		fo.write('%s\n' % (lp))
-
             # get correct tag and lemma
             t = formattag(tr.search(line).group(1), tagParts)
             l = lr.search(line).group(1)
@@ -221,7 +200,6 @@ def main():
                pof = w[-2:]
             else:
                pof = ''
-            #fo.write('%s : %s\n' % (w, pof))
 
             seq.append((
 	       encode(w),	# word
@@ -229,16 +207,6 @@ def main():
 	       encode(lp),	# possible lemmas
 	       encode(pof),	# postfix
 	       encode(t)))		# correct tag
-
-   #    if not line:
-   #        seq.append(d)
-   #        seq.append(d)
-   #        output_features(fo, seq)
-   #        seq = [d, d]
-   #    else:
-
-      #fields = line.strip('\n').split(' ')
-      #seq.append((encode(fields[0]), encode(fields[1]), encode(fields[2])))
 
 if __name__ == "__main__":
     main()
