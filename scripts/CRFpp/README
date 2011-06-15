@@ -1,0 +1,9 @@
+Skript pro vícekrokové trénování pomocí programu CRF++
+===============================================================================
+Vytvořeno jako součást bakalářské práce
+autor: Marek Vantuch (xvantu00@stud.fit.vutbr.cz)
+===============================================================================
+Použití:
+	1. Přeložit projekt featureGenerator za pomocí qmake
+	2. Upravit skript run.sh a v něm zadat všechna potřebná nastavení
+	3. Spustit skript run.sh 
